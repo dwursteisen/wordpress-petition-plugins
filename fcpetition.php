@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: FreeCharity.org.uk Petitions
+Plugin Name: FreeCharity.org.uk WordPress Petition
 Plugin URI: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Description: Adds a single, simple petition with e-mail based confirmation to your WordPress installation.
-Version: 1.0-beta
+Version: 1.0
 Author: James Davis
 Author URI: http://www.freecharity.org.uk/
 */
@@ -34,6 +34,21 @@ register_activation_hook(__FILE__, fcpetition_install());
 load_plugin_textdomain("fcpetition", 'wp-content/plugins/'.plugin_basename(dirname(__FILE__)));
 add_action('get_header','fcpetition_export');
 
+
+function fcpetition_upgrade(){
+	global $wpdb;
+	$table_name = $wpdb->prefix . "petition";
+
+	$code_version = 1;
+	$current_version = get_option("petition_version");
+	if(!isset($current_version)) { $current_version = 0;}
+	if($code_version==1 && $current_version==0){
+		$sql = "ALTER TABLE $table_name ADD COLUMN comment VARCHAR(300) AFTER confirm";
+		$wpdb->query($sql);
+		update_option("petition_version",1);
+	}
+}
+
 function fcpetition_install(){
 	/* Basic setup for new users */
 
@@ -41,17 +56,20 @@ function fcpetition_install(){
 
 	# Setup Database table
 	$table_name = $wpdb->prefix . "petition";
-	if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != "$table_name") {
+
+	if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
 		$sql = "CREATE TABLE $table_name (
-		  	  email VARCHAR(100),
-			  name VARCHAR(100),
-			  confirm VARCHAR(100),
-			  time DATETIME,
-			  UNIQUE KEY email (email)
-			);";
+			  	  email VARCHAR(100),
+				  name VARCHAR(100),
+				  confirm VARCHAR(100),
+				  comment VARCHAR(300),
+				  time DATETIME,
+				  UNIQUE KEY email (email)
+		);";
 		require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
 		dbDelta($sql);
 	}
+	
 	# Setup options, only if not already defined from a previous installation
 	if (get_option("petition_title")=="") {update_option("petition_title", __("My Petition","fcpetition"));}
         if (get_option("petition_text")=="") {update_option("petition_text", __("We the undersigned ask you to sign our petition.","fcpetition"));}
@@ -60,6 +78,8 @@ function fcpetition_install(){
 	if (get_option("petition_from")=="") {update_option("petition_from", __("My Petition <mypetition@foo.co.m>","fcpetition"));}
 	if (get_option("petition_maximum")=="") {update_option("petition_maximum", 10);}
 	if (get_option("petition_enabled")=="") {update_option("petition_enabled", "N" );}
+	if (get_option("petition_comments")=="") {update_option("petition_comments", "N" );}
+	fcpetition_upgrade();
 }
 
 function fcpetition_filter_pages($content) {
@@ -84,6 +104,9 @@ function fcpetition_filter_pages($content) {
 		#If the petition has been posted
 		$name = $wpdb->escape($_POST['petition_name']);
 		$email = $wpdb->escape($_POST['petition_email']);
+		$comment = $wpdb->escape($_POST['petition_comment']);
+		if(get_option("petition_enabled")!='Y') { $comment = "";}
+
 		#Pretty much lifted from lost password code
 		$confirm = substr( md5( uniqid( microtime() ) ), 0, 16);
 
@@ -92,7 +115,7 @@ function fcpetition_filter_pages($content) {
 			return __("Sorry, you must enter a name to sign the petition.","fcpetition");
 		} elseif (!is_email($email)){
 			return __("Sorry, \"$email\" does not appear to be a valid e-mail address.","fcpetition");
-		} elseif ($wpdb->query("INSERT INTO $table_name (email,name,confirm,time) VALUES ('$email','$name','$confirm',NOW())")===FALSE){
+		} elseif ($wpdb->query("INSERT INTO $table_name (email,name,confirm,comment,time) VALUES ('$email','$name','$confirm','$comment',NOW())")===FALSE){
 			# This has almost certainly occured due to a duplicate email key
                         $wpdb->show_errors();
                         return __("Sorry, someone has already attempted to sign the petition using this e-mail address.","fcpetition");
@@ -145,6 +168,7 @@ function fcpetition_form(){
 	$table_name = $wpdb->prefix . "petition";
 	$petition_maximum = get_option("petition_maximum");
 	$petition_text = get_option("petition_text");
+	$petition_comments = get_option("petition_comments");
 	$form_action = str_replace( '%7E', '~', $_SERVER['REQUEST_URI']);
 	$form  = "</p>
 		<div class='petition'>
@@ -155,8 +179,11 @@ function fcpetition_form(){
 			<form name='petition' method='post' action='$form_action' class='petition'>
 				<input type='hidden' name='petition_posted' value='Y'/>".
 				__("Name","fcpetition").":<br/><input type='text' name='petition_name' value=''/><br/>".
-				__("E-mail address","fcpetition").":<br/><input type='text' name='petition_email' value=''/><br/>
-				<input type='submit' name='Submit' value='".__("Sign the petition","fcpetiton")."'/>
+				__("E-mail address","fcpetition").":<br/><input type='text' name='petition_email' value=''/><br/>";
+	if ($petition_comments == 'Y') { 
+		$form = $form . __("Please enter an optional comment").":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
+	}
+	$form = $form . "			<input type='submit' name='Submit' value='".__("Sign the petition","fcpetiton")."'/>
 			</form>
 		<h3>
 			".__("Last ","fcpetition"). $petition_maximum . __(" signatories","fcpetition").
@@ -171,8 +198,8 @@ function fcpetition_add_pages() {
 	/* Add pages to the admin interface
 	 */
 
-	add_options_page('Petition Options', 'Petition', 8, 'petitionoptions', 'fcpetition_options_page');
-	add_management_page('Manage Petition', 'Petition', 8, 'petitionmanage', 'fcpetition_manage_page');
+	add_options_page('Petition Options', 'Petition', 8,basename(__FILE__), 'fcpetition_options_page');
+	add_management_page('Manage Petition', 'Petition', 8,basename(__FILE__), 'fcpetition_manage_page');
 }
 
 function fcpetition_export(){
@@ -191,7 +218,10 @@ function fcpetition_export(){
 }
 
 function fcpetition_manage_page() {
+	fcpetition_upgrade();
 	global $wpdb;
+	$comments = get_option("petition_comments");
+
         $table_name = $wpdb->prefix . "petition";
 	$n = $_GET['n']?$_GET['n']:0;
 
@@ -225,27 +255,32 @@ function fcpetition_manage_page() {
 	if (count($results)==10) { $pager .= "... <a href='$base_url&n=$j'>Next 10</a>";}
 	if ($pager != '') { echo "<p>".$pager."</p>";}
 	echo '<table class="widefat">';
-	echo '<tr><thead><th>Name</th><th>E-mail</th><th>Time</th><th>Confirmation code</th></thead></tr>';
+	echo '<tr><thead><th>'.__("Name").'</th><th>'.__("E-mail").'</th>';
+	if ($comments=='Y') {echo '<th>'.__("Comments").'</th>';}
+	echo '<th>'.__('Time').'</th><th>'.__('Confirmation code').'</th></thead></tr>';
 	foreach ($results as $row) {
 		if ($row->confirm=='') { 
-			$confirm = "<em>Confirmed</em>";
+			$confirm = "<em>".__("Confirmed")."</em>";
 		} else { 
 			$confirm = $row->confirm; 
 			$confirm = $confirm . "<form name='resendform' method='post' action='".str_replace( '%7E', '~', $_SERVER['REQUEST_URI'])."'>
 	                                               <input type='hidden' name='resend' value='$row->email'/>
-		                                       <input type='submit' name='Submit' value='Resend Confirmation e-mail'/>
+		                                       <input type='submit' name='Submit' value='".__("Resend Confirmation e-mail")."'/>
 					</form>";
 		}
                 echo "
 			<tr>
 				<td>$row->name</td>
 				<td>$row->email</td>
+		";
+		if ($comments=='Y') { echo "<td>$row->comment</td>";}
+		echo "
 				<td>$row->time</td>
 				<td>$confirm</td>
 				<td>
 					<form name='deleteform' method='post' action='".str_replace( '%7E', '~', $_SERVER['REQUEST_URI'])."'>
 						<input type='hidden' name='delete' value='$row->email'/>
-						<input type='submit' name='Submit' value='Delete'/>
+						<input type='submit' name='Submit' value='".__("Delete")."'/>
 					</form>
 				</td>
 			</tr>";
@@ -266,6 +301,7 @@ function fcpetition_manage_page() {
 function fcpetition_options_page() {
 	/* Handles the petition settings
 	 */
+    fcpetition_upgrade();
 
     global $wpdb;
     $table_name = $wpdb->prefix . "petition";
@@ -278,6 +314,7 @@ function fcpetition_options_page() {
     $petition_from = get_option("petition_from");
     $petition_maximum = get_option("petition_maximum");
     $petition_enabled = get_option("petition_enabled");
+    $petition_comments = get_option("petition_comments");
     // Test for submitted data
     if( $_POST['submitted'] == 'Y' ) {
             // Read their posted values
@@ -288,6 +325,7 @@ function fcpetition_options_page() {
 	    $petition_from = $_POST['petition_from'];
 	    $petition_maximum = $_POST['petition_maximum'];
 	    $petition_enabled = ($_POST['petition_enabled']=='Y')?'Y':'N';
+	    $petition_comments = ($_POST['petition_comments']=='Y')?'Y':'N';
             // Save the posted value in the database
 	    update_option("petition_title", $petition_title );
             update_option("petition_text", $petition_text );
@@ -296,6 +334,7 @@ function fcpetition_options_page() {
 	    update_option("petition_from", $petition_from );
 	    update_option("petition_maximum", $petition_maximum );
 	    update_option("petition_enabled", $petition_enabled );
+	    update_option("petition_comments", $petition_comments );
             // Put an options updated message on the sc
 	    ?>
 	    <?php
@@ -305,7 +344,6 @@ function fcpetition_options_page() {
 
     } else {
 	    ?>
-	    	<?php echo 'wp-content/plugins/'.plugin_basename(dirname(__FILE__));?>
 		<form name="optionsform" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<input type="hidden" name="submitted" value="Y">
 		<p>
@@ -326,12 +364,16 @@ function fcpetition_options_page() {
 		</p>
 
 		<p>
-			<?php _e("Please enter the address which the confirmation e-mail is to be sent from. This <strong>must</strong> follow the same format as the example address.","fcpetition")?><br/>
+			<?php _e("Please enter the address which the confirmation e-mail will appear to be sent from. Any replies to the confirmation e-mail will be directed to this address. This <strong>must</strong> follow the same format as the example address.","fcpetition")?><br/>
 			<input type="text" name="petition_from" value="<?php echo $petition_from; ?>" size="72"/>
 		</p>
 		<p>
 			<?php _e("Please enter the maximum number of signatures to be displayed","fcpetition")?><br/>
 			<input type="text" name="petition_maximum" value="<?php echo $petition_maximum; ?>"/>
+		</p>
+		<p>
+			<?php _e("Allow signatories to leave a comment","fcpetition")?>
+			<input type="checkbox" name="petition_comments" value="Y" <?php echo ($petition_comments=='Y')?'checked':'';?>>
 		</p>
 		<p>
 			<?php _e("Enable Petition","fcpetition")?>
@@ -341,6 +383,9 @@ function fcpetition_options_page() {
 			<input type="submit" name="Submit" value="<?php _e("Update Options","fcpetition")?>" />
 		</p>
 		</form>
+			<p>Written by James Davis and licensed under the GNU GPL. For assistance please visit this plugin's <a href="http://www.freecharity.org.uk/wordpress-petition-plugin/">web page</a>.
+
+		</p>
 	    <?php
     }
     echo "</div>";
