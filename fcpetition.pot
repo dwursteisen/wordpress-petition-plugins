@@ -7,7 +7,7 @@
 msgid	""
 msgstr	"Project-Id-Version: PACKAGE VERSION\n"
 	"Report-Msgid-Bugs-To: \n"
-	"POT-Creation-Date: 2007-10-31 13:20+0000\n"
+	"POT-Creation-Date: 2007-10-31 13:38+0000\n"
 	"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 	"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 	"Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,8 +34,32 @@ msgid	"After you have added your name to this petition an e-mail will be "
 	"this e-mail and your name will not be counted."
 msgstr	""
 
+#: fcpetition.php:375
+msgid	"Allow signatories to leave a comment"
+msgstr	""
+
 #: fcpetition.php:294
 msgid	"Clear all signatures"
+msgstr	""
+
+#: fcpetition.php:259
+msgid	"Comments"
+msgstr	""
+
+#: fcpetition.php:260
+msgid	"Confirmation code"
+msgstr	""
+
+#: fcpetition.php:263
+msgid	"Confirmed"
+msgstr	""
+
+#: fcpetition.php:283
+msgid	"Delete"
+msgstr	""
+
+#: fcpetition.php:258
+msgid	"E-mail"
 msgstr	""
 
 #: fcpetition.php:182
@@ -44,10 +68,6 @@ msgstr	""
 
 #: fcpetition.php:379
 msgid	"Enable Petition"
-msgstr	""
-
-#: fcpetition.php:375
-msgid	"Enable comments"
 msgstr	""
 
 #: fcpetition.php:189
@@ -62,7 +82,7 @@ msgstr	""
 msgid	"My Petition <mypetition@foo.co.m>"
 msgstr	""
 
-#: fcpetition.php:181
+#: fcpetition.php:181 fcpetition.php:258
 msgid	"Name"
 msgstr	""
 
@@ -75,9 +95,10 @@ msgid	"Please enter an optional comment"
 msgstr	""
 
 #: fcpetition.php:367
-msgid	"Please enter the address which the confirmation e-mail is to be sent "
-	"from. This <strong>must</strong> follow the same format as the "
-	"example address."
+msgid	"Please enter the address which the confirmation e-mail will appear "
+	"to be sent from. Any replies to the confirmation e-mail will be "
+	"directed to this address. This <strong>must</strong> follow the same "
+	"format as the example address."
 msgstr	""
 
 #: fcpetition.php:362
@@ -102,6 +123,10 @@ msgstr	""
 
 #: fcpetition.php:350
 msgid	"Please enter the petition title"
+msgstr	""
+
+#: fcpetition.php:268
+msgid	"Resend Confirmation e-mail"
 msgstr	""
 
 #: fcpetition.php:186
@@ -143,6 +168,10 @@ msgstr	""
 #: fcpetition.php:99
 msgid	"The confirmation code you supplied was invalid. Either it was "
 	"incorrect or it has already been used."
+msgstr	""
+
+#: fcpetition.php:260
+msgid	"Time"
 msgstr	""
 
 #: fcpetition.php:383
