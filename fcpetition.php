@@ -74,7 +74,7 @@ function fcpetition_install(){
 	if (get_option("petition_title")=="") {update_option("petition_title", __("My Petition","fcpetition"));}
         if (get_option("petition_text")=="") {update_option("petition_text", __("We the undersigned ask you to sign our petition.","fcpetition"));}
 	if (get_option("petition_confirmation")=="") {update_option("petition_confirmation", __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"));}
-	if (get_option("petition_confirmurl")=="")  {update_option("petition_confirmation",__("<PLEASE ENTER THE CORRECT URL>","fcpetition"));}
+	if (get_option("petition_confirmurl")=="")  {update_option("petition_confirmurl",__("<PLEASE ENTER THE CORRECT URL>","fcpetition"));}
 	if (get_option("petition_from")=="") {update_option("petition_from", __("My Petition <mypetition@foo.co.m>","fcpetition"));}
 	if (get_option("petition_maximum")=="") {update_option("petition_maximum", 10);}
 	if (get_option("petition_enabled")=="") {update_option("petition_enabled", "N" );}
