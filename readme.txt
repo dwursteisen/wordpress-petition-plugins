@@ -3,9 +3,8 @@ http://www.freecharity.org.uk/wordpress-petition-plugin/
 
 Installation
 
-   1. Download and unzip the plugin. Upload the file petition.php to the
-   wp-contents/plugins folder of your WordPress installation. You may wish to
-   upload it into a directory named petitions within the plugins folder.
+   1. Download and unzip the plugin. Upload the unzipped folder to the
+   wp-contents/plugins folder of your WordPress installation.
    2. Enable the plugin from the WordPress Plugins administration page.
 
 Configuration
