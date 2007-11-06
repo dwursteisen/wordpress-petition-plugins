@@ -7,7 +7,7 @@
 msgid	""
 msgstr	"Project-Id-Version: PACKAGE VERSION\n"
 	"Report-Msgid-Bugs-To: \n"
-	"POT-Creation-Date: 2007-10-31 13:38+0000\n"
+	"POT-Creation-Date: 2007-11-06 13:35+0000\n"
 	"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 	"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 	"Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,10 +23,6 @@ msgstr	""
 msgid	"<PLEASE ENTER THE CORRECT URL>"
 msgstr	""
 
-#: fcpetition.php:249
-msgid	"<a href=\""
-msgstr	""
-
 #: fcpetition.php:176
 msgid	"After you have added your name to this petition an e-mail will be "
 	"sent to the given address to confirm your signature. Please make "
@@ -34,31 +30,35 @@ msgid	"After you have added your name to this petition an e-mail will be "
 	"this e-mail and your name will not be counted."
 msgstr	""
 
-#: fcpetition.php:375
+#: fcpetition.php:387
 msgid	"Allow signatories to leave a comment"
 msgstr	""
 
-#: fcpetition.php:294
+#: fcpetition.php:306
 msgid	"Clear all signatures"
 msgstr	""
 
-#: fcpetition.php:259
+#: fcpetition.php:271
 msgid	"Comments"
 msgstr	""
 
-#: fcpetition.php:260
+#: fcpetition.php:272
 msgid	"Confirmation code"
 msgstr	""
 
-#: fcpetition.php:263
+#: fcpetition.php:257
+msgid	"Confirmation e-mail resent."
+msgstr	""
+
+#: fcpetition.php:275
 msgid	"Confirmed"
 msgstr	""
 
-#: fcpetition.php:283
+#: fcpetition.php:295
 msgid	"Delete"
 msgstr	""
 
-#: fcpetition.php:258
+#: fcpetition.php:270
 msgid	"E-mail"
 msgstr	""
 
@@ -66,12 +66,20 @@ msgstr	""
 msgid	"E-mail address"
 msgstr	""
 
-#: fcpetition.php:379
+#: fcpetition.php:391
 msgid	"Enable Petition"
+msgstr	""
+
+#: fcpetition.php:261
+msgid	"Export petition results as a CSV file"
 msgstr	""
 
 #: fcpetition.php:189
 msgid	"Last "
+msgstr	""
+
+#: fcpetition.php:206
+msgid	"Manage Petition"
 msgstr	""
 
 #: fcpetition.php:74
@@ -82,50 +90,58 @@ msgstr	""
 msgid	"My Petition <mypetition@foo.co.m>"
 msgstr	""
 
-#: fcpetition.php:181 fcpetition.php:258
+#: fcpetition.php:181 fcpetition.php:270
 msgid	"Name"
 msgstr	""
 
-#: fcpetition.php:341
+#: fcpetition.php:352
 msgid	"Options Updated."
+msgstr	""
+
+#: fcpetition.php:245
+msgid	"Petition Management"
+msgstr	""
+
+#: fcpetition.php:205 fcpetition.php:358
+msgid	"Petition Options"
 msgstr	""
 
 #: fcpetition.php:184
 msgid	"Please enter an optional comment"
 msgstr	""
 
-#: fcpetition.php:367
+#: fcpetition.php:379
 msgid	"Please enter the address which the confirmation e-mail will appear "
 	"to be sent from. Any replies to the confirmation e-mail will be "
 	"directed to this address. This <strong>must</strong> follow the same "
 	"format as the example address."
 msgstr	""
 
-#: fcpetition.php:362
+#: fcpetition.php:374
 msgid	"Please enter the confirmation URL. This is the page or post on which "
 	"the petition appears. This option <strong>must</strong> be correctly "
 	"set or the confirmation e-mails will not work."
 msgstr	""
 
-#: fcpetition.php:358
+#: fcpetition.php:370
 msgid	"Please enter the confirmation email text. Insert [[curl]] where the "
 	"confirmation URL is to appear. [[curl]] <strong>must</strong> appear "
 	"in the text or the confirmation e-mails will not work."
 msgstr	""
 
-#: fcpetition.php:371
+#: fcpetition.php:383
 msgid	"Please enter the maximum number of signatures to be displayed"
 msgstr	""
 
-#: fcpetition.php:354
+#: fcpetition.php:366
 msgid	"Please enter the petition text"
 msgstr	""
 
-#: fcpetition.php:350
+#: fcpetition.php:362
 msgid	"Please enter the petition title"
 msgstr	""
 
-#: fcpetition.php:268
+#: fcpetition.php:280
 msgid	"Resend Confirmation e-mail"
 msgstr	""
 
@@ -133,11 +149,11 @@ msgstr	""
 msgid	"Sign the petition"
 msgstr	""
 
-#: fcpetition.php:242
+#: fcpetition.php:250
 msgid	"Signature Deleted."
 msgstr	""
 
-#: fcpetition.php:237
+#: fcpetition.php:241
 msgid	"Signatures cleared"
 msgstr	""
 
@@ -170,11 +186,11 @@ msgid	"The confirmation code you supplied was invalid. Either it was "
 	"incorrect or it has already been used."
 msgstr	""
 
-#: fcpetition.php:260
+#: fcpetition.php:272
 msgid	"Time"
 msgstr	""
 
-#: fcpetition.php:383
+#: fcpetition.php:395
 msgid	"Update Options"
 msgstr	""
 

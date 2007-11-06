@@ -105,6 +105,7 @@ function fcpetition_filter_pages($content) {
 		$name = $wpdb->escape($_POST['petition_name']);
 		$email = $wpdb->escape($_POST['petition_email']);
 		$comment = $wpdb->escape($_POST['petition_comment']);
+		$comment = wp_kses($comment,array());
 		if(get_option("petition_enabled")!='Y') { $comment = "";}
 
 		#Pretty much lifted from lost password code
@@ -181,15 +182,19 @@ function fcpetition_form(){
 				__("Name","fcpetition").":<br/><input type='text' name='petition_name' value=''/><br/>".
 				__("E-mail address","fcpetition").":<br/><input type='text' name='petition_email' value=''/><br/>";
 	if ($petition_comments == 'Y') { 
-		$form = $form . __("Please enter an optional comment").":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
+		$form = $form . __("Please enter an optional comment","fcpetition").":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
 	}
 	$form = $form . "			<input type='submit' name='Submit' value='".__("Sign the petition","fcpetiton")."'/>
 			</form>
 		<h3>
 			".__("Last ","fcpetition"). $petition_maximum . __(" signatories","fcpetition").
 		"</h3>";
-	foreach ($wpdb->get_results("SELECT name from $table_name WHERE confirm='' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
-		$form .= '<span class="signature">'.$row->name . "</span><br/>";
+	foreach ($wpdb->get_results("SELECT name,comment from $table_name WHERE confirm='' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
+		if ($petition_comments == 'Y' && $row->comment<>"") {
+			$form .= "<span class='signature'>$row->name, \"$row->comment\"</span><br/>";
+		} else {
+			$form .= "<span class='signature'>$row->name </span><br/>";
+		}
 	}
 	return $form."</div><p>";
 }
@@ -198,8 +203,8 @@ function fcpetition_add_pages() {
 	/* Add pages to the admin interface
 	 */
 
-	add_options_page('Petition Options', 'Petition', 8,basename(__FILE__), 'fcpetition_options_page');
-	add_management_page('Manage Petition', 'Petition', 8,basename(__FILE__), 'fcpetition_manage_page');
+	add_options_page(__("Petition Options","fcpetiton"), 'Petition', 8,basename(__FILE__), 'fcpetition_options_page');
+	add_management_page(__("Manage Petition","fcpetiton"), 'Petition', 8,basename(__FILE__), 'fcpetition_manage_page');
 }
 
 function fcpetition_export(){
@@ -231,22 +236,31 @@ function fcpetition_manage_page() {
 	$base_url = $_SERVER['REQUEST_URI'];
 	$base_url = preg_replace("/\&.*/","",$base_url);
 
-	echo "<div class='wrap'><h2>Petition Management</h2>";
 	if( $_POST['clear'] == 'Y' ) {
 	                $wpdb->query("TRUNCATE $table_name");
+			echo '<div id="message" class="updated fade"><p><strong>';
 			_e("Signatures cleared","fcpetition");
+			echo "</p></strong></div>";
+
 	}
 	if($_POST['delete'] != ''){
 		$email = $_POST['delete'];
 		$wpdb->query("DELETE FROM $table_name WHERE email = '$email'");
+		echo '<div id="message" class="updated fade"><p><strong>';
 		_e("Signature Deleted.","fcpetition");
+		echo "</p></strong></div>";
 	}
 	if($_POST['resend'] != ''){
 	       $email = $_POST['resend'];
 	       fcpetition_mail($email); 
+	       echo '<div id="message" class="updated fade"><p><strong>';
+               _e("Confirmation e-mail resent.","fcpetition");
+               echo "</p></strong></div>";
         }
 
-	_e("<a href=\"".get_bloginfo('url')."?petition_export=Y\">Export petition results as a CSV file.</a>","fcpetition");
+	echo "<div class='wrap'><h2>".__("Petition Management","fcpetition")."</h2>";
+
+	echo '<a href="'.get_bloginfo('url').'?petition_export=Y">'.__("Export petition results as a CSV file","fcpetition").'</a>';
 
 	$results = $wpdb->get_results("SELECT * FROM $table_name ORDER BY time LIMIT $n,10");
 
@@ -306,7 +320,6 @@ function fcpetition_options_page() {
     global $wpdb;
     $table_name = $wpdb->prefix . "petition";
 
-    echo "<div class='wrap'><h2>Petition Options</h2>";
     $petition_title = get_option("petition_title");
     $petition_text = get_option("petition_text");
     $petition_confirmation = get_option("petition_confirmation");
@@ -337,13 +350,14 @@ function fcpetition_options_page() {
 	    update_option("petition_comments", $petition_comments );
             // Put an options updated message on the sc
 	    ?>
+	    <div id="message" class="updated fade"><p><strong>
+		    <?php _e("Options Updated.","fcpetition") ?>
+	    </p></strong></div>
 	    <?php
-		    _e("Options Updated.","fcpetition")
-            ?>
-	    <?php
-
-    } else {
+    }
 	    ?>
+	    <div class='wrap'>
+	    	<h2><?php _e("Petition Options","fcpetition")?></h2>
 		<form name="optionsform" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<input type="hidden" name="submitted" value="Y">
 		<p>
@@ -387,7 +401,6 @@ function fcpetition_options_page() {
 
 		</p>
 	    <?php
-    }
     echo "</div>";
 
 }
