@@ -102,11 +102,17 @@ function fcpetition_filter_pages($content) {
 
 	if( $_POST['petition_posted'] == 'Y' && substr_count($content,"[[petition]]")>0) {
 		#If the petition has been posted
+
+		#Clean some of the input, make SQL safe and remove HTML from name and comment which may be displayed later.
 		$name = $wpdb->escape($_POST['petition_name']);
+		$name = wp_kses($name,array());
 		$email = $wpdb->escape($_POST['petition_email']);
+		$email =  wp_kses($email,array());
 		$comment = $wpdb->escape($_POST['petition_comment']);
 		$comment = wp_kses($comment,array());
-		if(get_option("petition_enabled")!='Y') { $comment = "";}
+
+		#Make sure that no one is cheekily sending a comment when they shouldn't be
+		if(get_option("petition_comment")!='Y') { $comment = "";}
 
 		#Pretty much lifted from lost password code
 		$confirm = substr( md5( uniqid( microtime() ) ), 0, 16);
