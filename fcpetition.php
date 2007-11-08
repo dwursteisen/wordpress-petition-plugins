@@ -82,11 +82,20 @@ function fcpetition_install(){
 	fcpetition_upgrade();
 }
 
+function fcpetition_count(){
+	global $wpdb;
+	$table_name = $wpdb->prefix . "petition";
+	
+	$results = $wpdb->get_results("SELECT count(confirm) as c FROM $table_name WHERE confirm = ''");
+        $count = $results[0]->c;
+	echo $count;
+}
+
 function fcpetition_filter_pages($content) {
 	/* Filter the_content on appropriate pages. This function contains the
 	 * user facing portion of the code. 
 	 */
-
+	
 	global $wpdb;
 
         $table_name = $wpdb->prefix . "petition";
@@ -99,7 +108,6 @@ function fcpetition_filter_pages($content) {
 			return __("The confirmation code you supplied was invalid. Either it was incorrect or it has already been used.","fcpetition");
 		}
 	}
-
 	if( $_POST['petition_posted'] == 'Y' && substr_count($content,"[[petition]]")>0) {
 		#If the petition has been posted
 
