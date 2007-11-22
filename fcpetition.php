@@ -356,13 +356,27 @@ function fcpetition_options_page() {
             // Save the posted value in the database
 	    update_option("petition_title", $petition_title );
             update_option("petition_text", $petition_text );
-	    update_option("petition_confirmation", $petition_confirmation );
+	    if(strpos($petition_confirmation,"[[curl]]")) {
+	    	update_option("petition_confirmation", $petition_confirmation );
+	    } else {
+		$p_error = __("[[curl]] must appear in your confirmation email text.","fcpetition");
+		$petition_confirmation = get_option("petition_confirmation");
+	    }
 	    update_option("petition_confirmurl", $petition_confirmurl );
 	    update_option("petition_from", $petition_from );
 	    update_option("petition_maximum", $petition_maximum );
 	    update_option("petition_enabled", $petition_enabled );
 	    update_option("petition_comments", $petition_comments );
             // Put an options updated message on the sc
+
+	    if($p_error != "") {
+		print "
+			<div id=\"message\" class=\"error fade\"><p><strong>
+				$p_error
+	                </p></strong></div>
+		";
+	    }
+
 	    ?>
 	    <div id="message" class="updated fade"><p><strong>
 		    <?php _e("Options Updated.","fcpetition") ?>

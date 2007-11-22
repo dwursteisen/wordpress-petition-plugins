@@ -1,31 +1,30 @@
-WordPress Petition Plugin
-http://www.freecharity.org.uk/wordpress-petition-plugin/
+=== WordPress Petition Plugin ===
+Contributors: pishmishy
+Donate link: http://www.freecharity.org.uk/wordpress-petition-plugin/
+Tags: petition, comments
+Requires at least: 2.3
+Tested up to: 2.3
+Stable tag: 1.0
 
-Installation
+Runs a simple web and e-mail based petition through your WordPress based site or blog.
 
-   1. Download and unzip the plugin. Upload the unzipped folder to the
-   wp-contents/plugins folder of your WordPress installation.
-   2. Enable the plugin from the WordPress Plugins administration page.
+== Installation ==
 
-Configuration
+1. Download and unzip the plugin. Upload the unzipped folder to the wp-contents/plugins folder of your WordPress installation.
+2. Enable the plugin from the WordPress Plugins administration page.
 
-   1. The petition is configured through the "Petition" page under
-   Options. There are only a few options to be set. The details on the page,
-   and the default settings should explain the options to you.
-   2. When setting the confirmation e-mail text, placing [[curl]] within the
-   text will insert the confirmation URL at that point in the text. Failure to
-   place the URL within the text will result in a useless confirmation e-mail.
-   3. Within the post or page where you wish the petition to appear, insert
-   [[petition]]. The petition will not appear until you enable the petition on
-   the options page.
+== Frequently Asked Questions ==
 
-Managing your petition
+= How do I use the plugin? =
+
+1. The petition is configured through the "Petition" page under Options. There are only a few options to be set. Combined with the default options, you should need little assistance with theses.
+2. When setting the confirmation e-mail text, placing [[curl]] within the text will insert the confirmation URL at that point in the text. Failure to place the URL within the text will result in a useless confirmation e-mail.
+3. Within the post or page where you wish the petition to appear, insert [[petition]]. The petition will not appear until you enable the petition on the options page.
+
+= How can I manage the petition data? =
 
 The data gathered by the petition can be managed from the "Petition"
 page under Manage.
 
-   * The entire petition can be wiped using the button on the upper right of
-     the page.
-   * Individual signatures can be deleted or manually confirmed from within the
-     table.
-
+* The entire petition can be wiped using the button on the upper right of the page.
+* Individual signatures can be deleted or manually confirmed from within the table.
