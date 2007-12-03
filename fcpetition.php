@@ -227,8 +227,8 @@ function fcpetition_export(){
 	#we ought to check for admin access too
 	if ('Y' == $_GET['petition_export'] && current_user_can('manage_options')){
 		header('Content-Type: text/plain');
-		foreach ($wpdb->get_results("SELECT name,email,time from $table_name WHERE confirm='' ORDER BY time DESC") as $row) {
-		                print $row->name .",". $row->email .",". $row->time ."\n";
+		foreach ($wpdb->get_results("SELECT name,email,comment,time from $table_name WHERE confirm='' ORDER BY time DESC") as $row) {
+		                print $row->name .",". $row->email .",".$row->comment.",". $row->time ."\n";
 		}
 		exit;
 	} else {
