@@ -27,6 +27,19 @@ Author URI: http://www.freecharity.org.uk/
 */
 ?>
 <?php
+
+	$options_defaults = array (
+			"petition_title" 	=>  __("My Petition","fcpetition"),
+			"petition_text"  	=> __("We the undersigned ask you to sign our petition."),
+			"petition_confirmation"	=> __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"),
+			"petition_confirmurl" 	=> __("<PLEASE ENTER THE CORRECT URL>","fcpetition"),
+			"petition_from" 	=>  __("My Petition <","fcpetition").get_option('admin_email').">",
+			"petition_maximum" 	=> 10,
+			"petition_enabled" 	=> "N",
+			"petition_comments" 	=> "N"
+	);
+
+
 define("MAX_COMMENT_SIZE",300);
 add_action('admin_menu', 'fcpetition_add_pages');
 add_action('the_content','fcpetition_filter_pages');
@@ -63,6 +76,7 @@ function fcpetition_upgrade(){
 
 function fcpetition_install(){
 	global $wpdb;
+	global $options_defaults;
 
 	# Setup Database table
 	$table_name = $wpdb->prefix . "petition";
@@ -80,16 +94,6 @@ function fcpetition_install(){
 		dbDelta($sql);
 	}
 
-	$options_defaults = array (
-			"petition_title" 	=>  __("My Petition","fcpetition"),
-			"petition_text"  	=> __("We the undersigned ask you to sign our petition."),
-			"petition_confirmation"	=> __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"),
-			"petition_confirmurl" 	=> __("<PLEASE ENTER THE CORRECT URL>","fcpetition"),
-			"petition_from" 	=>  __("My Petition <","fcpetition").get_option('admin_email').">",
-			"petition_maximum" 	=> 10,
-			"petition_enabled" 	=> "N",
-			"petition_comments" 	=> "N"
-	);
 	foreach ($options_defaults as $option => $default){
 		if (get_option($option)=="") update_option($option,$default);
 	}
@@ -349,42 +353,30 @@ function fcpetition_options_page() {
     fcpetition_upgrade();
 
     global $wpdb;
+    global $options_defaults;
+
     $table_name = $wpdb->prefix . "petition";
 
-    $petition_title = get_option("petition_title");
-    $petition_text = get_option("petition_text");
-    $petition_confirmation = get_option("petition_confirmation");
-    $petition_confirmurl = get_option("petition_confirmurl");
-    $petition_from = get_option("petition_from");
-    $petition_maximum = get_option("petition_maximum");
-    $petition_enabled = get_option("petition_enabled");
-    $petition_comments = get_option("petition_comments");
+	#Fetch options
+	foreach ($options_defaults as $option => $default){
+		$$option = get_option($option);
+	}
+
     // Test for submitted data
     if( $_POST['submitted'] == 'Y' ) {
-            // Read their posted values
-	    $petition_title = $_POST['petition_title'];
-	    $petition_text = $_POST['petition_text'];
-	    $petition_confirmation = $_POST['petition_confirmation'];
-	    $petition_confirmurl = $_POST['petition_confirmurl'];
-	    $petition_from = $_POST['petition_from'];
-	    $petition_maximum = $_POST['petition_maximum'];
-	    $petition_enabled = ($_POST['petition_enabled']=='Y')?'Y':'N';
-	    $petition_comments = ($_POST['petition_comments']=='Y')?'Y':'N';
-            // Save the posted value in the database
-	    update_option("petition_title", $petition_title );
-            update_option("petition_text", $petition_text );
-	    if(strpos($petition_confirmation,"[[curl]]")) {
-	    	update_option("petition_confirmation", $petition_confirmation );
-	    } else {
-		$p_error = __("[[curl]] must appear in your confirmation email text.","fcpetition");
-		$petition_confirmation = get_option("petition_confirmation");
-	    }
-	    update_option("petition_confirmurl", $petition_confirmurl );
-	    update_option("petition_from", $petition_from );
-	    update_option("petition_maximum", $petition_maximum );
-	    update_option("petition_enabled", $petition_enabled );
-	    update_option("petition_comments", $petition_comments );
-            // Put an options updated message on the sc
+		
+		foreach ($options_defaults as $option => $default){
+			//Read posted value
+			$$option = $_POST[$option];
+			//Perform any checks here, continue over any problem input
+			if($option == "petition_confirmation" && !strpos($petition_confirmation,"[[curl]]")) {
+				$p_error = __("[[curl]] must appear in your confirmation email text.","fcpetition");
+				$petition_confirmation = get_option("petition_confirmation");
+				continue;
+			}
+			//Update options table
+			update_option($option,$$option);
+		}
 
 	    if($p_error != "") {
 		print "
