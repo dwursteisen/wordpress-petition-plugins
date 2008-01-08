@@ -33,6 +33,19 @@ add_action('the_content','fcpetition_filter_pages');
 register_activation_hook(__FILE__, fcpetition_install()); 
 load_plugin_textdomain("fcpetition", 'wp-content/plugins/'.plugin_basename(dirname(__FILE__)));
 add_action('get_header','fcpetition_export');
+if ( isset($_REQUEST['petition-confirm']) )
+	add_action('template_redirect', 'fcpetition_confirm');
+
+function fcpetition_confirm(){
+	global $wpdb;
+	$confirm = $wpdb->escape($_GET['petition-confirm']);
+	if ($wpdb->query("UPDATE $table_name SET confirm = '' WHERE confirm = '$confirm'")==1) {
+		print __("Your signature has now been added to the petition. Thank you.","fcpetition");
+	} else {
+		print __("The confirmation code you supplied was invalid. Either it was incorrect or it has already been used.","fcpetition");
+	}
+	die();
+}
 
 function fcpetition_upgrade(){
 	global $wpdb;
@@ -49,8 +62,6 @@ function fcpetition_upgrade(){
 }
 
 function fcpetition_install(){
-	/* Basic setup for new users */
-
 	global $wpdb;
 
 	# Setup Database table
@@ -69,15 +80,19 @@ function fcpetition_install(){
 		dbDelta($sql);
 	}
 
-	# Setup options, only if not already defined from a previous installation
-	if (get_option("petition_title")=="") {update_option("petition_title", __("My Petition","fcpetition"));}
-        if (get_option("petition_text")=="") {update_option("petition_text", __("We the undersigned ask you to sign our petition.","fcpetition"));}
-	if (get_option("petition_confirmation")=="") {update_option("petition_confirmation", __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"));}
-	if (get_option("petition_confirmurl")=="")  {update_option("petition_confirmurl",__("<PLEASE ENTER THE CORRECT URL>","fcpetition"));}
-	if (get_option("petition_from")=="") {update_option("petition_from", __("My Petition <","fcpetition").get_option('admin_email').">");}
-	if (get_option("petition_maximum")=="") {update_option("petition_maximum", 10);}
-	if (get_option("petition_enabled")=="") {update_option("petition_enabled", "N" );}
-	if (get_option("petition_comments")=="") {update_option("petition_comments", "N" );}
+	$options_defaults = array (
+			"petition_title" 	=>  __("My Petition","fcpetition"),
+			"petition_text"  	=> __("We the undersigned ask you to sign our petition."),
+			"petition_confirmation"	=> __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"),
+			"petition_confirmurl" 	=> __("<PLEASE ENTER THE CORRECT URL>","fcpetition"),
+			"petition_from" 	=>  __("My Petition <","fcpetition").get_option('admin_email').">",
+			"petition_maximum" 	=> 10,
+			"petition_enabled" 	=> "N",
+			"petition_comments" 	=> "N"
+	);
+	foreach ($options_defaults as $option => $default){
+		if (get_option($option)=="") update_option($option,$default);
+	}
 	fcpetition_upgrade();
 }
 
