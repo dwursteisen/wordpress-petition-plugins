@@ -28,35 +28,62 @@ Author URI: http://www.freecharity.org.uk/
 ?>
 <?php
 
-	$options_defaults = array (
-			"petition_title" 	=>  __("My Petition","fcpetition"),
-			"petition_text"  	=> __("We the undersigned ask you to sign our petition."),
-			"petition_confirmation"	=> __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"),
-			"petition_confirmurl" 	=> __("<PLEASE ENTER THE CORRECT URL>","fcpetition"),
-			"petition_from" 	=>  __("My Petition <","fcpetition").get_option('admin_email').">",
-			"petition_maximum" 	=> 10,
-			"petition_enabled" 	=> "N",
-			"petition_comments" 	=> "N"
-	);
-
-
+$options_defaults = array (
+	"petition_title" 	=>  __("My Petition","fcpetition"),
+	"petition_text"  	=> __("We the undersigned ask you to sign our petition."),
+	"petition_confirmation"	=> __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"),
+	"petition_confirmurl" 	=> __("<PLEASE ENTER THE CORRECT URL>","fcpetition"),
+	"petition_from" 	=>  __("My Petition <","fcpetition").get_option('admin_email').">",
+	"petition_maximum" 	=> 10,
+	"petition_enabled" 	=> "N",
+	"petition_comments" 	=> "N"
+);
 define("MAX_COMMENT_SIZE",300);
+
 add_action('admin_menu', 'fcpetition_add_pages');
 add_action('the_content','fcpetition_filter_pages');
-register_activation_hook(__FILE__, fcpetition_install()); 
-load_plugin_textdomain("fcpetition", 'wp-content/plugins/'.plugin_basename(dirname(__FILE__)));
 add_action('get_header','fcpetition_export');
 if ( isset($_REQUEST['petition-confirm']) )
-	add_action('template_redirect', 'fcpetition_confirm');
+    add_action('template_redirect', 'fcpetition_confirm');
+
+register_activation_hook(__FILE__, fcpetition_install()); 
+load_plugin_textdomain("fcpetition", 'wp-content/plugins/'.plugin_basename(dirname(__FILE__)));
 
 function fcpetition_confirm(){
 	global $wpdb;
+	$table_name = $wpdb->prefix . "petition";
+
 	$confirm = $wpdb->escape($_GET['petition-confirm']);
+	?>
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	<html>
+	<head>
+		<title><?php printf(__('Confirm Petition Signature - %s', "fcpetition"), get_bloginfo('name')); ?></title>
+		<style type="text/css" media="screen">
+			@import url( <?php echo get_settings('siteurl'); ?>/wp-admin/wp-admin.css );
+		</style>
+		<link rel="stylesheet" type="text/css" media="print" href="<?php echo get_settings('siteurl'); ?>/print.css" />
+		<meta http-equiv="Content-Type" content="text/html;charset=<?php bloginfo('charset'); ?>" />
+	</head>
+	<body>
+	<div class="wrap">
+		<h2><?php printf(__('Confirm Petition Signature - %s', "fcpetition"), get_bloginfo('name')); ?></h2>
+		<p>
+	<?php
 	if ($wpdb->query("UPDATE $table_name SET confirm = '' WHERE confirm = '$confirm'")==1) {
 		print __("Your signature has now been added to the petition. Thank you.","fcpetition");
 	} else {
 		print __("The confirmation code you supplied was invalid. Either it was incorrect or it has already been used.","fcpetition");
 	}
+	?>
+		</p>
+		<p>
+		<?php printf(__('<a href="%s">Take me back to "%s"</a>', "fcpetition"),get_option("petition_confirmurl"), get_bloginfo('name')); ?> 
+		</p>
+		</div>
+		</body>
+	</html>
+	<?php
 	die();
 }
 
@@ -116,16 +143,8 @@ function fcpetition_filter_pages($content) {
 	
 	global $wpdb;
 
-        $table_name = $wpdb->prefix . "petition";
+    $table_name = $wpdb->prefix . "petition";
 
-	if($_GET['petition_confirm'] != '' && substr_count($content,"[[petition]]")>0){
-		$confirm = $wpdb->escape($_GET['petition_confirm']);
-		if ($wpdb->query("UPDATE $table_name SET confirm = '' WHERE confirm = '$confirm'")==1) {
-			return __("Your signature has now been added to the petition. Thank you.","fcpetition");
-		} else {
-			return __("The confirmation code you supplied was invalid. Either it was incorrect or it has already been used.","fcpetition");
-		}
-	}
 	if( $_POST['petition_posted'] == 'Y' && substr_count($content,"[[petition]]")>0) {
 		#If the petition has been posted
 
@@ -176,20 +195,12 @@ function fcpetition_mail($email){
 	$table_name = $wpdb->prefix . "petition";
 
 	$petition_confirmation = get_option("petition_confirmation");
-	$petition_confirmurl = get_option("petition_confirmurl");
-        $petition_from = get_option("petition_from");
-        $petition_title = get_option("petition_title");
+    $petition_from = get_option("petition_from");
+    $petition_title = get_option("petition_title");
 	$results = $wpdb->get_results("SELECT confirm FROM $table_name WHERE email = '$email'");
 	$confirm = $results[0]->confirm;
-
-        #Construct a confirmation URL, appending an extra parameter to the URL as necessary
-        if(substr_count($petition_confirmurl,"?") > 0) {
-	        #There are already arguments, add one
-	        $confirm_url =  $petition_confirmurl."&petition_confirm=$confirm";
-	} else {
-                #There are no arguments, start one
-		$confirm_url =  $petition_confirmurl."?petition_confirm=$confirm";
-	}
+	
+	$confirm_url = get_bloginfo('home') . "/?petition-confirm=$confirm";
 	$petition_confirmation = str_replace('[[curl]]',$confirm_url,$petition_confirmation);
 	wp_mail($email,"Petition: Confirm your signing of the '$petition_title'","$petition_confirmation","From: $petition_from");
 }
