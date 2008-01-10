@@ -28,30 +28,58 @@ Author URI: http://www.freecharity.org.uk/
 ?>
 <?php
 
+/*
+ *  Global variables and constants
+ */
+
+// Define options and their default settings
 $options_defaults = array (
-	"petition_title" 	=>  __("My Petition","fcpetition"),
-	"petition_text"  	=> __("We the undersigned ask you to sign our petition."),
+	"petition_title" 		=>  __("My Petition","fcpetition"),
+	"petition_text"  		=> __("We the undersigned ask you to sign our petition."),
 	"petition_confirmation"	=> __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"),
 	"petition_confirmurl" 	=> __("<PLEASE ENTER THE CORRECT URL>","fcpetition"),
-	"petition_from" 	=>  __("My Petition <","fcpetition").get_option('admin_email').">",
-	"petition_maximum" 	=> 10,
-	"petition_enabled" 	=> "N",
+	"petition_from" 		=>  __("My Petition <","fcpetition").get_option('admin_email').">",
+	"petition_maximum" 		=> 10,
+	"petition_enabled" 		=> "N",
 	"petition_comments" 	=> "N"
 );
+
+/* Define the maximum comment size. You can't simply just change this for an existing install
+ * you must modify the database table too
+ */
 define("MAX_COMMENT_SIZE",300);
 
-add_action('admin_menu', 'fcpetition_add_pages');
-add_action('the_content','fcpetition_filter_pages');
-add_action('get_header','fcpetition_export');
+// The petition table
+$table_name = $wpdb->prefix . "petition";
+$petition_table = "CREATE TABLE $table_name (
+                  		email VARCHAR(100),
+				        name VARCHAR(100),
+						confirm VARCHAR(100),
+						comment VARCHAR(". MAX_COMMENT_SIZE ."),
+						time DATETIME,UNIQUE KEY email (email)
+					);
+";
+						
+/*
+ *  Actions
+ */
+
+add_action('admin_menu', 'fcpetition_add_pages');			//Action adds pages
+add_action('the_content','fcpetition_filter_pages');		//Action to display the petition to the user
+add_action('get_header','fcpetition_export');				//Action for exporting the petition
 if ( isset($_REQUEST['petition-confirm']) )
     add_action('template_redirect', 'fcpetition_confirm');
 
 register_activation_hook(__FILE__, fcpetition_install()); 
 load_plugin_textdomain("fcpetition", 'wp-content/plugins/'.plugin_basename(dirname(__FILE__)));
 
+/*
+ *  Functions
+ */
+
 function fcpetition_confirm(){
 	global $wpdb;
-	$table_name = $wpdb->prefix . "petition";
+	global $table_name;
 
 	$confirm = $wpdb->escape($_GET['petition-confirm']);
 	?>
@@ -89,7 +117,7 @@ function fcpetition_confirm(){
 
 function fcpetition_upgrade(){
 	global $wpdb;
-	$table_name = $wpdb->prefix . "petition";
+	global $table_name;
 
 	$code_version = 1;
 	$current_version = get_option("petition_version");
@@ -104,21 +132,12 @@ function fcpetition_upgrade(){
 function fcpetition_install(){
 	global $wpdb;
 	global $options_defaults;
-
-	# Setup Database table
-	$table_name = $wpdb->prefix . "petition";
+	global $table_name;
+	global $petition_table;
 
 	if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-		$sql = "CREATE TABLE $table_name (
-			  	  email VARCHAR(100),
-				  name VARCHAR(100),
-				  confirm VARCHAR(100),
-				  comment VARCHAR(". MAX_COMMENT_SIZE ."),
-				  time DATETIME,
-				  UNIQUE KEY email (email)
-		);";
 		require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
-		dbDelta($sql);
+		dbDelta($petition_table);
 	}
 
 	foreach ($options_defaults as $option => $default){
@@ -129,7 +148,7 @@ function fcpetition_install(){
 
 function fcpetition_count(){
 	global $wpdb;
-	$table_name = $wpdb->prefix . "petition";
+	global $table_name;
 	
 	$results = $wpdb->get_results("SELECT count(confirm) as c FROM $table_name WHERE confirm = ''");
         $count = $results[0]->c;
@@ -142,8 +161,7 @@ function fcpetition_filter_pages($content) {
 	 */
 	
 	global $wpdb;
-
-    $table_name = $wpdb->prefix . "petition";
+	global $table_name;
 
 	if( $_POST['petition_posted'] == 'Y' && substr_count($content,"[[petition]]")>0) {
 		#If the petition has been posted
@@ -192,7 +210,7 @@ function fcpetition_filter_pages($content) {
 
 function fcpetition_mail($email){
 	global $wpdb;
-	$table_name = $wpdb->prefix . "petition";
+	global $table_name;
 
 	$petition_confirmation = get_option("petition_confirmation");
     $petition_from = get_option("petition_from");
@@ -211,8 +229,8 @@ function fcpetition_form(){
 	 */
 
 	global $wpdb;
+	global $table_name;
 
-	$table_name = $wpdb->prefix . "petition";
 	$petition_maximum = get_option("petition_maximum");
 	$petition_text = get_option("petition_text");
 	$petition_comments = get_option("petition_comments");
@@ -255,7 +273,7 @@ function fcpetition_add_pages() {
 
 function fcpetition_export(){
 	global $wpdb;
-	$table_name = $wpdb->prefix . "petition";
+	global $table_name;
 	#we ought to check for admin access too
 	if ('Y' == $_GET['petition_export'] && current_user_can('manage_options')){
 		header('Content-Type: text/plain');
@@ -271,9 +289,9 @@ function fcpetition_export(){
 function fcpetition_manage_page() {
 	fcpetition_upgrade();
 	global $wpdb;
+	global $table_name;
 	$comments = get_option("petition_comments");
 
-        $table_name = $wpdb->prefix . "petition";
 	$n = $_GET['n']?$_GET['n']:0;
 
 	$i = ($n-10>0)?$n-10:0;
@@ -365,8 +383,7 @@ function fcpetition_options_page() {
 
     global $wpdb;
     global $options_defaults;
-
-    $table_name = $wpdb->prefix . "petition";
+	global $table_name;
 
 	#Fetch options
 	foreach ($options_defaults as $option => $default){
