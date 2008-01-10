@@ -151,8 +151,7 @@ function fcpetition_count(){
 	global $table_name;
 	
 	$results = $wpdb->get_results("SELECT count(confirm) as c FROM $table_name WHERE confirm = ''");
-        $count = $results[0]->c;
-	echo $count;
+    echo $results[0]->c;
 }
 
 function fcpetition_filter_pages($content) {
@@ -200,10 +199,16 @@ function fcpetition_filter_pages($content) {
 		}
 	} else {
 		#If not, decide whether to display the petition
-		if(get_option("petition_enabled")=='Y'){
-			return str_replace('[[petition]]',fcpetition_form(),$content);
+		if(get_option("petition_enabled")=='Y' && stripos($content,"[[petition]]")){
+			print substr($content,0,stripos($content,"[[petition]]"));
+			fcpetition_form();
+			print substr($content,stripos($content,"[[petition]]")+12);
+		} elseif (stripos($content,"[[petition]]")) {
+			print substr($content,0,stripos($content,"[[petition]]"));
+			print "<strong>[[This petition has been disabled]]</strong>";
+			print substr($content,stripos($content,"[[petition]]")+12);
 		} else {
-			return str_replace('[[petition]]','<strong>[[This petition has been disabled]]</strong>',$content);
+			print $content;
 		}
 	}
 }
@@ -235,32 +240,41 @@ function fcpetition_form(){
 	$petition_text = get_option("petition_text");
 	$petition_comments = get_option("petition_comments");
 	$form_action = str_replace( '%7E', '~', $_SERVER['REQUEST_URI']);
-	$form  = "</p>
-		<div class='petition'>
-		$petition_text<br/><br/>
-			<em>". __("After you have added your name to this petition an e-mail will be sent to the given address to confirm your signature. Please make sure that your e-mail address is correct or you will not receive this e-mail and your name will not be counted.","fcpetition") ."
+	?>
+			</p>
+			<div class='petition'>
+			<?php echo $petition_text ?><br/><br/>
+			<em>
+				After you have added your name to this petition an e-mail will be sent to the given address to confirm your signature. Please make sure that your e-mail address is correct or you will not receive this e-mail and your name will not be counted.
 			</em>
-		<br/><br/>
-			<form name='petition' method='post' action='$form_action' class='petition'>
-				<input type='hidden' name='petition_posted' value='Y'/>".
-				__("Name","fcpetition").":<br/><input type='text' name='petition_name' value=''/><br/>".
-				__("E-mail address","fcpetition").":<br/><input type='text' name='petition_email' value=''/><br/>";
-	if ($petition_comments == 'Y') { 
-		$form = $form . __("Please enter an optional comment (maximum ". MAX_COMMENT_SIZE." characters)","fcpetition").":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
+			<br/><br/>
+			<form name='petition' method='post' action='<?php echo $form_action ?>' class='petition'>
+				<input type='hidden' name='petition_posted' value='Y'/>
+				Name: <br/><input type='text' name='petition_name' value=''/><br/>
+				E-mail address: <br/><input type='text' name='petition_email' value=''/><br/>
+	<?php
+	if ($petition_comments == 'Y') {
+		?>
+				Please enter an optional comment (maximum <?php echo MAX_COMMENT_SIZE; ?> characters)<br/>
+				<textarea name='petition_comment' cols='50'></textarea>
+				<br/>
+		<?php
 	}
-	$form = $form . "			<input type='submit' name='Submit' value='".__("Sign the petition","fcpetiton")."'/>
+	?>
+				<input type='submit' name='Submit' value='Sign the petition'/>
 			</form>
-		<h3>
-			".__("Last ","fcpetition"). $petition_maximum . __(" signatories","fcpetition").
-		"</h3>";
+			<h3>Last <?php echo $petition_maximum; ?> signatories </h3>
+	<?php
 	foreach ($wpdb->get_results("SELECT name,comment from $table_name WHERE confirm='' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
 		if ($petition_comments == 'Y' && $row->comment<>"") {
-			$form .= "<span class='signature'>$row->name, \"$row->comment\"</span><br/>";
+			?> <span class='signature'><?php echo $row->name ." ". $row->comment;?> </span><br/> <?php
 		} else {
-			$form .= "<span class='signature'>$row->name </span><br/>";
+			?> <span class='signature'><?php echo $row->name;?> </span><br/> <?php
 		}
 	}
-	return $form."</div><p>";
+	?>
+	</div><p>
+	<?php
 }
 
 function fcpetition_add_pages() {
