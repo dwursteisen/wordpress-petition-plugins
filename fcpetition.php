@@ -44,10 +44,16 @@ $options_defaults = array (
 	"petition_comments" 	=> "N"
 );
 
-/* Define the maximum comment size. You can't simply just change this for an existing install
- * you must modify the database table too
+/*  Define the maximum comment size. You can't simply just change this for an existing install
+ *  you must modify the database table too
  */
 define("MAX_COMMENT_SIZE",300);
+/*  Disable e-mail verficiation of petitions.
+ *  THIS IS A BAD THING. ENABLING THIS FEAUTRE WILL OPEN YOUR PETITION TO ABUSE AND SPAM.
+ *  Set the option to 1 if you really want this. Otherwise, leave well alone.
+ *  This option is purposely hidden to ordinary users.
+ */ 
+define("OVERRIDE_VERIFICATION",0);
 
 // The petition table
 $table_name = $wpdb->prefix . "petition";
@@ -194,9 +200,14 @@ function fcpetition_filter_pages($content) {
 		} else {
 			$wpdb->show_errors();
                         # Successful signature, send an e-mail asking the user to confirm
-                        $petition_confirmation = str_replace('[[curl]]',$confirm_url,$petition_confirmation);
-			fcpetition_mail($email);
-                        return __("Thank you for signing the petition. An e-mail has been sent to you so that you may confirm your signature.","fcpetition");
+						if (OVERRIDE_VERIFICATION) { 
+							$wpdb->query("UPDATE $table_name SET confirm = '' WHERE confirm = '$confirm'");
+							return __("Your signature has now been added to the petition. Thank you.","fcpetition");						
+						} else {
+	                        $petition_confirmation = str_replace('[[curl]]',$confirm_url,$petition_confirmation);
+							fcpetition_mail($email);
+                        	return __("Thank you for signing the petition. An e-mail has been sent to you so that you may confirm your signature.","fcpetition");
+						}
 		}
 	} else {
 		#If not, decide whether to display the petition
