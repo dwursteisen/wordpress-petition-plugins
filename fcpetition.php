@@ -44,6 +44,10 @@ $options_defaults = array (
 	"petition_comments" 	=> "N"
 );
 
+$options_global = array (
+	"petition_number" 		=> 1
+);
+
 /*  Define the maximum comment size. You can't simply just change this for an existing install
  *  you must modify the database table too
  */
@@ -65,7 +69,7 @@ $petition_table = "CREATE TABLE $table_name (
 						time DATETIME,UNIQUE KEY email (email)
 					);
 ";
-						
+
 /*
  *  Actions
  */
@@ -138,6 +142,7 @@ function fcpetition_upgrade(){
 function fcpetition_install(){
 	global $wpdb;
 	global $options_defaults;
+	global $options_global;
 	global $table_name;
 	global $petition_table;
 
@@ -146,8 +151,12 @@ function fcpetition_install(){
 		dbDelta($petition_table);
 	}
 
+
 	foreach ($options_defaults as $option => $default){
 		if (get_option($option)=="") update_option($option,$default);
+	}
+	foreach ($options_global as $option => $default){
+	        if (get_option($option)=="") update_option($option,$default);
 	}
 	fcpetition_upgrade();
 }
@@ -278,8 +287,59 @@ function fcpetition_add_pages() {
 	/* Add pages to the admin interface
 	 */
 
-	add_options_page(__("Petition Options","fcpetiton"), 'Petition', 8,basename(__FILE__), 'fcpetition_options_page');
+	add_options_page(__("Petition Main","fcpetiton"), 'Petition Main', 8,basename(__FILE__)."_main", 'fcpetition_main_page');
+	add_options_page(__("Petition Options","fcpetiton"), "Petition", 8,basename(__FILE__)."_one", 'fcpetition_options_page');
 	add_management_page(__("Manage Petition","fcpetiton"), 'Petition', 8,basename(__FILE__), 'fcpetition_manage_page');
+}
+
+function fcpetition_main_page(){
+	global $options_global;
+	//print "Hello world";
+	//print $_GET['page'];
+	foreach ($options_global as $option => $default){
+		$$option = get_option($option);
+	}
+	//print "Hello $petition_number";
+	?>
+		<div class='wrap'><h2><?php _e("Petition Main Settings","fcpetition") ?> </h2>
+	<?php
+
+    if( $_POST['submitted'] == 'Y' ) {
+		foreach ($options_global as $option => $default){
+			//Read posted value
+			$$option = $_POST[$option];
+			//cast
+			$petition_number = (int) $petition_number;
+			update_option($option,$$option);
+		}
+
+	    if($p_error != "") {
+		print "
+			<div id=\"message\" class=\"error fade\"><p><strong>
+				$p_error
+	                </p></strong></div>
+		";
+	    }
+	    ?>
+	    <div id="message" class="updated fade"><p><strong>
+		    <?php _e("Options Updated.","fcpetition") ?>
+	    </p></strong></div>
+	    <?php
+    }
+	    ?>
+
+
+		<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
+			<input type="hidden" name="submitted" value="Y">
+			Number of petitions:
+			<input type="text" name="petition_number" size="3" value="<?php echo $petition_number; ?>"/>
+			<p class="submit">
+			<input type='submit' name='Submit' value='<?php _e("Update Options")?>'/>
+			</p>
+		</form>
+		</div>
+
+	<?php
 }
 
 function fcpetition_export(){
