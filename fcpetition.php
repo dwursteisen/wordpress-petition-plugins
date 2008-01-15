@@ -44,10 +44,6 @@ $options_defaults = array (
 	"petition_comments" 	=> "N"
 );
 
-$options_global = array (
-	"petition_number" 		=> 1
-);
-
 /*  Define the maximum comment size. You can't simply just change this for an existing install
  *  you must modify the database table too
  */
@@ -60,13 +56,29 @@ define("MAX_COMMENT_SIZE",300);
 define("OVERRIDE_VERIFICATION",0);
 
 // The petition table
-$table_name = $wpdb->prefix . "petition";
-$petition_table = "CREATE TABLE $table_name (
+$signature_table = $wpdb->prefix . "petition_signatures";
+$signature_table_sql = "CREATE TABLE $signature_table (
+						petition INT,
                   		email VARCHAR(100),
 				        name VARCHAR(100),
 						confirm VARCHAR(100),
 						comment VARCHAR(". MAX_COMMENT_SIZE ."),
-						time DATETIME,UNIQUE KEY email (email)
+						time DATETIME,UNIQUE KEY email (email,petition)
+					);
+";
+
+$petitions_table = $wpdb->prefix . "petitions";
+$petitions_table_sql = "CREATE TABLE $petitions_table (
+						petition INT AUTO_INCREMENT,
+						petition_title VARCHAR(100),
+						petition_text VARCHAR(100),
+						petition_confirmation VARCHAR(100),
+						petition_confirmurl VARCHAR(100),
+						petition_from VARCHAR(100),
+						petition_maximum INT,
+						petition_enabled TINYINT(1),
+						petition_comments TINYINT(1),
+						PRIMARY KEY (petition)
 					);
 ";
 
@@ -89,7 +101,7 @@ load_plugin_textdomain("fcpetition", 'wp-content/plugins/'.plugin_basename(dirna
 
 function fcpetition_confirm(){
 	global $wpdb;
-	global $table_name;
+	global $signature_table;
 
 	$confirm = $wpdb->escape($_GET['petition-confirm']);
 	?>
@@ -108,7 +120,7 @@ function fcpetition_confirm(){
 		<h2><?php printf(__('Confirm Petition Signature - %s', "fcpetition"), get_bloginfo('name')); ?></h2>
 		<p>
 	<?php
-	if ($wpdb->query("UPDATE $table_name SET confirm = '' WHERE confirm = '$confirm'")==1) {
+	if ($wpdb->query("UPDATE $signature_table SET confirm = '' WHERE confirm = '$confirm'")==1) {
 		print __("Your signature has now been added to the petition. Thank you.","fcpetition");
 	} else {
 		print __("The confirmation code you supplied was invalid. Either it was incorrect or it has already been used.","fcpetition");
@@ -125,47 +137,33 @@ function fcpetition_confirm(){
 	die();
 }
 
-function fcpetition_upgrade(){
-	global $wpdb;
-	global $table_name;
-
-	$code_version = 1;
-	$current_version = get_option("petition_version");
-	if(!isset($current_version)) { $current_version = 0;}
-	if($code_version==1 && $current_version==0){
-		$sql = "ALTER TABLE $table_name ADD COLUMN comment VARCHAR(". MAX_COMMENT_SIZE .") AFTER confirm";
-		$wpdb->query($sql);
-		update_option("petition_version",1);
-	}
-}
-
 function fcpetition_install(){
 	global $wpdb;
 	global $options_defaults;
-	global $options_global;
-	global $table_name;
-	global $petition_table;
+	global $signature_table;
+	global $signature_table_sql;
+	global $petitions_table;
+	global $petitions_table_sql;
 
-	if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+	if($wpdb->get_var("SHOW TABLES LIKE '$signature_table'") != $signature_table) {
 		require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
-		dbDelta($petition_table);
+		dbDelta($signature_table_sql);
 	}
-
+    if($wpdb->get_var("SHOW TABLES LIKE '$petitions_table'") != $petitions_table) {
+	    require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
+	    dbDelta($petitions_table_sql);
+    }
 
 	foreach ($options_defaults as $option => $default){
 		if (get_option($option)=="") update_option($option,$default);
 	}
-	foreach ($options_global as $option => $default){
-	        if (get_option($option)=="") update_option($option,$default);
-	}
-	fcpetition_upgrade();
 }
 
 function fcpetition_count(){
 	global $wpdb;
-	global $table_name;
+	global $signature_table;
 	
-	$results = $wpdb->get_results("SELECT count(confirm) as c FROM $table_name WHERE confirm = ''");
+	$results = $wpdb->get_results("SELECT count(confirm) as c FROM $signature_table WHERE confirm = ''");
         $count = $results[0]->c;
 	echo $count;
 }
@@ -176,7 +174,7 @@ function fcpetition_filter_pages($content) {
 	 */
 	
 	global $wpdb;
-	global $table_name;
+	global $signature_table;
 
 	if( $_POST['petition_posted'] == 'Y' && substr_count($content,"[[petition]]")>0) {
 		#If the petition has been posted
@@ -202,7 +200,7 @@ function fcpetition_filter_pages($content) {
 			return __("Sorry, \"$email\" does not appear to be a valid e-mail address.","fcpetition");
 		} else if (strlen($comment) > MAX_COMMENT_SIZE) {
 			return __("Sorry, your comment is longer than ".MAX_COMMENT_SIZE." characters.","fcpetition");
-		} elseif ($wpdb->query("INSERT INTO $table_name (email,name,confirm,comment,time) VALUES ('$email','$name','$confirm','$comment',NOW())")===FALSE){
+		} elseif ($wpdb->query("INSERT INTO $signature_table (email,name,confirm,comment,time) VALUES ('$email','$name','$confirm','$comment',NOW())")===FALSE){
 			# This has almost certainly occured due to a duplicate email key
                         $wpdb->show_errors();
                         return __("Sorry, someone has already attempted to sign the petition using this e-mail address.","fcpetition");
@@ -210,7 +208,7 @@ function fcpetition_filter_pages($content) {
 			$wpdb->show_errors();
                         # Successful signature, send an e-mail asking the user to confirm
 						if (OVERRIDE_VERIFICATION) { 
-							$wpdb->query("UPDATE $table_name SET confirm = '' WHERE confirm = '$confirm'");
+							$wpdb->query("UPDATE $signature_table SET confirm = '' WHERE confirm = '$confirm'");
 							return __("Your signature has now been added to the petition. Thank you.","fcpetition");						
 						} else {
 	                        $petition_confirmation = str_replace('[[curl]]',$confirm_url,$petition_confirmation);
@@ -230,12 +228,12 @@ function fcpetition_filter_pages($content) {
 
 function fcpetition_mail($email){
 	global $wpdb;
-	global $table_name;
+	global $signature_table;
 
 	$petition_confirmation = get_option("petition_confirmation");
     $petition_from = get_option("petition_from");
     $petition_title = get_option("petition_title");
-	$results = $wpdb->get_results("SELECT confirm FROM $table_name WHERE email = '$email'");
+	$results = $wpdb->get_results("SELECT confirm FROM $signature_table WHERE email = '$email'");
 	$confirm = $results[0]->confirm;
 	
 	$confirm_url = get_bloginfo('home') . "/?petition-confirm=$confirm";
@@ -249,7 +247,7 @@ function fcpetition_form(){
 	 */
 
 	global $wpdb;
-	global $table_name;
+	global $signature_table;
 
 	$petition_maximum = get_option("petition_maximum");
 	$petition_text = get_option("petition_text");
@@ -273,7 +271,7 @@ function fcpetition_form(){
 		<h3>
 			".__("Last ","fcpetition"). $petition_maximum . __(" signatories","fcpetition").
 		"</h3>";
-	foreach ($wpdb->get_results("SELECT name,comment from $table_name WHERE confirm='' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
+	foreach ($wpdb->get_results("SELECT name,comment from $signature_table WHERE confirm='' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
 		if ($petition_comments == 'Y' && $row->comment<>"") {
 			$form .= "<span class='signature'>$row->name, \"$row->comment\"</span><br/>";
 		} else {
@@ -286,69 +284,70 @@ function fcpetition_form(){
 function fcpetition_add_pages() {
 	/* Add pages to the admin interface
 	 */
+	global $petitions_table;
+	global $wpdb;
 
 	add_options_page(__("Petition Main","fcpetiton"), 'Petition Main', 8,basename(__FILE__)."_main", 'fcpetition_main_page');
-	add_options_page(__("Petition Options","fcpetiton"), "Petition", 8,basename(__FILE__)."_one", 'fcpetition_options_page');
+	foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
+		add_options_page(__("Petition Options","fcpetiton"), "Petition \"".$row->petition_title."\"", 8,basename(__FILE__)."_".$row->petition, 'fcpetition_options_page');
+	}
 	add_management_page(__("Manage Petition","fcpetiton"), 'Petition', 8,basename(__FILE__), 'fcpetition_manage_page');
 }
 
 function fcpetition_main_page(){
-	global $options_global;
-	//print "Hello world";
+	global $wpdb;
+	global $petitions_table;
 	//print $_GET['page'];
-	foreach ($options_global as $option => $default){
-		$$option = get_option($option);
+	if ('Y' == $_POST['add']){
+		$petition_title = $wpdb->escape($_POST['petition_title']);
+		$wpdb->query("INSERT into $petitions_table (petition_title) values ('$petition_title');");
 	}
-	//print "Hello $petition_number";
+	if ('Y' == $_POST['delete']){
+		$petition = $wpdb->escape($_POST['petition']);
+		$wpdb->query("DELETE FROM $petitions_table WHERE petition = '$petition'");
+	}
+
 	?>
-		<div class='wrap'><h2><?php _e("Petition Main Settings","fcpetition") ?> </h2>
-	<?php
-
-    if( $_POST['submitted'] == 'Y' ) {
-		foreach ($options_global as $option => $default){
-			//Read posted value
-			$$option = $_POST[$option];
-			//cast
-			$petition_number = (int) $petition_number;
-			update_option($option,$$option);
-		}
-
-	    if($p_error != "") {
-		print "
-			<div id=\"message\" class=\"error fade\"><p><strong>
-				$p_error
-	                </p></strong></div>
-		";
-	    }
-	    ?>
-	    <div id="message" class="updated fade"><p><strong>
-		    <?php _e("Options Updated.","fcpetition") ?>
-	    </p></strong></div>
-	    <?php
-    }
-	    ?>
-
-
+		<div class='wrap'><h2><?php _e("Add New Petition","fcpetition") ?> </h2>
 		<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
-			<input type="hidden" name="submitted" value="Y">
-			Number of petitions:
-			<input type="text" name="petition_number" size="3" value="<?php echo $petition_number; ?>"/>
+			<input type="hidden" name="add" value="Y">
+			<input type="text" name="petition_title">
 			<p class="submit">
-			<input type='submit' name='Submit' value='<?php _e("Update Options")?>'/>
+			<input type='submit' name='Submit' value='<?php _e("Add Petition")?>'/>
 			</p>
 		</form>
 		</div>
-
+		<div class='wrap'><h2><?php _e("Current Petitions","fcpetition") ?> </h2>
+			<table class="widefat">
+			<tr><thead><th><?php _e("ID")?></th><th><?php _e("Title")?></th><th><?php _e("Delete")?></th></thead></tr>
+			<?php
+			foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
+				?>
+				<tr>
+					<td><?php print $row->petition;?></td><td><?php print $row->petition_title;?></td>
+					<td>
+						<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
+						<input type="hidden" name="petition" value="<?php print $row->petition;?>">
+						<input type="hidden" name="delete" value="Y">
+						<input type='submit' name='Submit' value='<?php _e("Delete Petition")?>'/>
+					</td>
+				
+				</tr>
+				<?php
+			}
+			?>
+			</table>
+		</div>
 	<?php
 }
 
 function fcpetition_export(){
 	global $wpdb;
-	global $table_name;
+	global $signature_table;
 	#we ought to check for admin access too
 	if ('Y' == $_GET['petition_export'] && current_user_can('manage_options')){
 		header('Content-Type: text/plain');
-		foreach ($wpdb->get_results("SELECT name,email,comment,time from $table_name WHERE confirm='' ORDER BY time DESC") as $row) {
+		foreach ($wpdb->get_results("SELECT name,email,comment,time from $signature_table WHERE confirm='' ORDER BY time DESC") as $row) {
 		                print $row->name .",". $row->email .",".$row->comment.",". $row->time ."\n";
 		}
 		exit;
@@ -358,9 +357,8 @@ function fcpetition_export(){
 }
 
 function fcpetition_manage_page() {
-	fcpetition_upgrade();
 	global $wpdb;
-	global $table_name;
+	global $signature_table;
 	$comments = get_option("petition_comments");
 
 	$n = $_GET['n']?$_GET['n']:0;
@@ -372,7 +370,7 @@ function fcpetition_manage_page() {
 	$base_url = preg_replace("/\&.*/","",$base_url);
 
 	if( $_POST['clear'] == 'Y' ) {
-	                $wpdb->query("TRUNCATE $table_name");
+	                $wpdb->query("TRUNCATE $signature_table");
 			echo '<div id="message" class="updated fade"><p><strong>';
 			_e("Signatures cleared","fcpetition");
 			echo "</p></strong></div>";
@@ -380,7 +378,7 @@ function fcpetition_manage_page() {
 	}
 	if($_POST['delete'] != ''){
 		$email = $_POST['delete'];
-		$wpdb->query("DELETE FROM $table_name WHERE email = '$email'");
+		$wpdb->query("DELETE FROM $signature_table WHERE email = '$email'");
 		echo '<div id="message" class="updated fade"><p><strong>';
 		_e("Signature Deleted.","fcpetition");
 		echo "</p></strong></div>";
@@ -397,7 +395,7 @@ function fcpetition_manage_page() {
 
 	echo '<a href="'.get_bloginfo('url').'?petition_export=Y">'.__("Export petition results as a CSV file","fcpetition").'</a>';
 
-	$results = $wpdb->get_results("SELECT * FROM $table_name ORDER BY time LIMIT $n,10");
+	$results = $wpdb->get_results("SELECT * FROM $signature_table ORDER BY time LIMIT $n,10");
 
 	echo "<p> Showing ".($n +1). " to $j </p>";
 	if ($n>0) { $pager .= "<a href='$base_url&n=$i'>Previous 10</a> ... ";}
@@ -450,11 +448,10 @@ function fcpetition_manage_page() {
 function fcpetition_options_page() {
 	/* Handles the petition settings
 	 */
-    fcpetition_upgrade();
 
     global $wpdb;
     global $options_defaults;
-	global $table_name;
+	global $signature_table;
 
 	#Fetch options
 	foreach ($options_defaults as $option => $default){
