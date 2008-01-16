@@ -40,8 +40,8 @@ $options_defaults = array (
 	"petition_confirmurl" 	=> __("<PLEASE ENTER THE CORRECT URL>","fcpetition"),
 	"petition_from" 		=>  __("My Petition <","fcpetition").get_option('admin_email').">",
 	"petition_maximum" 		=> 10,
-	"petition_enabled" 		=> "N",
-	"petition_comments" 	=> "N"
+	"petition_enabled" 		=> 0,
+	"petition_comments" 	=> 0
 );
 
 /*  Define the maximum comment size. You can't simply just change this for an existing install
@@ -128,7 +128,7 @@ function fcpetition_confirm(){
 	?>
 		</p>
 		<p>
-		<?php printf(__('<a href="%s">Take me back to "%s"</a>', "fcpetition"),get_option("petition_confirmurl"), get_bloginfo('name')); ?> 
+		<?php printf(__('<a href="%s">Take me back to "%s"</a>', "fcpetition"),get_bloginfo('home'), get_bloginfo('name')); ?> 
 		</p>
 		</div>
 		</body>
@@ -153,10 +153,6 @@ function fcpetition_install(){
 	    require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
 	    dbDelta($petitions_table_sql);
     }
-
-	#foreach ($options_defaults as $option => $default){
-	#	if (get_option($option)=="") update_option($option,$default);
-	#}
 }
 
 function fcpetition_count(){
@@ -175,8 +171,9 @@ function fcpetition_filter_pages($content) {
 	
 	global $wpdb;
 	global $signature_table;
+	global $petitions_table;
 
-	if( $_POST['petition_posted'] == 'Y' && substr_count($content,"[[petition]]")>0) {
+	if( $_POST['petition_posted'] == 'Y' && preg_match('/\[\[petition-(.*)\]\]/',$content)) {
 		#If the petition has been posted
 
 		#Clean some of the input, make SQL safe and remove HTML from name and comment which may be displayed later.
@@ -186,9 +183,12 @@ function fcpetition_filter_pages($content) {
 		$email =  wp_kses($email,array());
 		$comment = $wpdb->escape($_POST['petition_comment']);
 		$comment = wp_kses($comment,array());
+		$petition = $wpdb->escape($_POST['petition']);
+		$petition = wp_kses($petition,array());
 
 		#Make sure that no one is cheekily sending a comment when they shouldn't be
-		if(get_option("petition_comments")!='Y') { $comment = "";}
+		$rs = $wpdb->get_results("select petition_comments from $petitions_table");
+		if($rs[0]->petition_comments == 0) $comment = "";
 
 		#Pretty much lifted from lost password code
 		$confirm = substr( md5( uniqid( microtime() ) ), 0, 16);
@@ -200,7 +200,7 @@ function fcpetition_filter_pages($content) {
 			return __("Sorry, \"$email\" does not appear to be a valid e-mail address.","fcpetition");
 		} else if (strlen($comment) > MAX_COMMENT_SIZE) {
 			return __("Sorry, your comment is longer than ".MAX_COMMENT_SIZE." characters.","fcpetition");
-		} elseif ($wpdb->query("INSERT INTO $signature_table (email,name,confirm,comment,time) VALUES ('$email','$name','$confirm','$comment',NOW())")===FALSE){
+		} elseif ($wpdb->query("INSERT INTO $signature_table (petition,email,name,confirm,comment,time) VALUES ('$petition','$email','$name','$confirm','$comment',NOW())")===FALSE){
 			# This has almost certainly occured due to a duplicate email key
                         $wpdb->show_errors();
                         return __("Sorry, someone has already attempted to sign the petition using this e-mail address.","fcpetition");
@@ -218,10 +218,10 @@ function fcpetition_filter_pages($content) {
 		}
 	} else {
 		#If not, decide whether to display the petition
-		if(get_option("petition_enabled")=='Y'){
-			return str_replace('[[petition]]',fcpetition_form(),$content);
+		if (preg_match('/\[\[petition-(.*)\]\]/',$content,$m)) {
+			return preg_replace('/\[\[petition-(.*)\]\]/',fcpetition_form($m[1]),$content);
 		} else {
-			return str_replace('[[petition]]','<strong>[[This petition has been disabled]]</strong>',$content);
+			return $content;
 		}
 	}
 }
@@ -241,17 +241,24 @@ function fcpetition_mail($email){
 	wp_mail($email,"Petition: Confirm your signing of the '$petition_title'","$petition_confirmation","From: $petition_from");
 }
 
-function fcpetition_form(){
+function fcpetition_form($petition){
 	/* Generates the HTML form presented in the_content of the tagged
 	 * post/page 
 	 */
 
 	global $wpdb;
 	global $signature_table;
+	global $petitions_table;
 
-	$petition_maximum = get_option("petition_maximum");
-	$petition_text = get_option("petition_text");
-	$petition_comments = get_option("petition_comments");
+	$rs = $wpdb->get_results("SELECT * from $petitions_table where petition = $petition");
+	if (count($rs) != 1) return "<strong>This petition does not exist</strong>";
+	
+	$petition_maximum = $rs[0]->petition_maximum;
+	$petition_text = $rs[0]->petition_text;
+	$petition_comments = $rs[0]->petition_comments;
+	$petition_enabled = $rs[0]->petition_enabled;
+	if(!$petition_enabled) return "<strong>This petition is not enabled</strong>";
+
 	$form_action = str_replace( '%7E', '~', $_SERVER['REQUEST_URI']);
 	$form  = "</p>
 		<div class='petition'>
@@ -263,16 +270,16 @@ function fcpetition_form(){
 				<input type='hidden' name='petition_posted' value='Y'/>".
 				__("Name","fcpetition").":<br/><input type='text' name='petition_name' value=''/><br/>".
 				__("E-mail address","fcpetition").":<br/><input type='text' name='petition_email' value=''/><br/>";
-	if ($petition_comments == 'Y') { 
+	if ($petition_comments == 1) { 
 		$form = $form . __("Please enter an optional comment (maximum ". MAX_COMMENT_SIZE." characters)","fcpetition").":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
 	}
-	$form = $form . "			<input type='submit' name='Submit' value='".__("Sign the petition","fcpetiton")."'/>
+	$form = $form . "			<input type='hidden' name='petition' value='$petition'/><input type='submit' name='Submit' value='".__("Sign the petition","fcpetiton")."'/>
 			</form>
 		<h3>
 			".__("Last ","fcpetition"). $petition_maximum . __(" signatories","fcpetition").
 		"</h3>";
 	foreach ($wpdb->get_results("SELECT name,comment from $signature_table WHERE confirm='' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
-		if ($petition_comments == 'Y' && $row->comment<>"") {
+		if ($petition_comments == 1 && $row->comment<>"") {
 			$form .= "<span class='signature'>$row->name, \"$row->comment\"</span><br/>";
 		} else {
 			$form .= "<span class='signature'>$row->name </span><br/>";
@@ -538,11 +545,11 @@ function fcpetition_options_page() {
 		</p>
 		<p>
 			<?php _e("Allow signatories to leave a comment","fcpetition")?>
-			<input type="checkbox" name="petition_comments" value="Y" <?php echo ($petition_comments=='Y')?'checked':'';?>>
+			<input type="checkbox" name="petition_comments" value="1" <?php echo ($petition_comments)?'checked':'';?>>
 		</p>
 		<p>
 			<?php _e("Enable Petition","fcpetition")?>
-			<input type="checkbox" name="petition_enabled" value="Y" <?php echo ($petition_enabled=='Y')?'checked':'';?>>
+			<input type="checkbox" name="petition_enabled" value="1" <?php echo ($petition_enabled)?'checked':'';?>>
 		</p>
 			<p class="submit">
 			<input type="submit" name="Submit" value="<?php _e("Update Options","fcpetition")?>" />
