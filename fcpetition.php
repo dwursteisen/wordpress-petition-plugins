@@ -34,7 +34,7 @@ Author URI: http://www.freecharity.org.uk/
 
 // Define options and their default settings
 $options_defaults = array (
-	"petition_title" 		=>  __("My Petition","fcpetition"),
+	"petition_title" 		=> '',
 	"petition_text"  		=> __("We the undersigned ask you to sign our petition."),
 	"petition_confirmation"	=> __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"),
 	"petition_confirmurl" 	=> __("<PLEASE ENTER THE CORRECT URL>","fcpetition"),
@@ -297,10 +297,22 @@ function fcpetition_add_pages() {
 function fcpetition_main_page(){
 	global $wpdb;
 	global $petitions_table;
+	global $options_defaults;
+
 	//print $_GET['page'];
 	if ($_POST['addpetition'] != ''){
 		$petition_title = $wpdb->escape($_POST['addpetition']);
-		$wpdb->query("INSERT into $petitions_table (petition_title) values ('$petition_title');");
+		$n = "(petition_title";
+		$v = "('$petition_title'";
+		foreach ($options_defaults as $option => $default) {
+			if ($option == "petition_title") continue;
+			$n .= ",$option"; 
+			$v .= ",'$default'";
+		}
+		$n .= ")";
+		$v .= ")";
+		$wpdb->query("INSERT into $petitions_table $n values $v;");
+
 	}
 	if ($_POST['deletepetition'] != ''){
 		$petition = $wpdb->escape($_POST['deletepetition']);
@@ -452,30 +464,32 @@ function fcpetition_options_page() {
     global $wpdb;
     global $options_defaults;
 	global $signature_table;
+	global $petitions_table;
 
-	$po = $_GET['page'];
+	$po = $wpdb->escape($_GET['page']);
 	$po = substr($po,strrpos($po,"_")+1);
-	print "Petition: $po";
 
 	#Fetch options
-	foreach ($options_defaults as $option => $default){
-		$$option = get_option($option);
+	foreach ($wpdb->get_results("SELECT * FROM $petitions_table WHERE petition='$po'") as $row) {
+		foreach ($options_defaults as $option => $default){
+			$$option = $row->$option;
+		}
 	}
 
     // Test for submitted data
     if( $_POST['submitted'] == 'Y' ) {
 		
 		foreach ($options_defaults as $option => $default){
-			//Read posted value
-			$$option = $_POST[$option];
 			//Perform any checks here, continue over any problem input
-			if($option == "petition_confirmation" && !strpos($petition_confirmation,"[[curl]]")) {
+			if($option == "petition_confirmation" && !strpos($_POST[$option],"[[curl]]")) {
 				$p_error = __("[[curl]] must appear in your confirmation email text.","fcpetition");
-				$petition_confirmation = get_option("petition_confirmation");
+				$petition_confirmation =  $$option;
 				continue;
 			}
 			//Update options table
-			update_option($option,$$option);
+			$$option = $wpdb->escape($_POST[$option]);
+			$foo = $$option;
+			$wpdb->query("update $petitions_table set $option = '$foo' where petition='$po'");
 		}
 
 	    if($p_error != "") {
