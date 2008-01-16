@@ -154,9 +154,9 @@ function fcpetition_install(){
 	    dbDelta($petitions_table_sql);
     }
 
-	foreach ($options_defaults as $option => $default){
-		if (get_option($option)=="") update_option($option,$default);
-	}
+	#foreach ($options_defaults as $option => $default){
+	#	if (get_option($option)=="") update_option($option,$default);
+	#}
 }
 
 function fcpetition_count(){
