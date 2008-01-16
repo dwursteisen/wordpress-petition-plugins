@@ -298,20 +298,20 @@ function fcpetition_main_page(){
 	global $wpdb;
 	global $petitions_table;
 	//print $_GET['page'];
-	if ('Y' == $_POST['add']){
-		$petition_title = $wpdb->escape($_POST['petition_title']);
+	if ($_POST['addpetition'] != ''){
+		$petition_title = $wpdb->escape($_POST['addpetition']);
 		$wpdb->query("INSERT into $petitions_table (petition_title) values ('$petition_title');");
 	}
-	if ('Y' == $_POST['delete']){
-		$petition = $wpdb->escape($_POST['petition']);
+	if ($_POST['deletepetition'] != ''){
+		$petition = $wpdb->escape($_POST['deletepetition']);
+		print $petition;
 		$wpdb->query("DELETE FROM $petitions_table WHERE petition = '$petition'");
 	}
 
 	?>
 		<div class='wrap'><h2><?php _e("Add New Petition","fcpetition") ?> </h2>
 		<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
-			<input type="hidden" name="add" value="Y">
-			<input type="text" name="petition_title">
+			<input type="text" name="addpetition">
 			<p class="submit">
 			<input type='submit' name='Submit' value='<?php _e("Add Petition")?>'/>
 			</p>
@@ -327,9 +327,9 @@ function fcpetition_main_page(){
 					<td><?php print $row->petition;?></td><td><?php print $row->petition_title;?></td>
 					<td>
 						<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
-						<input type="hidden" name="petition" value="<?php print $row->petition;?>">
-						<input type="hidden" name="delete" value="Y">
-						<input type='submit' name='Submit' value='<?php _e("Delete Petition")?>'/>
+							<input type="hidden" name="deletepetition" value="<?php print $row->petition;?>">
+							<input type='submit' name='Submit' value='<?php _e("Delete Petition")?>'/>
+						</form>
 					</td>
 				
 				</tr>
@@ -452,6 +452,10 @@ function fcpetition_options_page() {
     global $wpdb;
     global $options_defaults;
 	global $signature_table;
+
+	$po = $_GET['page'];
+	$po = substr($po,strrpos($po,"_")+1);
+	print "Petition: $po";
 
 	#Fetch options
 	foreach ($options_defaults as $option => $default){
