@@ -278,7 +278,7 @@ function fcpetition_form($petition){
 		<h3>
 			".__("Last ","fcpetition"). $petition_maximum . __(" signatories","fcpetition").
 		"</h3>";
-	foreach ($wpdb->get_results("SELECT name,comment from $signature_table WHERE confirm='' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
+	foreach ($wpdb->get_results("SELECT name,comment from $signature_table WHERE confirm='' AND petition = '$petition' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
 		if ($petition_comments == 1 && $row->comment<>"") {
 			$form .= "<span class='signature'>$row->name, \"$row->comment\"</span><br/>";
 		} else {
@@ -297,13 +297,15 @@ function fcpetition_add_pages() {
 	add_options_page(__("Petition Main","fcpetiton"), 'Petition Main', 8,basename(__FILE__)."_main", 'fcpetition_main_page');
 	foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
 		add_options_page(__("Petition Options","fcpetiton"), "Petition \"".$row->petition_title."\"", 8,basename(__FILE__)."_".$row->petition, 'fcpetition_options_page');
+		add_management_page(__("Manage Petition","fcpetiton"), "Petition \"".$row->petition_title."\"", 8,basename(__FILE__)."_".$row->petition, 'fcpetition_manage_page');
 	}
-	add_management_page(__("Manage Petition","fcpetiton"), 'Petition', 8,basename(__FILE__), 'fcpetition_manage_page');
+	#add_management_page(__("Manage Petition","fcpetiton"), 'Petition', 8,basename(__FILE__), 'fcpetition_manage_page');
 }
 
 function fcpetition_main_page(){
 	global $wpdb;
 	global $petitions_table;
+	global $signature_table;
 	global $options_defaults;
 
 	//print $_GET['page'];
@@ -325,6 +327,7 @@ function fcpetition_main_page(){
 		$petition = $wpdb->escape($_POST['deletepetition']);
 		print $petition;
 		$wpdb->query("DELETE FROM $petitions_table WHERE petition = '$petition'");
+		$wpdb->query("DELETE FROM $signature_table WHERE petition = '$petition'");
 	}
 
 	?>
@@ -378,6 +381,10 @@ function fcpetition_export(){
 function fcpetition_manage_page() {
 	global $wpdb;
 	global $signature_table;
+    $po = $wpdb->escape($_GET['page']);
+    $po = substr($po,strrpos($po,"_")+1);
+
+
 	$comments = get_option("petition_comments");
 
 	$n = $_GET['n']?$_GET['n']:0;
@@ -389,7 +396,7 @@ function fcpetition_manage_page() {
 	$base_url = preg_replace("/\&.*/","",$base_url);
 
 	if( $_POST['clear'] == 'Y' ) {
-	                $wpdb->query("TRUNCATE $signature_table");
+	        $wpdb->query("DELETE from $signature_table WHERE petition='$po'");
 			echo '<div id="message" class="updated fade"><p><strong>';
 			_e("Signatures cleared","fcpetition");
 			echo "</p></strong></div>";
@@ -397,7 +404,7 @@ function fcpetition_manage_page() {
 	}
 	if($_POST['delete'] != ''){
 		$email = $_POST['delete'];
-		$wpdb->query("DELETE FROM $signature_table WHERE email = '$email'");
+		$wpdb->query("DELETE FROM $signature_table WHERE email = '$email' AND petition='$po'");
 		echo '<div id="message" class="updated fade"><p><strong>';
 		_e("Signature Deleted.","fcpetition");
 		echo "</p></strong></div>";
@@ -411,10 +418,9 @@ function fcpetition_manage_page() {
         }
 
 	echo "<div class='wrap'><h2>".__("Petition Management","fcpetition")."</h2>";
+	echo '<a href="'.get_bloginfo('url').'?petition_export='.$po.'">'.__("Export petition results as a CSV file","fcpetition").'</a>';
 
-	echo '<a href="'.get_bloginfo('url').'?petition_export=Y">'.__("Export petition results as a CSV file","fcpetition").'</a>';
-
-	$results = $wpdb->get_results("SELECT * FROM $signature_table ORDER BY time LIMIT $n,10");
+	$results = $wpdb->get_results("SELECT * FROM $signature_table WHERE petition='$po' ORDER BY time LIMIT $n,10");
 
 	echo "<p> Showing ".($n +1). " to $j </p>";
 	if ($n>0) { $pager .= "<a href='$base_url&n=$i'>Previous 10</a> ... ";}
