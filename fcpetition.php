@@ -27,13 +27,12 @@ Author URI: http://www.freecharity.org.uk/
 */
 ?>
 <?php
-
+define("MAX_COMMENT_SIZE",300);
 add_action('admin_menu', 'fcpetition_add_pages');
 add_action('the_content','fcpetition_filter_pages');
 register_activation_hook(__FILE__, fcpetition_install()); 
 load_plugin_textdomain("fcpetition", 'wp-content/plugins/'.plugin_basename(dirname(__FILE__)));
 add_action('get_header','fcpetition_export');
-$max_comment_size = 300;
 
 function fcpetition_upgrade(){
 	global $wpdb;
@@ -43,7 +42,7 @@ function fcpetition_upgrade(){
 	$current_version = get_option("petition_version");
 	if(!isset($current_version)) { $current_version = 0;}
 	if($code_version==1 && $current_version==0){
-		$sql = "ALTER TABLE $table_name ADD COLUMN comment VARCHAR(300) AFTER confirm";
+		$sql = "ALTER TABLE $table_name ADD COLUMN comment VARCHAR(". MAX_COMMENT_SIZE .") AFTER confirm";
 		$wpdb->query($sql);
 		update_option("petition_version",1);
 	}
@@ -53,7 +52,6 @@ function fcpetition_install(){
 	/* Basic setup for new users */
 
 	global $wpdb;
-	global $max_comment_size;
 
 	# Setup Database table
 	$table_name = $wpdb->prefix . "petition";
@@ -63,14 +61,14 @@ function fcpetition_install(){
 			  	  email VARCHAR(100),
 				  name VARCHAR(100),
 				  confirm VARCHAR(100),
-				  comment VARCHAR($max_comment_size),
+				  comment VARCHAR(". MAX_COMMENT_SIZE ."),
 				  time DATETIME,
 				  UNIQUE KEY email (email)
 		);";
 		require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
 		dbDelta($sql);
 	}
-	
+
 	# Setup options, only if not already defined from a previous installation
 	if (get_option("petition_title")=="") {update_option("petition_title", __("My Petition","fcpetition"));}
         if (get_option("petition_text")=="") {update_option("petition_text", __("We the undersigned ask you to sign our petition.","fcpetition"));}
@@ -98,7 +96,6 @@ function fcpetition_filter_pages($content) {
 	 */
 	
 	global $wpdb;
-	global $max_comment_size;
 
         $table_name = $wpdb->prefix . "petition";
 
@@ -132,8 +129,8 @@ function fcpetition_filter_pages($content) {
 			return __("Sorry, you must enter a name to sign the petition.","fcpetition");
 		} elseif (!is_email($email)){
 			return __("Sorry, \"$email\" does not appear to be a valid e-mail address.","fcpetition");
-		} else if (strlen($comment) > $max_comment_size) {
-			return __("Sorry, your comment is longer than $max_comment_size characters.","fcpetition");
+		} else if (strlen($comment) > MAX_COMMENT_SIZE) {
+			return __("Sorry, your comment is longer than ".MAX_COMMENT_SIZE." characters.","fcpetition");
 		} elseif ($wpdb->query("INSERT INTO $table_name (email,name,confirm,comment,time) VALUES ('$email','$name','$confirm','$comment',NOW())")===FALSE){
 			# This has almost certainly occured due to a duplicate email key
                         $wpdb->show_errors();
@@ -184,7 +181,6 @@ function fcpetition_form(){
 	 */
 
 	global $wpdb;
-	global $max_comment_size;
 
 	$table_name = $wpdb->prefix . "petition";
 	$petition_maximum = get_option("petition_maximum");
@@ -202,7 +198,7 @@ function fcpetition_form(){
 				__("Name","fcpetition").":<br/><input type='text' name='petition_name' value=''/><br/>".
 				__("E-mail address","fcpetition").":<br/><input type='text' name='petition_email' value=''/><br/>";
 	if ($petition_comments == 'Y') { 
-		$form = $form . __("Please enter an optional comment (maximum $max_comment_size characters)","fcpetition").":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
+		$form = $form . __("Please enter an optional comment (maximum ". MAX_COMMENT_SIZE." characters)","fcpetition").":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
 	}
 	$form = $form . "			<input type='submit' name='Submit' value='".__("Sign the petition","fcpetiton")."'/>
 			</form>
