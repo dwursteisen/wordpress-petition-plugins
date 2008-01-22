@@ -522,6 +522,7 @@ function fcpetition_options_page() {
 	    ?>
 	    <div class='wrap'>
 	    	<h2><?php _e("Petition Options","fcpetition")?></h2>
+			<p><?php printf(__("Place [[petition-%s]] in the page or post where you wish this petition to appear.","fcpetition"),$po); ?></p>
 		<form name="optionsform" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<input type="hidden" name="submitted" value="Y">
 		<p>
