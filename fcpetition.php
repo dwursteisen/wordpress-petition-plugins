@@ -3,7 +3,7 @@
 Plugin Name: FreeCharity.org.uk WordPress Petition
 Plugin URI: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Description: Adds a single, simple petition with e-mail based confirmation to your WordPress installation.
-Version: 1.0
+Version: 1.0.1
 Author: James Davis
 Author URI: http://www.freecharity.org.uk/
 */
@@ -70,14 +70,15 @@ function fcpetition_install(){
 	}
 
 	# Setup options, only if not already defined from a previous installation
-	if (get_option("petition_title")=="") {update_option("petition_title", __("My Petition","fcpetition"));}
-        if (get_option("petition_text")=="") {update_option("petition_text", __("We the undersigned ask you to sign our petition.","fcpetition"));}
-	if (get_option("petition_confirmation")=="") {update_option("petition_confirmation", __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"));}
-	if (get_option("petition_confirmurl")=="")  {update_option("petition_confirmurl",__("<PLEASE ENTER THE CORRECT URL>","fcpetition"));}
-	if (get_option("petition_from")=="") {update_option("petition_from", __("My Petition <","fcpetition").get_option('admin_email').">");}
-	if (get_option("petition_maximum")=="") {update_option("petition_maximum", 10);}
-	if (get_option("petition_enabled")=="") {update_option("petition_enabled", "N" );}
-	if (get_option("petition_comments")=="") {update_option("petition_comments", "N" );}
+	if (!get_option("petition_title")) {update_option("petition_title", __("My Petition","fcpetition"));}
+    if (!get_option("petition_text")) {update_option("petition_text", __("We the undersigned ask you to sign our petition.","fcpetition"));}
+	if (!get_option("petition_confirmation")) {update_option("petition_confirmation", __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"));}
+	if (!get_option("petition_confirmurl"))  {update_option("petition_confirmurl",__("<PLEASE ENTER THE CORRECT URL>","fcpetition"));}
+	if (!get_option("petition_from")) {update_option("petition_from", __("My Petition <","fcpetition").get_option('admin_email').">");}
+	if (!get_option("petition_maximum")) {update_option("petition_maximum", 10);}
+	if (!get_option("petition_enabled")) {update_option("petition_enabled", "N" );}
+	if (!get_option("petition_comments")) {update_option("petition_comments", "N" );}
+	wp_cache_flush();
 	fcpetition_upgrade();
 }
 
@@ -158,17 +159,18 @@ function fcpetition_mail($email){
 
 	$petition_confirmation = get_option("petition_confirmation");
 	$petition_confirmurl = get_option("petition_confirmurl");
-        $petition_from = get_option("petition_from");
-        $petition_title = get_option("petition_title");
+    $petition_from = get_option("petition_from");
+    $petition_title = get_option("petition_title");
+
 	$results = $wpdb->get_results("SELECT confirm FROM $table_name WHERE email = '$email'");
 	$confirm = $results[0]->confirm;
 
-        #Construct a confirmation URL, appending an extra parameter to the URL as necessary
-        if(substr_count($petition_confirmurl,"?") > 0) {
-	        #There are already arguments, add one
-	        $confirm_url =  $petition_confirmurl."&petition_confirm=$confirm";
+    #Construct a confirmation URL, appending an extra parameter to the URL as necessary
+	if(substr_count($petition_confirmurl,"?") > 0) {
+		#There are already arguments, add one
+		$confirm_url =  $petition_confirmurl."&petition_confirm=$confirm";
 	} else {
-                #There are no arguments, start one
+		#There are no arguments, start one
 		$confirm_url =  $petition_confirmurl."?petition_confirm=$confirm";
 	}
 	$petition_confirmation = str_replace('[[curl]]',$confirm_url,$petition_confirmation);
