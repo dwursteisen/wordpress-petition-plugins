@@ -368,9 +368,10 @@ function fcpetition_export(){
 	global $wpdb;
 	global $signature_table;
 	#we ought to check for admin access too
-	if ('Y' == $_GET['petition_export'] && current_user_can('manage_options')){
+	if ($_GET['petition_export'] && current_user_can('manage_options')){
+		$po = $wpdb->escape($_GET['petition_export']);
 		header('Content-Type: text/plain');
-		foreach ($wpdb->get_results("SELECT name,email,comment,time from $signature_table WHERE confirm='' ORDER BY time DESC") as $row) {
+		foreach ($wpdb->get_results("SELECT name,email,comment,time from $signature_table WHERE confirm='' and petition = '$po' ORDER BY time DESC") as $row) {
 		                print $row->name .",". $row->email .",".$row->comment.",". $row->time ."\n";
 		}
 		exit;
