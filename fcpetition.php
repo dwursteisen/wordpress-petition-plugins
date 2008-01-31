@@ -38,7 +38,7 @@ $options_defaults = array (
 	"petition_text"  		=> __("We the undersigned ask you to sign our petition."),
 	"petition_confirmation"	=> __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"),
 	"petition_confirmurl" 	=> __("<PLEASE ENTER THE CORRECT URL>","fcpetition"),
-	"petition_from" 		=>  __("My Petition <","fcpetition").get_option('admin_email').">",
+	"petition_from" 		=>  sprintf(__("My Petition <%s>","fcpetition"),get_option('admin_email')),
 	"petition_maximum" 		=> 10,
 	"petition_enabled" 		=> 0,
 	"petition_comments" 	=> 0
@@ -128,7 +128,7 @@ function fcpetition_confirm(){
 	?>
 		</p>
 		<p>
-		<?php printf(__('<a href="%s">Take me back to "%s"</a>', "fcpetition"),get_bloginfo('home'), get_bloginfo('name')); ?> 
+		<a href="<?php bloginfo('home')?>"><?php printf(__('Take me back to "%s"', "fcpetition"),get_bloginfo('name')); ?></a>
 		</p>
 		</div>
 		</body>
@@ -212,7 +212,7 @@ function fcpetition_filter_pages($content) {
 							return __("Your signature has now been added to the petition. Thank you.","fcpetition");						
 						} else {
 	                        $petition_confirmation = str_replace('[[curl]]',$confirm_url,$petition_confirmation);
-							fcpetition_mail($email);
+							fcpetition_mail($email,$petition);
                         	return __("Thank you for signing the petition. An e-mail has been sent to you so that you may confirm your signature.","fcpetition");
 						}
 		}
@@ -226,19 +226,19 @@ function fcpetition_filter_pages($content) {
 	}
 }
 
-function fcpetition_mail($email){
+function fcpetition_mail($email,$po){
 	global $wpdb;
 	global $signature_table;
 
-	$petition_confirmation = get_option("petition_confirmation");
-    $petition_from = get_option("petition_from");
-    $petition_title = get_option("petition_title");
-	$results = $wpdb->get_results("SELECT confirm FROM $signature_table WHERE email = '$email'");
-	$confirm = $results[0]->confirm;
-	
+	$rs = $wpdb->get_results("select petition_confirmation,petition_from,petition_title,confirm from wp_petition_signatures,wp_petitions where wp_petitions.petition = wp_petition_signatures.petition and email = '$email' and wp_petitions.petition = '$po';");
+	$petition_confirmation = $rs[0]->petition_confirmation;
+	$petition_from = $rs[0]->petition_from;
+	$petition_title = $rs[0]->petition_title;
+	$confirm = $rs[0]->confirm;
+
 	$confirm_url = get_bloginfo('home') . "/?petition-confirm=$confirm";
 	$petition_confirmation = str_replace('[[curl]]',$confirm_url,$petition_confirmation);
-	wp_mail($email,"Petition: Confirm your signing of the '$petition_title'","$petition_confirmation","From: $petition_from");
+	wp_mail($email,"Petition: Confirm your signing of the '$petition_title' $po","$petition_confirmation","From: $petition_from");
 }
 
 function fcpetition_form($petition){
@@ -276,7 +276,7 @@ function fcpetition_form($petition){
 	$form = $form . "			<input type='hidden' name='petition' value='$petition'/><input type='submit' name='Submit' value='".__("Sign the petition","fcpetiton")."'/>
 			</form>
 		<h3>
-			".__("Last ","fcpetition"). $petition_maximum . __(" signatories","fcpetition").
+			". sprintf(__("Last %s signatories","fcpetition"),$petition_maximum).
 		"</h3>";
 	foreach ($wpdb->get_results("SELECT name,comment from $signature_table WHERE confirm='' AND petition = '$petition' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
 		if ($petition_comments == 1 && $row->comment<>"") {
@@ -294,7 +294,7 @@ function fcpetition_add_pages() {
 	global $petitions_table;
 	global $wpdb;
 
-	add_options_page(__("Petition Main","fcpetiton"), 'Petition Main', 8,basename(__FILE__)."_main", 'fcpetition_main_page');
+	add_options_page(__("Petition Setup","fcpetiton"), 'Petition Setup', 8,basename(__FILE__)."_main", 'fcpetition_main_page');
 	foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
 		add_options_page(__("Petition Options","fcpetiton"), "Petition \"".$row->petition_title."\"", 8,basename(__FILE__)."_".$row->petition, 'fcpetition_options_page');
 		add_management_page(__("Manage Petition","fcpetiton"), "Petition \"".$row->petition_title."\"", 8,basename(__FILE__)."_".$row->petition, 'fcpetition_manage_page');
@@ -332,6 +332,7 @@ function fcpetition_main_page(){
 
 	?>
 		<div class='wrap'><h2><?php _e("Add New Petition","fcpetition") ?> </h2>
+		<p><?php _e("Adding or deleting a petition will not immediately update the structure of the administration menus.","fcpetition"); ?></p>
 		<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 			<input type="text" name="addpetition">
 			<p class="submit">
@@ -341,7 +342,7 @@ function fcpetition_main_page(){
 		</div>
 		<div class='wrap'><h2><?php _e("Current Petitions","fcpetition") ?> </h2>
 			<table class="widefat">
-			<tr><thead><th><?php _e("ID")?></th><th><?php _e("Title")?></th><th><?php _e("Delete")?></th></thead></tr>
+			<tr><thead><th><?php _e("Petition ID","fcpetition")?></th><th><?php _e("Petition Title","fcpetition")?></th><th></th></thead></tr>
 			<?php
 			foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
 				?>
@@ -350,7 +351,7 @@ function fcpetition_main_page(){
 					<td>
 						<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 							<input type="hidden" name="deletepetition" value="<?php print $row->petition;?>">
-							<input type='submit' name='Submit' value='<?php _e("Delete Petition")?>'/>
+							<input type='submit' name='Submit' value='<?php _e("Delete Petition","fcpetition")?>'/>
 						</form>
 					</td>
 				
@@ -411,7 +412,7 @@ function fcpetition_manage_page() {
 	}
 	if($_POST['resend'] != ''){
 	       $email = $_POST['resend'];
-	       fcpetition_mail($email); 
+	       fcpetition_mail($email,$po); 
 	       echo '<div id="message" class="updated fade"><p><strong>';
                _e("Confirmation e-mail resent.","fcpetition");
                echo "</p></strong></div>";
@@ -422,22 +423,22 @@ function fcpetition_manage_page() {
 
 	$results = $wpdb->get_results("SELECT * FROM $signature_table WHERE petition='$po' ORDER BY time LIMIT $n,10");
 
-	echo "<p> Showing ".($n +1). " to $j </p>";
-	if ($n>0) { $pager .= "<a href='$base_url&n=$i'>Previous 10</a> ... ";}
-	if (count($results)==10) { $pager .= "... <a href='$base_url&n=$j'>Next 10</a>";}
+	printf("<p> Showing %d to %d</p>",$n +1,$j);
+	if ($n>0) { $pager .= "<a href='$base_url&n=$i'>" . __("Previous 10","fcpetition") ."</a> ... ";}
+	if (count($results)==10) { $pager .= "... <a href='$base_url&n=$j'>". __("Next 10","fcpetition") ."</a>";}
 	if ($pager != '') { echo "<p>".$pager."</p>";}
 	echo '<table class="widefat">';
-	echo '<tr><thead><th>'.__("Name").'</th><th>'.__("E-mail").'</th>';
-	if ($comments=='Y') {echo '<th>'.__("Comments").'</th>';}
-	echo '<th>'.__('Time').'</th><th>'.__('Confirmation code').'</th></thead></tr>';
+	echo '<tr><thead><th>'.__("Name","fcpetition").'</th><th>'.__("E-mail address","fcpetition").'</th>';
+	if ($comments=='Y') {echo '<th>'.__("Comments","fcpetition").'</th>';}
+	echo '<th>'.__('Time',"fcpetition").'</th><th>'.__('Confirmation code',"fcpetition").'</th></thead></tr>';
 	foreach ($results as $row) {
 		if ($row->confirm=='') { 
-			$confirm = "<em>".__("Confirmed")."</em>";
+			$confirm = "<em>".__("Signature confirmed.","fcpetition")."</em>";
 		} else { 
 			$confirm = $row->confirm; 
 			$confirm = $confirm . "<form name='resendform' method='post' action='".str_replace( '%7E', '~', $_SERVER['REQUEST_URI'])."'>
 	                                               <input type='hidden' name='resend' value='$row->email'/>
-		                                       <input type='submit' name='Submit' value='".__("Resend Confirmation e-mail")."'/>
+		                                       <input type='submit' name='Submit' value='".__("Resend Confirmation e-mail","fcpetition")."'/>
 					</form>";
 		}
                 echo "
@@ -452,7 +453,7 @@ function fcpetition_manage_page() {
 				<td>
 					<form name='deleteform' method='post' action='".str_replace( '%7E', '~', $_SERVER['REQUEST_URI'])."'>
 						<input type='hidden' name='delete' value='$row->email'/>
-						<input type='submit' name='Submit' value='".__("Delete")."'/>
+						<input type='submit' name='Submit' value='".__("Delete Signature")."'/>
 					</form>
 				</td>
 			</tr>";
