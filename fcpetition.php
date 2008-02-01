@@ -208,10 +208,12 @@ function fcpetition_form(){
 			".__("Last ","fcpetition"). $petition_maximum . __(" signatories","fcpetition").
 		"</h3>";
 	foreach ($wpdb->get_results("SELECT name,comment from $table_name WHERE confirm='' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
-		if ($petition_comments == 'Y' && $row->comment<>"") {
-			$form .= "<span class='signature'>$row->name, \"$row->comment\"</span><br/>";
+		$name = stripslashes($row->name);
+		$comment =  stripslashes($row->comment);
+		if ($petition_comments == 'Y' && $comment<>"") {
+			$form .= "<span class='signature'>$name, \"$comment\"</span><br/>";
 		} else {
-			$form .= "<span class='signature'>$row->name </span><br/>";
+			$form .= "<span class='signature'>$name </span><br/>";
 		}
 	}
 	return $form."</div><p>";
@@ -338,23 +340,23 @@ function fcpetition_options_page() {
     global $wpdb;
     $table_name = $wpdb->prefix . "petition";
 
-    $petition_title = get_option("petition_title");
-    $petition_text = get_option("petition_text");
-    $petition_confirmation = get_option("petition_confirmation");
+    $petition_title = stripslashes(get_option("petition_title"));
+    $petition_text = stripslashes(get_option("petition_text"));
+    $petition_confirmation = stripslashes(get_option("petition_confirmation"));
     $petition_confirmurl = get_option("petition_confirmurl");
-    $petition_from = get_option("petition_from");
-    $petition_maximum = get_option("petition_maximum");
+    $petition_from = stripslashes(get_option("petition_from"));
+    $petition_maximum = stripslashes(get_option("petition_maximum"));
     $petition_enabled = get_option("petition_enabled");
     $petition_comments = get_option("petition_comments");
     // Test for submitted data
     if( $_POST['submitted'] == 'Y' ) {
             // Read their posted values
-	    $petition_title = $_POST['petition_title'];
-	    $petition_text = $_POST['petition_text'];
-	    $petition_confirmation = $_POST['petition_confirmation'];
+	    $petition_title = stripslashes($_POST['petition_title']);
+	    $petition_text = stripslashes($_POST['petition_text']);
+	    $petition_confirmation = stripslashes($_POST['petition_confirmation']);
 	    $petition_confirmurl = $_POST['petition_confirmurl'];
-	    $petition_from = $_POST['petition_from'];
-	    $petition_maximum = $_POST['petition_maximum'];
+	    $petition_from = stripslashes($_POST['petition_from']);
+	    $petition_maximum = stripslashes($_POST['petition_maximum']);
 	    $petition_enabled = ($_POST['petition_enabled']=='Y')?'Y':'N';
 	    $petition_comments = ($_POST['petition_comments']=='Y')?'Y':'N';
             // Save the posted value in the database
