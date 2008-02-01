@@ -234,7 +234,8 @@ function fcpetition_export(){
 	if ('Y' == $_GET['petition_export'] && current_user_can('manage_options')){
 		header('Content-Type: text/plain');
 		foreach ($wpdb->get_results("SELECT name,email,comment,time from $table_name WHERE confirm='' ORDER BY time DESC") as $row) {
-		                print $row->name .",". $row->email .",".$row->comment.",". $row->time ."\n";
+						$comment = stripslashes($row->comment);
+		                print $row->name .",". $row->email .",".$comment.",". $row->time ."\n";
 		}
 		exit;
 	} else {
@@ -283,6 +284,7 @@ function fcpetition_manage_page() {
 	echo '<a href="'.get_bloginfo('url').'?petition_export=Y">'.__("Export petition results as a CSV file","fcpetition").'</a>';
 
 	$results = $wpdb->get_results("SELECT * FROM $table_name ORDER BY time LIMIT $n,10");
+	
 
 	echo "<p> Showing ".($n +1). " to $j </p>";
 	if ($n>0) { $pager .= "<a href='$base_url&n=$i'>Previous 10</a> ... ";}
@@ -307,7 +309,7 @@ function fcpetition_manage_page() {
 				<td>$row->name</td>
 				<td>$row->email</td>
 		";
-		if ($comments=='Y') { echo "<td>$row->comment</td>";}
+		if ($comments=='Y') { $comment = stripslashes($row->comment); echo "<td>$comment</td>";}
 		echo "
 				<td>$row->time</td>
 				<td>$confirm</td>
