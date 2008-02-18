@@ -294,12 +294,9 @@ function fcpetition_add_pages() {
 	global $petitions_table;
 	global $wpdb;
 
-	add_options_page(__("Petition Setup","fcpetiton"), 'Petition Setup', 8,basename(__FILE__)."_main", 'fcpetition_main_page');
-	foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
-		add_options_page(__("Petition Options","fcpetiton"), "Petition \"".$row->petition_title."\"", 8,basename(__FILE__)."_".$row->petition, 'fcpetition_options_page');
-		add_management_page(__("Manage Petition","fcpetiton"), "Petition \"".$row->petition_title."\"", 8,basename(__FILE__)."_".$row->petition, 'fcpetition_manage_page');
-	}
-	#add_management_page(__("Manage Petition","fcpetiton"), 'Petition', 8,basename(__FILE__), 'fcpetition_manage_page');
+	add_options_page(__("Add/Delete Petitions","fcpetiton"), 'Add/Delete Petitions', 8,basename(__FILE__)."_main", 'fcpetition_main_page');
+	add_options_page(__("Petition Options","fcpetiton"), "Petition Options", 8,basename(__FILE__)."_options", 'fcpetition_options_page');
+	add_management_page(__("Petition Management","fcpetiton"), "Petition Management", 8,basename(__FILE__)."_manage", 'fcpetition_manage_page');
 }
 
 function fcpetition_main_page(){
@@ -383,8 +380,15 @@ function fcpetition_export(){
 function fcpetition_manage_page() {
 	global $wpdb;
 	global $signature_table;
-    $po = $wpdb->escape($_GET['page']);
-    $po = substr($po,strrpos($po,"_")+1);
+	global $petitions_table;
+
+    if($_POST['petition_select']) {
+		$po =  $wpdb->escape($_POST['petition_select']);
+	} else {
+		$po = 0;
+	}
+	#$po = $wpdb->escape($_GET['page']);
+    #$po = substr($po,strrpos($po,"_")+1);
 
 
 	$comments = get_option("petition_comments");
@@ -419,6 +423,27 @@ function fcpetition_manage_page() {
                echo "</p></strong></div>";
         }
 
+	?>
+		<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
+		<p>Petition: 
+		<select name="petition_select">
+		<?php
+            foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
+		?>
+			<?php if ($row->petition == $po) { ?>
+				<option value="<?php print $row->petition;?>" selected="yes"><?php print $row->petition_title;?></option>
+			<?php } else { ?>
+				<option value="<?php print $row->petition;?>"><?php print $row->petition_title;?></option>
+			<?php } ?>
+
+		<?php } ?>
+		</p>
+		</select>
+		<input type="submit" name="Submit" value="<?php _e("Select","fcpetition")?>" />
+		</form>
+	<?php
+
+	if ($po==0) { echo "</div>"; return;}
 	echo "<div class='wrap'><h2>".__("Petition Management","fcpetition")."</h2>";
 	echo '<a href="'.get_bloginfo('url').'?petition_export='.$po.'">'.__("Export petition results as a CSV file","fcpetition").'</a>';
 
@@ -455,6 +480,7 @@ function fcpetition_manage_page() {
 					<form name='deleteform' method='post' action='".str_replace( '%7E', '~', $_SERVER['REQUEST_URI'])."'>
 						<input type='hidden' name='delete' value='$row->email'/>
 						<input type='submit' name='Submit' value='".__("Delete Signature")."'/>
+						<input type='hidden' name='petition_select' value='$po'>
 					</form>
 				</td>
 			</tr>";
@@ -465,6 +491,7 @@ function fcpetition_manage_page() {
                 <form name="clearform" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 	        	<p class="submit">
 	        		<input type="hidden" name="clear" value="Y">
+					<input type="hidden" name="petition_select" value="<?php echo $po; ?>">
 				<input type="submit" name="Submit" value="<?php _e("Clear all signatures","fcpetition")?>" />
 		        </p>
 	        </form>
@@ -481,9 +508,11 @@ function fcpetition_options_page() {
 	global $signature_table;
 	global $petitions_table;
 
-	$po = $wpdb->escape($_GET['page']);
-	$po = substr($po,strrpos($po,"_")+1);
-
+	if($_POST['petition_select']) {
+		$po =  $wpdb->escape($_POST['petition_select']);
+	} else {
+		$po = 0;
+	}
 	#Fetch options
 	foreach ($wpdb->get_results("SELECT * FROM $petitions_table WHERE petition='$po'") as $row) {
 		foreach ($options_defaults as $option => $default){
@@ -523,10 +552,30 @@ function fcpetition_options_page() {
     }
 	    ?>
 	    <div class='wrap'>
+		<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
+		<p>Petition: 
+		<select name="petition_select">
+		<?php
+            foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
+		?>
+			<?php if ($row->petition == $po) { ?>
+				<option value="<?php print $row->petition;?>" selected="yes"><?php print $row->petition_title;?></option>
+			<?php } else { ?>
+				<option value="<?php print $row->petition;?>"><?php print $row->petition_title;?></option>
+			<?php } ?>
+
+		<?php } ?>
+		</p>
+		</select>
+		<input type="submit" name="Submit" value="<?php _e("Select","fcpetition")?>" />
+	 	</form>
+	
+		<?php if($po != 0) { ?>
 	    	<h2><?php _e("Petition Options","fcpetition")?></h2>
 			<p><?php printf(__("Place [[petition-%s]] in the page or post where you wish this petition to appear.","fcpetition"),$po); ?></p>
 		<form name="optionsform" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<input type="hidden" name="submitted" value="Y">
+		<input type="hidden" name="petition_select" value="<?php echo $po; ?>"/>
 		<p>
 			<?php _e("Please enter the petition title","fcpetition")?><br/>
 			<input type="text" name="petition_title" value="<?php echo $petition_title; ?>" size="72"/>
@@ -564,6 +613,8 @@ function fcpetition_options_page() {
 			<input type="submit" name="Submit" value="<?php _e("Update Options","fcpetition")?>" />
 		</p>
 		</form>
+		<?php } ?>
+			<hr/>
 			<p>Written by James Davis and licensed under the GNU GPL. For assistance please visit this plugin's <a href="http://www.freecharity.org.uk/wordpress-petition-plugin/">web page</a>.
 
 		</p>
