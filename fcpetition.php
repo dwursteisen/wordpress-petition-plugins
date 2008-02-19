@@ -238,7 +238,7 @@ function fcpetition_mail($email,$po){
 
 	$confirm_url = get_bloginfo('home') . "/?petition-confirm=$confirm";
 	$petition_confirmation = str_replace('[[curl]]',$confirm_url,$petition_confirmation);
-	wp_mail($email,"Petition: Confirm your signing of the '$petition_title' $po","$petition_confirmation","From: $petition_from");
+	wp_mail($email,"Petition: Confirm your signing of the '$petition_title'","$petition_confirmation","From: $petition_from");
 }
 
 function fcpetition_form($petition){
@@ -420,9 +420,11 @@ function fcpetition_manage_page() {
         }
 
 	?>
+
+		<div class='wrap'>
 		<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<p>Petition: 
-		<select name="petition_select">
+		<select name="petition_select" onchange='this.form.submit()'>
 		<?php
             foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
 		?>
@@ -435,13 +437,13 @@ function fcpetition_manage_page() {
 		<?php } ?>
 		</p>
 		</select>
-		<input type="submit" name="Submit" value="<?php _e("Select","fcpetition")?>" />
+		<noscript><input type="submit" name="Submit" value="<?php _e("Select","fcpetition")?>" /></noscript>
 		</form>
 	<?php
 
 	if ($po==0) { echo "</div>"; return;}
 	?>
-	<div class='wrap'><h2><?php _e("Petition Management","fcpetition") ?></h2>
+	<h2><?php _e("Petition Management","fcpetition") ?></h2>
 	<a href="<?php echo get_bloginfo('url') ;?>?petition_export=<?php echo $po;?>"><?php _e("Export petition results as a CSV file","fcpetition");?></a>
 	
 	<?php
@@ -474,31 +476,31 @@ function fcpetition_manage_page() {
 		} else { 
 			$confirm = $row->confirm; 
 			$confirm = $confirm . "<form name='resendform' method='post' action='".str_replace( '%7E', '~', $_SERVER['REQUEST_URI'])."'>
-	                                               <input type='hidden' name='resend' value='$row->email'/>
-		                                       <input type='submit' name='Submit' value='".__("Resend Confirmation e-mail","fcpetition")."'/>
-					</form>";
+	                               	<input type='hidden' name='resend' value='$row->email'/>
+									<input type='hidden' name='petition_select' value='$po'/>
+		                            <input type='submit' name='Submit' value='".__("Resend Confirmation e-mail","fcpetition")."'/>
+								   </form>";
 		}
-                echo "
+    ?>
 			<tr>
-				<td>$row->name</td>
-				<td>$row->email</td>
-		";
+				<td><?php echo $row->name; ?></td>
+				<td><?php echo $row->email; ?></td>
+	<?php
 		if ($petion_comments) { echo "<td>$row->comment</td>";}
-		echo "
-				<td>$row->time</td>
-				<td>$confirm</td>
+	?>
+				<td><?php echo $row->time; ?></td>
+				<td><?php echo $confirm; ?></td>
 				<td>
-					<form name='deleteform' method='post' action='".str_replace( '%7E', '~', $_SERVER['REQUEST_URI'])."'>
-						<input type='hidden' name='delete' value='$row->email'/>
-						<input type='submit' name='Submit' value='".__("Delete Signature")."'/>
-						<input type='hidden' name='petition_select' value='$po'>
+					<form name='deleteform' method='post' action='<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>'>
+						<input type='hidden' name='delete' value='<?php echo $row->email;?>'/>
+						<input type='submit' name='Submit' value='<?php _e("Delete Signature"); ?>'/>
+						<input type='hidden' name='petition_select' value='<?php echo $po;?>'>
 					</form>
 				</td>
-			</tr>";
-	}
-	echo "</table>";
+			</tr>
+	<?php } ?>
+	</table>
 
-	?>
                 <form name="clearform" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 	        	<p class="submit">
 	        		<input type="hidden" name="clear" value="Y">
@@ -565,7 +567,7 @@ function fcpetition_options_page() {
 	    <div class='wrap'>
 		<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<p>Petition: 
-		<select name="petition_select">
+		<select name="petition_select" onchange='this.form.submit()'>
 		<?php
             foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
 		?>
@@ -578,7 +580,7 @@ function fcpetition_options_page() {
 		<?php } ?>
 		</p>
 		</select>
-		<input type="submit" name="Submit" value="<?php _e("Select","fcpetition")?>" />
+		<noscript><input type="submit" name="Submit" value="<?php _e("Select","fcpetition")?>" /></noscript>
 	 	</form>
 	
 		<?php if($po != 0) { ?>
