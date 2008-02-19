@@ -381,17 +381,13 @@ function fcpetition_manage_page() {
 	global $wpdb;
 	global $signature_table;
 	global $petitions_table;
+	global $options_defaults;
 
     if($_POST['petition_select']) {
 		$po =  $wpdb->escape($_POST['petition_select']);
 	} else {
 		$po = 0;
 	}
-	#$po = $wpdb->escape($_GET['page']);
-    #$po = substr($po,strrpos($po,"_")+1);
-
-
-	$comments = get_option("petition_comments");
 
 	$n = $_GET['n']?$_GET['n']:0;
 
@@ -444,20 +440,35 @@ function fcpetition_manage_page() {
 	<?php
 
 	if ($po==0) { echo "</div>"; return;}
-	echo "<div class='wrap'><h2>".__("Petition Management","fcpetition")."</h2>";
-	echo '<a href="'.get_bloginfo('url').'?petition_export='.$po.'">'.__("Export petition results as a CSV file","fcpetition").'</a>';
+	?>
+	<div class='wrap'><h2><?php _e("Petition Management","fcpetition") ?></h2>
+	<a href="<?php echo get_bloginfo('url') ;?>?petition_export=<?php echo $po;?>"><?php _e("Export petition results as a CSV file","fcpetition");?></a>
+	
+	<?php
+		foreach ($wpdb->get_results("SELECT * FROM $petitions_table WHERE petition='$po'") as $row) {
+			foreach ($options_defaults as $option => $default){
+				$$option = $row->$option;
+			}
+		}
+	?>
 
-	$results = $wpdb->get_results("SELECT * FROM $signature_table WHERE petition='$po' ORDER BY time LIMIT $n,10");
-
-	printf("<p> Showing %d to %d</p>",$n +1,$j);
-	if ($n>0) { $pager .= "<a href='$base_url&n=$i'>" . __("Previous 10","fcpetition") ."</a> ... ";}
-	if (count($results)==10) { $pager .= "... <a href='$base_url&n=$j'>". __("Next 10","fcpetition") ."</a>";}
-	if ($pager != '') { echo "<p>".$pager."</p>";}
-	echo '<table class="widefat">';
-	echo '<tr><thead><th>'.__("Name","fcpetition").'</th><th>'.__("E-mail address","fcpetition").'</th>';
-	if ($comments=='Y') {echo '<th>'.__("Comments","fcpetition").'</th>';}
-	echo '<th>'.__('Time',"fcpetition").'</th><th>'.__('Confirmation code',"fcpetition").'</th></thead></tr>';
-	foreach ($results as $row) {
+	<?php
+		$results = $wpdb->get_results("SELECT * FROM $signature_table WHERE petition='$po' ORDER BY time LIMIT $n,10");
+		printf(__("<p> Showing %d to %d</p>"),$n +1,$j);
+		if ($n>0) { $pager .= "<a href='$base_url&n=$i'>" . __("Previous 10","fcpetition") ."</a> ... ";}
+		if (count($results)==10) { $pager .= "... <a href='$base_url&n=$j'>". __("Next 10","fcpetition") ."</a>";}
+		if ($pager != '') { echo "<p>".$pager."</p>";}
+	?>
+		<table class="widefat">
+		<tr><thead><th><?php _e("Name","fcpetition"); ?></th><th><?php _e("E-mail address","fcpetition"); ?></th>
+	<?php
+		if ($petition_comments) {
+			echo "<th>".__("Comments","fcpetition")."</th>";
+		} 
+	?>
+		<th><?php _e('Time',"fcpetition"); ?></th><th> <?php _e('Confirmation code',"fcpetition"); ?></th></thead></tr>
+		<?php
+		foreach ($results as $row) {
 		if ($row->confirm=='') { 
 			$confirm = "<em>".__("Signature confirmed.","fcpetition")."</em>";
 		} else { 
@@ -472,7 +483,7 @@ function fcpetition_manage_page() {
 				<td>$row->name</td>
 				<td>$row->email</td>
 		";
-		if ($comments=='Y') { echo "<td>$row->comment</td>";}
+		if ($petion_comments) { echo "<td>$row->comment</td>";}
 		echo "
 				<td>$row->time</td>
 				<td>$confirm</td>
