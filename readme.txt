@@ -28,3 +28,7 @@ page under Manage.
 
 * The entire petition can be wiped using the button on the upper right of the page.
 * Individual signatures can be deleted or manually confirmed from within the table.
+
+== Getting Help ==
+
+E-mail petition@freecharity.org.uk
