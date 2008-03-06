@@ -6,7 +6,11 @@ Requires at least: 2.3
 Tested up to: 2.3
 Stable tag: 1.0.1
 
-Runs a simple web and e-mail based petition through your WordPress based site or blog. 
+Run a simple web and e-mail based petition through WordPress.
+
+== Description ==
+
+The plugin allows you to run a single petition through your WordPress installation. The petition appears on a page or post in WordPress. Upon submitting their details the user is sent an e-mail, prompting them to confirm their signature. The may can leave an optional comment if required. Details of signatories can be exported when the petition is complete.
 
 == Installation ==
 
