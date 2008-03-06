@@ -47,7 +47,7 @@ $options_defaults = array (
 /*  Define the maximum comment size. You can't simply just change this for an existing install
  *  you must modify the database table too
  */
-define("MAX_COMMENT_SIZE",300);
+define("MAX_COMMENT_SIZE",255);
 /*  Disable e-mail verficiation of petitions.
  *  THIS IS A BAD THING. ENABLING THIS FEAUTRE WILL OPEN YOUR PETITION TO ABUSE AND SPAM.
  *  Set the option to 1 if you really want this. Otherwise, leave well alone.
