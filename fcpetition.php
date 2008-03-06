@@ -27,7 +27,7 @@ Author URI: http://www.freecharity.org.uk/
 */
 ?>
 <?php
-define("MAX_COMMENT_SIZE",300);
+define("MAX_COMMENT_SIZE",255);
 add_action('admin_menu', 'fcpetition_add_pages');
 add_action('the_content','fcpetition_filter_pages');
 register_activation_hook(__FILE__, fcpetition_install()); 
