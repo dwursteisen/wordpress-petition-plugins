@@ -3,8 +3,8 @@ Contributors: pishmishy
 Donate link: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Tags: petition, comments, activism, politics, campaign
 Requires at least: 2.3
-Tested up to: 2.3
-Stable tag: 1.0.1
+Tested up to: 2.5
+Stable tag: 2.0
 
 Run a simple web and e-mail based petition through WordPress.
 
