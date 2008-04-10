@@ -161,7 +161,7 @@ function fcpetition_count(){
 	
 	$results = $wpdb->get_results("SELECT count(confirm) as c FROM $signature_table WHERE confirm = ''");
         $count = $results[0]->c;
-	echo $count;
+	return $count;
 }
 
 function fcpetition_filter_pages($content) {
@@ -276,8 +276,7 @@ function fcpetition_form($petition){
 	$form = $form . "			<input type='hidden' name='petition' value='$petition'/><input type='submit' name='Submit' value='".__("Sign the petition","fcpetiton")."'/>
 			</form>
 		<h3>
-			". sprintf(__("Last %s signatories","fcpetition"),$petition_maximum).
-		"</h3>";
+			". sprintf(__("Last %d of %d signatories","fcpetition"),$petition_maximum,fcpetition_count())."</h3>";
 	foreach ($wpdb->get_results("SELECT name,comment from $signature_table WHERE confirm='' AND petition = '$petition' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
 		if ($petition_comments == 1 && $row->comment<>"") {
 			$form .= "<span class='signature'>$row->name, \"$row->comment\"</span><br/>";
