@@ -359,7 +359,7 @@ function fcpetition_main_page(){
 			foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
 				?>
 				<tr>
-					<td><?php print $row->petition;?></td><td><?php print $row->petition_title;?></td>
+					<td><?php print $row->petition;?></td><td><?php print stripslashes($row->petition_title);?></td>
 					<td>
 						<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 							<input type="hidden" name="deletepetition" value="<?php print $row->petition;?>">
@@ -552,7 +552,7 @@ function fcpetition_options_page() {
 	#Fetch options
 	foreach ($wpdb->get_results("SELECT * FROM $petitions_table WHERE petition='$po'") as $row) {
 		foreach ($options_defaults as $option => $default){
-			$$option = $row->$option;
+			$$option = stripslashes($row->$option);
 		}
 	}
 
@@ -567,8 +567,8 @@ function fcpetition_options_page() {
 				continue;
 			}
 			//Update options table
-			$$option = $wpdb->escape($_POST[$option]);
-			$foo = $$option;
+			$$option = stripslashes($_POST[$option]);
+			$foo = $wpdb->escape($$option);
 			$wpdb->query("update $petitions_table set $option = '$foo' where petition='$po'");
 		}
 
@@ -598,9 +598,9 @@ function fcpetition_options_page() {
             foreach ($plist as $row) {
 		?>
 			<?php if ($row->petition == $po) { ?>
-				<option value="<?php print $row->petition;?>" selected="yes"><?php print $row->petition_title;?></option>
+				<option value="<?php print $row->petition;?>" selected="yes"><?php print stripslashes($row->petition_title);?></option>
 			<?php } else { ?>
-				<option value="<?php print $row->petition;?>"><?php print $row->petition_title;?></option>
+				<option value="<?php print $row->petition;?>"><?php print stripslashes($row->petition_title);?></option>
 			<?php } ?>
 
 		<?php } ?>
