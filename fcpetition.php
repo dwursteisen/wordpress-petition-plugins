@@ -384,7 +384,7 @@ function fcpetition_export(){
 		$po = $wpdb->escape($_GET['petition_export']);
 		header('Content-Type: text/plain');
 		foreach ($wpdb->get_results("SELECT name,email,comment,time from $signature_table WHERE confirm='' and petition = '$po' ORDER BY time DESC") as $row) {
-		                print $row->name .",". $row->email .",".$row->comment.",". $row->time ."\n";
+		                print stripslashes($row->name) .",". stripslashes($row->email) .",".stripslashes($row->comment).",". $row->time ."\n";
 		}
 		exit;
 	} else {
@@ -447,9 +447,9 @@ function fcpetition_manage_page() {
             foreach ($plist as $row) {
 		?>
 			<?php if ($row->petition == $po) { ?>
-				<option value="<?php print $row->petition;?>" selected="yes"><?php print $row->petition_title;?></option>
+				<option value="<?php print $row->petition;?>" selected="yes"><?php print stripslashes($row->petition_title);?></option>
 			<?php } else { ?>
-				<option value="<?php print $row->petition;?>"><?php print $row->petition_title;?></option>
+				<option value="<?php print $row->petition;?>"><?php print stripslashes($row->petition_title);?></option>
 			<?php } ?>
 
 		<?php } ?>
@@ -491,7 +491,7 @@ function fcpetition_manage_page() {
 			echo "<th>".__("Comments","fcpetition")."</th>";
 		} 
 	?>
-		<th><?php _e('Time',"fcpetition"); ?></th><th> <?php _e('Confirmation code',"fcpetition"); ?></th></thead></tr>
+		<th><?php _e('Time',"fcpetition"); ?></th><th> <?php _e('Confirmation code',"fcpetition"); ?></th><th></th></thead></tr>
 		<?php
 		foreach ($results as $row) {
 		if ($row->confirm=='') { 
@@ -506,12 +506,12 @@ function fcpetition_manage_page() {
 		}
     ?>
 			<tr>
-				<td><?php echo $row->name; ?></td>
-				<td><?php echo $row->email; ?></td>
+				<td class="name"><?php echo stripslashes($row->name); ?></td>
+				<td class="email"><?php echo stripslashes($row->email); ?></td>
 	<?php
-		if ($petion_comments) { echo "<td>$row->comment</td>";}
+		if ($petition_comments) { echo "<td class=\"comment\">". stripslashes($row->comment)."</td>";}
 	?>
-				<td><?php echo $row->time; ?></td>
+				<td class="time"><?php echo $row->time; ?></td>
 				<td><?php echo $confirm; ?></td>
 				<td>
 					<form name='deleteform' method='post' action='<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>'>
