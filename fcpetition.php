@@ -249,8 +249,8 @@ function fcpetition_mail($email,$po){
 
 	$rs = $wpdb->get_results("select petition_confirmation,petition_from,petition_title,confirm from wp_petition_signatures,wp_petitions where wp_petitions.petition = wp_petition_signatures.petition and email = '$email' and wp_petitions.petition = '$po';");
 	$petition_confirmation = $rs[0]->petition_confirmation;
-	$petition_from = $rs[0]->petition_from;
-	$petition_title = $rs[0]->petition_title;
+	$petition_from = stripslashes($rs[0]->petition_from);
+	$petition_title = stripslashes($rs[0]->petition_title);
 	$confirm = $rs[0]->confirm;
 
 	$confirm_url = get_bloginfo('home') . "/?petition-confirm=$confirm";
@@ -271,7 +271,7 @@ function fcpetition_form($petition){
 	if (count($rs) != 1) return "<strong>This petition does not exist</strong>";
 	
 	$petition_maximum = $rs[0]->petition_maximum;
-	$petition_text = $rs[0]->petition_text;
+	$petition_text = stripslashes($rs[0]->petition_text);
 	$petition_comments = $rs[0]->petition_comments;
 	$petition_enabled = $rs[0]->petition_enabled;
 	if(!$petition_enabled) return "<strong>This petition is not enabled</strong>";
