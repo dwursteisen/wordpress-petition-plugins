@@ -567,8 +567,8 @@ function fcpetition_options_page() {
 				continue;
 			}
 			//Update options table
-			$$option = stripslashes($_POST[$option]);
-			$foo = $wpdb->escape($$option);
+			$$option = $_POST[$option];
+			$foo = $wpdb->escape($_POST[$option]);
 			$wpdb->query("update $petitions_table set $option = '$foo' where petition='$po'");
 		}
 
@@ -622,24 +622,24 @@ function fcpetition_options_page() {
 		<input type="hidden" name="petition_select" value="<?php echo $po; ?>"/>
 		<p>
 			<?php _e("Please enter the petition title","fcpetition")?><br/>
-			<input type="text" name="petition_title" value="<?php echo $petition_title; ?>" size="72"/>
+			<input type="text" name="petition_title" value="<?php echo stripslashes($petition_title); ?>" size="72"/>
 		</p>
 		<p>
 			<?php _e("Please enter the petition text","fcpetition")?><br/>
-			<textarea name="petition_text" rows="10" cols="72"><?php echo $petition_text; ?></textarea>
+			<textarea name="petition_text" rows="10" cols="72"><?php echo stripslashes($petition_text); ?></textarea>
 		</p>
 		<p>
 			<?php _e("Please enter the confirmation email text. Insert [[curl]] where the confirmation URL is to appear. [[curl]] <strong>must</strong> appear in the text or the confirmation e-mails will not work.","fcpetition")?><br/>
-        	        <textarea name="petition_confirmation" rows="10" cols="72"><?php echo $petition_confirmation; ?></textarea>
+        	        <textarea name="petition_confirmation" rows="10" cols="72"><?php echo stripslashes($petition_confirmation); ?></textarea>
 		</p>
 		<p>
 		        <?php _e("Please enter the confirmation URL. This is the page or post on which the petition appears. This option <strong>must</strong> be correctly set or the confirmation e-mails will not work.","fcpetition")?><br/>
-		        <input type="text" name="petition_confirmurl" size="72" value="<?php echo $petition_confirmurl; ?>"/>
+		        <input type="text" name="petition_confirmurl" size="72" value="<?php echo stripslashes($petition_confirmurl); ?>"/>
 		</p>
 
 		<p>
 			<?php _e("Please enter the address which the confirmation e-mail will appear to be sent from. Any replies to the confirmation e-mail will be directed to this address. This <strong>must</strong> follow the same format as the example address.","fcpetition")?><br/>
-			<input type="text" name="petition_from" value="<?php echo $petition_from; ?>" size="72"/>
+			<input type="text" name="petition_from" value="<?php echo stripslashes($petition_from); ?>" size="72"/>
 		</p>
 		<p>
 			<?php _e("Please enter the maximum number of signatures to be displayed","fcpetition")?><br/>
