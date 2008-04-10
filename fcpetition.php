@@ -164,6 +164,23 @@ function fcpetition_count(){
 	return $count;
 }
 
+function fcpetition_countu(){
+	global $wpdb;
+	global $signature_table;
+	
+	$results = $wpdb->get_results("SELECT count(confirm) as c FROM $signature_table");
+        $count = $results[0]->c;
+	return $count;
+}
+
+function fcpetition_first(){
+	global $wpdb;
+	global $petitions_table;
+	$results = $wpdb->get_results("SELECT petition FROM $petitions_table ORDER by petition limit 0,1");
+	if (count($results)==0) return false;
+	return $results[0]->petition;
+}
+
 function fcpetition_filter_pages($content) {
 	/* Filter the_content on appropriate pages. This function contains the
 	 * user facing portion of the code. 
@@ -321,7 +338,6 @@ function fcpetition_main_page(){
 	}
 	if ($_POST['deletepetition'] != ''){
 		$petition = $wpdb->escape($_POST['deletepetition']);
-		print $petition;
 		$wpdb->query("DELETE FROM $petitions_table WHERE petition = '$petition'");
 		$wpdb->query("DELETE FROM $signature_table WHERE petition = '$petition'");
 	}
@@ -385,7 +401,7 @@ function fcpetition_manage_page() {
     if($_POST['petition_select']) {
 		$po =  $wpdb->escape($_POST['petition_select']);
 	} else {
-		$po = 0;
+		$po = fcpetition_first();
 	}
 
 	$n = $_GET['n']?$_GET['n']:0;
@@ -419,13 +435,16 @@ function fcpetition_manage_page() {
         }
 
 	?>
-
+		
 		<div class='wrap'>
+		<?php $plist = $wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition");
+		      if (count($plist)>0) {
+		?>
 		<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<p>Petition: 
 		<select name="petition_select" onchange='this.form.submit()'>
 		<?php
-            foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
+            foreach ($plist as $row) {
 		?>
 			<?php if ($row->petition == $po) { ?>
 				<option value="<?php print $row->petition;?>" selected="yes"><?php print $row->petition_title;?></option>
@@ -438,6 +457,11 @@ function fcpetition_manage_page() {
 		</select>
 		<noscript><input type="submit" name="Submit" value="<?php _e("Select","fcpetition")?>" /></noscript>
 		</form>
+		<?php } else { ?>
+				<div id="message" class="error fade"><p><strong>    
+                		<?php _e("Please add a petition.","fcpetition"); ?>
+				</p></strong></div>
+		<?php } ?>
 	<?php
 
 	if ($po==0) { echo "</div>"; return;}
@@ -455,7 +479,7 @@ function fcpetition_manage_page() {
 
 	<?php
 		$results = $wpdb->get_results("SELECT * FROM $signature_table WHERE petition='$po' ORDER BY time LIMIT $n,10");
-		printf(__("<p> Showing %d to %d</p>"),$n +1,$j);
+		printf(__("<p> Showing %d to %d of %d (%d confirmed)</p>"),$n +1,$j,fcpetition_countu(),fcpetition_count());
 		if ($n>0) { $pager .= "<a href='$base_url&n=$i'>" . __("Previous 10","fcpetition") ."</a> ... ";}
 		if (count($results)==10) { $pager .= "... <a href='$base_url&n=$j'>". __("Next 10","fcpetition") ."</a>";}
 		if ($pager != '') { echo "<p>".$pager."</p>";}
@@ -523,7 +547,7 @@ function fcpetition_options_page() {
 	if($_POST['petition_select']) {
 		$po =  $wpdb->escape($_POST['petition_select']);
 	} else {
-		$po = 0;
+		$po = fcpetition_first();
 	}
 	#Fetch options
 	foreach ($wpdb->get_results("SELECT * FROM $petitions_table WHERE petition='$po'") as $row) {
@@ -564,11 +588,14 @@ function fcpetition_options_page() {
     }
 	    ?>
 	    <div class='wrap'>
+		<?php $plist = $wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition");
+			if(count($plist) > 0) {
+		?>
 		<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<p>Petition: 
 		<select name="petition_select" onchange='this.form.submit()'>
 		<?php
-            foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
+            foreach ($plist as $row) {
 		?>
 			<?php if ($row->petition == $po) { ?>
 				<option value="<?php print $row->petition;?>" selected="yes"><?php print $row->petition_title;?></option>
@@ -581,7 +608,12 @@ function fcpetition_options_page() {
 		</select>
 		<noscript><input type="submit" name="Submit" value="<?php _e("Select","fcpetition")?>" /></noscript>
 	 	</form>
-	
+		<?php } else { ?>
+			<div id="message" class="error fade"><p><strong>	
+				<?php _e("Please add a petition.","fcpetition"); ?>
+			</p></strong></div>
+		<?php } ?>
+
 		<?php if($po != 0) { ?>
 	    	<h2><?php _e("Petition Options","fcpetition")?></h2>
 			<p><?php printf(__("Place [[petition-%s]] in the page or post where you wish this petition to appear.","fcpetition"),$po); ?></p>
