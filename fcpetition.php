@@ -71,8 +71,8 @@ $petitions_table = $wpdb->prefix . "petitions";
 $petitions_table_sql = "CREATE TABLE $petitions_table (
 						petition INT AUTO_INCREMENT,
 						petition_title VARCHAR(100),
-						petition_text VARCHAR(100),
-						petition_confirmation VARCHAR(100),
+						petition_text TEXT,
+						petition_confirmation TEXT,
 						petition_confirmurl VARCHAR(100),
 						petition_from VARCHAR(100),
 						petition_maximum INT,
@@ -271,14 +271,13 @@ function fcpetition_form($petition){
 	if (count($rs) != 1) return "<strong>This petition does not exist</strong>";
 	
 	$petition_maximum = $rs[0]->petition_maximum;
-	$petition_text = stripslashes($rs[0]->petition_text);
+	$petition_text = wpautop(stripslashes($rs[0]->petition_text));
 	$petition_comments = $rs[0]->petition_comments;
 	$petition_enabled = $rs[0]->petition_enabled;
 	if(!$petition_enabled) return "<strong>This petition is not enabled</strong>";
 
 	$form_action = str_replace( '%7E', '~', $_SERVER['REQUEST_URI']);
-	$form  = "</p>
-		<div class='petition'>
+	$form  = "
 		$petition_text<br/><br/>
 			<em>". __("After you have added your name to this petition an e-mail will be sent to the given address to confirm your signature. Please make sure that your e-mail address is correct or you will not receive this e-mail and your name will not be counted.","fcpetition") ."
 			</em>
@@ -301,7 +300,7 @@ function fcpetition_form($petition){
 			$form .= "<span class='signature'>$row->name </span><br/>";
 		}
 	}
-	return $form."</div><p>";
+	return "</p><div class='petition'>".$form."</div><p>";
 }
 
 function fcpetition_add_pages() {
