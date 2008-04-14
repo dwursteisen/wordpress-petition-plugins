@@ -4,13 +4,13 @@ Donate link: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Tags: petition, comments, activism, politics, campaign
 Requires at least: 2.3
 Tested up to: 2.5
-Stable tag: 2.0
+Stable tag: 2.0.1
 
-Run a simple web and e-mail based petition through WordPress.
+Run simple web and e-mail based petitions through WordPress.
 
 == Description ==
 
-The plugin allows you to run a petitions through your WordPress installation. The petition appears on a page or post in WordPress. Upon submitting their details the user is sent an e-mail, prompting them to confirm their signature. The may can leave an optional comment if required. Details of signatories can be exported when the petition is complete.
+The plugin allows you to run a petition through your WordPress installation. The petition appears on a page or post in WordPress. Upon submitting their details the user is sent an e-mail, prompting them to confirm their signature. The may can leave an optional comment if required. Details of signatories can be exported when the petition is complete.
 
 == Installation ==
 
@@ -21,9 +21,10 @@ The plugin allows you to run a petitions through your WordPress installation. Th
 
 = How do I use the plugin? =
 
-1. The petition is configured through the "Petition" page under Options. There are only a few options to be set. Combined with the default options, you should need little assistance with theses.
-2. When setting the confirmation e-mail text, placing [[curl]] within the text will insert the confirmation URL at that point in the text. Failure to place the URL within the text will result in a useless confirmation e-mail.
-3. Within the post or page where you wish the petition to appear, insert [[petition]]. The petition will not appear until you enable the petition on the options page.
+1. Petitions can be added and removed on the "Add/Delete Petitions" page in the Settings administration page (Options prior to 2.5).
+2. Settings for individual petitions can be changed on the adjacent "Petition Options" page. The settings should be self explanatory.
+3. When setting the confirmation e-mail text, placing [[curl]] within the text will insert the confirmation URL at that point in the text. Failure to place the URL within the text will result in a useless confirmation e-mail.
+4. Within the post or page where you wish the petition to appear, insert [[petition-n]] where n is the number of the petition. The petition will not appear until you enable the petition on the options page.
 
 = How can I manage the petition data? =
 
