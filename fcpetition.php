@@ -35,7 +35,7 @@ Author URI: http://www.freecharity.org.uk/
 // Define options and their default settings
 $options_defaults = array (
 	"petition_title" 		=> '',
-	"petition_text"  		=> __("We the undersigned ask you to sign our petition."),
+	"petition_text"  		=> __("We the undersigned ask you to sign our petition.","fcpetition"),
 	"petition_confirmation"	=> __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"),
 	"petition_confirmurl" 	=> __("<PLEASE ENTER THE CORRECT URL>","fcpetition"),
 	"petition_from" 		=>  sprintf(__("My Petition <%s>","fcpetition"),get_option('admin_email')),
@@ -255,7 +255,8 @@ function fcpetition_mail($email,$po){
 
 	$confirm_url = get_bloginfo('home') . "/?petition-confirm=$confirm";
 	$petition_confirmation = str_replace('[[curl]]',$confirm_url,$petition_confirmation);
-	wp_mail($email,"Petition: Confirm your signing of the '$petition_title'","$petition_confirmation","From: $petition_from");
+	$subject = sprintf(__("Petition: Confirm your signing of the petition '%s'"),$petition_title);
+	wp_mail($email,"$subject","$petition_confirmation","From: $petition_from");
 }
 
 function fcpetition_form($petition){
@@ -268,13 +269,13 @@ function fcpetition_form($petition){
 	global $petitions_table;
 
 	$rs = $wpdb->get_results("SELECT * from $petitions_table where petition = $petition");
-	if (count($rs) != 1) return "<strong>This petition does not exist</strong>";
+	if (count($rs) != 1) return "<strong>". __("This petition does not exist"). "</strong>";
 	
 	$petition_maximum = $rs[0]->petition_maximum;
 	$petition_text = wpautop(stripslashes($rs[0]->petition_text));
 	$petition_comments = $rs[0]->petition_comments;
 	$petition_enabled = $rs[0]->petition_enabled;
-	if(!$petition_enabled) return "<strong>This petition is not enabled</strong>";
+	if(!$petition_enabled) return "<strong>".__("This petition is not enabled")."</strong>";
 
 	$form_action = str_replace( '%7E', '~', $_SERVER['REQUEST_URI']);
 	$form  = "
@@ -289,7 +290,7 @@ function fcpetition_form($petition){
 	if ($petition_comments == 1) { 
 		$form = $form . __("Please enter an optional comment (maximum ". MAX_COMMENT_SIZE." characters)","fcpetition").":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
 	}
-	$form = $form . "			<input type='hidden' name='petition' value='$petition'/><input type='submit' name='Submit' value='".__("Sign the petition","fcpetiton")."'/>
+	$form = $form . "			<input type='hidden' name='petition' value='$petition'/><input type='submit' name='Submit' value='".__("Sign the petition","fcpetition")."'/>
 			</form>
 		<h3>
 			". sprintf(__("Last %d of %d signatories","fcpetition"),$petition_maximum,fcpetition_count())."</h3>";
@@ -309,9 +310,9 @@ function fcpetition_add_pages() {
 	global $petitions_table;
 	global $wpdb;
 
-	add_options_page(__("Add/Delete Petitions","fcpetiton"), 'Add/Delete Petitions', 8,basename(__FILE__)."_main", 'fcpetition_main_page');
-	add_options_page(__("Petition Options","fcpetiton"), "Petition Options", 8,basename(__FILE__)."_options", 'fcpetition_options_page');
-	add_management_page(__("Petition Management","fcpetiton"), "Petition Management", 8,basename(__FILE__)."_manage", 'fcpetition_manage_page');
+	add_options_page(__("Add/Delete Petitions","fcpetition"), 'Add/Delete Petitions', 8,basename(__FILE__)."_main", 'fcpetition_main_page');
+	add_options_page(__("Petition Options","fcpetition"), "Petition Options", 8,basename(__FILE__)."_options", 'fcpetition_options_page');
+	add_management_page(__("Petition Management","fcpetition"), "Petition Management", 8,basename(__FILE__)."_manage", 'fcpetition_manage_page');
 }
 
 function fcpetition_main_page(){
