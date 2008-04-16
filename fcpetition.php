@@ -81,6 +81,7 @@ $petitions_table_sql = "CREATE TABLE $petitions_table (
 						PRIMARY KEY (petition)
 					);
 ";
+$old_table = $table_prefix . "petition";
 
 /*
  *  Actions
@@ -153,6 +154,21 @@ function fcpetition_install(){
 	    require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
 	    dbDelta($petitions_table_sql);
     }
+}
+
+function fcpetition_import_version1($target) {
+	global $wpdb;
+	global $old_table;
+	global $signature_table;
+	$old_rows = $wpdb->get_results("select email,name,confirm,comment,name,time from $old_table");
+	$c = 0;
+	foreach($old_rows as $row) {
+		$q = "INSERT INTO $signature_table (petition,email,name,confirm,comment,time) values ($target,'$row->email','$row->name','$row->confirm','$row->comment','$row->time')";
+		$wpdb->query($q);
+		$c++;
+	}
+	$wpdb->query("DROP TABLE $old_table");
+	return $c;
 }
 
 function fcpetition_count(){
@@ -319,6 +335,7 @@ function fcpetition_main_page(){
 	global $wpdb;
 	global $petitions_table;
 	global $signature_table;
+	global $old_table;
 	global $options_defaults;
 
 	//print $_GET['page'];
@@ -340,6 +357,17 @@ function fcpetition_main_page(){
 		$petition = $wpdb->escape($_POST['deletepetition']);
 		$wpdb->query("DELETE FROM $petitions_table WHERE petition = '$petition'");
 		$wpdb->query("DELETE FROM $signature_table WHERE petition = '$petition'");
+	}
+	if ($_POST['importpetition'] != ''){
+		$target = $wpdb->escape($_POST['importpetition']);
+		$rows_imp = fcpetition_import_version1($target);
+		?>
+			<div id="message" class="updated fade"><p><strong>
+				<?php printf(__("Imported %s signatures","fcpetition"),$rows_imp); ?>
+			</strong></p></div>
+
+		<?php
+
 	}
 
 	?>
@@ -373,6 +401,24 @@ function fcpetition_main_page(){
 			?>
 			</table>
 		</div>
+		<?php $old_t =  $wpdb->get_results("SHOW TABLES FROM littledog LIKE '$old_table';"); 
+			if(count($old_t) > 0) { ?>
+		<div class='wrap'><h2>Import data from version 1.</h2>
+	       <?php $plist = $wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition");
+	            if(count($plist) > 0) { ?>
+			<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
+			 	<?php _e("Import to petition:","fcpetition"); ?>
+				<select name="importpetition">
+		        <?php foreach ($plist as $row) {?>
+					<option value="<?php print $row->petition;?>"><?php print stripslashes($row->petition_title);?></option>
+				<?php } ?>
+				</select>
+				<input type='submit' name='Submit' value='<?php _e("Import Petition","fcpetition")?>'/>
+			<?php } else { ?>
+				<?php _e("You must first add a petition to import the data to.","fcpetition"); ?>
+			<?php } ?>
+		</div>
+		<?php } ?>
 	<?php
 }
 
