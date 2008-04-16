@@ -3,7 +3,7 @@
 Plugin Name: FreeCharity.org.uk WordPress Petition
 Plugin URI: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Description: Simple petitions with e-mail based confirmation to your WordPress installation.
-Version: 2.0.2
+Version: 2.0.3
 Author: James Davis
 Author URI: http://www.freecharity.org.uk/
 */
@@ -56,7 +56,7 @@ define("MAX_COMMENT_SIZE",255);
 define("OVERRIDE_VERIFICATION",0);
 
 // The petition table
-$signature_table = $wpdb->prefix . "petition_signatures";
+$signature_table = $table_prefix . "petition_signatures";
 $signature_table_sql = "CREATE TABLE $signature_table (
 						petition INT,
                   		email VARCHAR(100),
@@ -67,7 +67,7 @@ $signature_table_sql = "CREATE TABLE $signature_table (
 					);
 ";
 
-$petitions_table = $wpdb->prefix . "petitions";
+$petitions_table = $table_prefix . "petitions";
 $petitions_table_sql = "CREATE TABLE $petitions_table (
 						petition INT AUTO_INCREMENT,
 						petition_title VARCHAR(100),
