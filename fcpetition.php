@@ -262,8 +262,9 @@ function fcpetition_filter_pages($content) {
 function fcpetition_mail($email,$po){
 	global $wpdb;
 	global $signature_table;
+	global $petitions_table;
 
-	$rs = $wpdb->get_results("select petition_confirmation,petition_from,petition_title,confirm from wp_petition_signatures,wp_petitions where wp_petitions.petition = wp_petition_signatures.petition and email = '$email' and wp_petitions.petition = '$po';");
+	$rs = $wpdb->get_results("select petition_confirmation,petition_from,petition_title,confirm from $signature_table,$petitions_table where $petitions_table.petition = $signature_table.petition and email = '$email' and $petitions_table.petition = '$po';");
 	$petition_confirmation = $rs[0]->petition_confirmation;
 	$petition_from = stripslashes($rs[0]->petition_from);
 	$petition_title = stripslashes($rs[0]->petition_title);
