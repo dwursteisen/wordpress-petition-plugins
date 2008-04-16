@@ -376,7 +376,7 @@ function fcpetition_main_page(){
 		<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 			<input type="text" name="addpetition">
 			<p class="submit">
-			<input type='submit' name='Submit' value='<?php _e("Add Petition")?>'/>
+			<input type='submit' name='Submit' value='<?php _e("Add Petition","fcpetition")?>'/>
 			</p>
 		</form>
 		</div>
