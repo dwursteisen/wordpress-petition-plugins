@@ -514,6 +514,14 @@ function fcpetition_manage_page() {
 	if ($po==0) { echo "</div>"; return;}
 	?>
 	<h2><?php _e("Petition Management","fcpetition") ?></h2>
+
+	<?php $results = $wpdb->get_results("SELECT * FROM $signature_table WHERE petition='$po' ORDER BY time LIMIT $n,10"); 
+		if (count($results) < 1) {
+			_e("There are no signatures to manage yet","fcpetition");
+			return;
+		}
+	?>
+
 	<a href="<?php echo get_bloginfo('url') ;?>?petition_export=<?php echo $po;?>"><?php _e("Export petition results as a CSV file","fcpetition");?></a>
 	
 	<?php
@@ -525,7 +533,6 @@ function fcpetition_manage_page() {
 	?>
 
 	<?php
-		$results = $wpdb->get_results("SELECT * FROM $signature_table WHERE petition='$po' ORDER BY time LIMIT $n,10");
 		printf(__("<p> Showing %d to %d of %d (%d confirmed)</p>","fcpetition"),$n +1,$j,fcpetition_countu(),fcpetition_count());
 		if ($n>0) { $pager .= "<a href='$base_url&n=$i'>" . __("Previous 10","fcpetition") ."</a> ... ";}
 		if (count($results)==10) { $pager .= "... <a href='$base_url&n=$j'>". __("Next 10","fcpetition") ."</a>";}
