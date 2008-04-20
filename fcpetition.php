@@ -32,6 +32,8 @@ Author URI: http://www.freecharity.org.uk/
  *  Global variables and constants
  */
 
+load_plugin_textdomain("fcpetition", 'wp-content/plugins/'.plugin_basename(dirname(__FILE__)));
+
 // Define options and their default settings
 $options_defaults = array (
 	"petition_title" 		=> '',
@@ -94,7 +96,6 @@ if ( isset($_REQUEST['petition-confirm']) )
     add_action('template_redirect', 'fcpetition_confirm');
 
 register_activation_hook(__FILE__, fcpetition_install()); 
-load_plugin_textdomain("fcpetition", 'wp-content/plugins/'.plugin_basename(dirname(__FILE__)));
 
 /*
  *  Functions
