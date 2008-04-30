@@ -3,7 +3,7 @@
 Plugin Name: FreeCharity.org.uk WordPress Petition
 Plugin URI: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Description: Simple petitions with e-mail based confirmation to your WordPress installation.
-Version: 2.0.4
+Version: 2.0.5
 Author: James Davis
 Author URI: http://www.freecharity.org.uk/
 */
@@ -314,7 +314,8 @@ function fcpetition_form($petition){
 			". sprintf(__("Last %d of %d signatories","fcpetition"),$petition_maximum,fcpetition_count())."</h3>";
 	foreach ($wpdb->get_results("SELECT name,comment from $signature_table WHERE confirm='' AND petition = '$petition' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
 		if ($petition_comments == 1 && $row->comment<>"") {
-			$form .= "<span class='signature'>$row->name, \"$row->comment\"</span><br/>";
+			$comment = stripslashes($row->comment);
+			$form .= "<span class='signature'>$row->name, \"$comment\"</span><br/>";
 		} else {
 			$form .= "<span class='signature'>$row->name </span><br/>";
 		}
@@ -432,7 +433,7 @@ function fcpetition_export(){
 		$po = $wpdb->escape($_GET['petition_export']);
 		header('Content-Type: text/plain');
 		foreach ($wpdb->get_results("SELECT name,email,comment,time from $signature_table WHERE confirm='' and petition = '$po' ORDER BY time DESC") as $row) {
-		                print stripslashes($row->name) .",". stripslashes($row->email) .",".stripslashes($row->comment).",". $row->time ."\n";
+		                print '"' . stripslashes($row->name) .'","'. stripslashes($row->email) .'","'.stripslashes($row->comment).'","'. $row->time ."\"\n";
 		}
 		exit;
 	} else {

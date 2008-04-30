@@ -7,7 +7,7 @@
 msgid	""
 msgstr	"Project-Id-Version: PACKAGE VERSION\n"
 	"Report-Msgid-Bugs-To: \n"
-	"POT-Creation-Date: 2008-04-17 16:38+0100\n"
+	"POT-Creation-Date: 2008-04-30 16:39+0100\n"
 	"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 	"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 	"Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,237 +15,241 @@ msgstr	"Project-Id-Version: PACKAGE VERSION\n"
 	"Content-Type: text/plain; charset=CHARSET\n"
 	"Content-Transfer-Encoding: 8bit\n"
 
-#: fcpetition.php:40
+#: fcpetition.php:42
 msgid	"<PLEASE ENTER THE CORRECT URL>"
 msgstr	""
 
-#: fcpetition.php:529
+#: fcpetition.php:538
 #, php-format
 msgid	"<p> Showing %d to %d of %d (%d confirmed)</p>"
 msgstr	""
 
-#: fcpetition.php:375
+#: fcpetition.php:377
 msgid	"Add New Petition"
 msgstr	""
 
-#: fcpetition.php:380
+#: fcpetition.php:382
 msgid	"Add Petition"
 msgstr	""
 
-#: fcpetition.php:330
+#: fcpetition.php:332
 msgid	"Add/Delete Petitions"
 msgstr	""
 
-#: fcpetition.php:376
+#: fcpetition.php:378
 msgid	"Adding or deleting a petition will not immediately update the "
 	"structure of the administration menus."
 msgstr	""
 
-#: fcpetition.php:300
+#: fcpetition.php:301
 msgid	"After you have added your name to this petition an e-mail will be "
 	"sent to the given address to confirm your signature. Please make "
 	"sure that your e-mail address is correct or you will not receive "
 	"this e-mail and your name will not be counted."
 msgstr	""
 
-#: fcpetition.php:696
+#: fcpetition.php:705
 msgid	"Allow signatories to leave a comment"
 msgstr	""
 
-#: fcpetition.php:578
+#: fcpetition.php:587
 msgid	"Clear all signatures"
 msgstr	""
 
-#: fcpetition.php:538
+#: fcpetition.php:547
 msgid	"Comments"
 msgstr	""
 
-#: fcpetition.php:112 fcpetition.php:121
+#: fcpetition.php:113 fcpetition.php:122
 #, php-format
 msgid	"Confirm Petition Signature - %s"
 msgstr	""
 
-#: fcpetition.php:541
+#: fcpetition.php:550
 msgid	"Confirmation code"
 msgstr	""
 
-#: fcpetition.php:480
+#: fcpetition.php:482
 msgid	"Confirmation e-mail resent."
 msgstr	""
 
-#: fcpetition.php:384
+#: fcpetition.php:386
 msgid	"Current Petitions"
 msgstr	""
 
-#: fcpetition.php:395
+#: fcpetition.php:397
 msgid	"Delete Petition"
 msgstr	""
 
-#: fcpetition.php:566
+#: fcpetition.php:575
 msgid	"Delete Signature"
 msgstr	""
 
-#: fcpetition.php:306 fcpetition.php:535
+#: fcpetition.php:307 fcpetition.php:544
 msgid	"E-mail address"
 msgstr	""
 
-#: fcpetition.php:700
+#: fcpetition.php:709
 msgid	"Enable Petition"
 msgstr	""
 
-#: fcpetition.php:517
+#: fcpetition.php:527
 msgid	"Export petition results as a CSV file"
 msgstr	""
 
-#: fcpetition.php:417
+#: fcpetition.php:419
 msgid	"Import Petition"
 msgstr	""
 
-#: fcpetition.php:411
+#: fcpetition.php:413
 msgid	"Import to petition:"
 msgstr	""
 
-#: fcpetition.php:367
+#: fcpetition.php:369
 #, php-format
 msgid	"Imported %s signatures"
 msgstr	""
 
-#: fcpetition.php:313
+#: fcpetition.php:314
 #, php-format
 msgid	"Last %d of %d signatories"
 msgstr	""
 
-#: fcpetition.php:41
+#: fcpetition.php:43
 #, php-format
 msgid	"My Petition <%s>"
 msgstr	""
 
-#: fcpetition.php:305 fcpetition.php:535
+#: fcpetition.php:306 fcpetition.php:544
 msgid	"Name"
 msgstr	""
 
-#: fcpetition.php:531
+#: fcpetition.php:540
 msgid	"Next 10"
 msgstr	""
 
-#: fcpetition.php:632
+#: fcpetition.php:641
 msgid	"Options Updated."
 msgstr	""
 
-#: fcpetition.php:386
+#: fcpetition.php:388
 msgid	"Petition ID"
 msgstr	""
 
-#: fcpetition.php:332 fcpetition.php:516
+#: fcpetition.php:334 fcpetition.php:518
 msgid	"Petition Management"
 msgstr	""
 
-#: fcpetition.php:331 fcpetition.php:665
+#: fcpetition.php:333 fcpetition.php:674
 msgid	"Petition Options"
 msgstr	""
 
-#: fcpetition.php:386
+#: fcpetition.php:388
 msgid	"Petition Title"
 msgstr	""
 
-#: fcpetition.php:275
+#: fcpetition.php:493 fcpetition.php:651
+msgid	"Petition:"
+msgstr	""
+
+#: fcpetition.php:276
 #, php-format
 msgid	"Petition: Confirm your signing of the petition '%s'"
 msgstr	""
 
-#: fcpetition.php:666
+#: fcpetition.php:675
 #, php-format
 msgid	"Place [[petition-%s]] in the page or post where you wish this "
 	"petition to appear."
 msgstr	""
 
-#: fcpetition.php:509 fcpetition.php:660
+#: fcpetition.php:511 fcpetition.php:669
 msgid	"Please add a petition."
 msgstr	""
 
-#: fcpetition.php:308
+#: fcpetition.php:309
 #, php-format
 msgid	"Please enter an optional comment (maximum %s characters)"
 msgstr	""
 
-#: fcpetition.php:688
+#: fcpetition.php:697
 msgid	"Please enter the address which the confirmation e-mail will appear "
 	"to be sent from. Any replies to the confirmation e-mail will be "
 	"directed to this address. This <strong>must</strong> follow the same "
 	"format as the example address."
 msgstr	""
 
-#: fcpetition.php:683
+#: fcpetition.php:692
 msgid	"Please enter the confirmation URL. This is the page or post on which "
 	"the petition appears. This option <strong>must</strong> be correctly "
 	"set or the confirmation e-mails will not work."
 msgstr	""
 
-#: fcpetition.php:679
+#: fcpetition.php:688
 msgid	"Please enter the confirmation email text. Insert [[curl]] where the "
 	"confirmation URL is to appear. [[curl]] <strong>must</strong> appear "
 	"in the text or the confirmation e-mails will not work."
 msgstr	""
 
-#: fcpetition.php:692
+#: fcpetition.php:701
 msgid	"Please enter the maximum number of signatures to be displayed"
 msgstr	""
 
-#: fcpetition.php:675
+#: fcpetition.php:684
 msgid	"Please enter the petition text"
 msgstr	""
 
-#: fcpetition.php:671
+#: fcpetition.php:680
 msgid	"Please enter the petition title"
 msgstr	""
 
-#: fcpetition.php:530
+#: fcpetition.php:539
 msgid	"Previous 10"
 msgstr	""
 
-#: fcpetition.php:551
+#: fcpetition.php:560
 msgid	"Resend Confirmation e-mail"
 msgstr	""
 
-#: fcpetition.php:505 fcpetition.php:656
+#: fcpetition.php:507 fcpetition.php:665
 msgid	"Select"
 msgstr	""
 
-#: fcpetition.php:310
+#: fcpetition.php:311
 msgid	"Sign the petition"
 msgstr	""
 
-#: fcpetition.php:473
+#: fcpetition.php:475
 msgid	"Signature Deleted."
 msgstr	""
 
-#: fcpetition.php:545
+#: fcpetition.php:554
 msgid	"Signature confirmed."
 msgstr	""
 
-#: fcpetition.php:465
+#: fcpetition.php:467
 msgid	"Signatures cleared"
 msgstr	""
 
-#: fcpetition.php:239
+#: fcpetition.php:240
 msgid	"Sorry, someone has already attempted to sign the petition using this "
 	"e-mail address."
 msgstr	""
 
-#: fcpetition.php:231
+#: fcpetition.php:232
 msgid	"Sorry, you must enter a name to sign the petition."
 msgstr	""
 
-#: fcpetition.php:235
+#: fcpetition.php:236
 msgid	"Sorry, your comment is longer than "
 msgstr	""
 
-#: fcpetition.php:132
+#: fcpetition.php:133
 #, php-format
 msgid	"Take me back to \"%s\""
 msgstr	""
 
-#: fcpetition.php:39
+#: fcpetition.php:41
 msgid	"Thank you for signing the petition.\n"
 	"\n"
 	"[[curl]]\n"
@@ -255,44 +259,48 @@ msgid	"Thank you for signing the petition.\n"
 	"James"
 msgstr	""
 
-#: fcpetition.php:249
+#: fcpetition.php:250
 msgid	"Thank you for signing the petition. An e-mail has been sent to you "
 	"so that you may confirm your signature."
 msgstr	""
 
-#: fcpetition.php:127
+#: fcpetition.php:128
 msgid	"The confirmation code you supplied was invalid. Either it was "
 	"incorrect or it has already been used."
 msgstr	""
 
-#: fcpetition.php:289
+#: fcpetition.php:522
+msgid	"There are no signatures to manage yet"
+msgstr	""
+
+#: fcpetition.php:290
 msgid	"This petition does not exist"
 msgstr	""
 
-#: fcpetition.php:295
+#: fcpetition.php:296
 msgid	"This petition is not enabled"
 msgstr	""
 
-#: fcpetition.php:541
+#: fcpetition.php:550
 msgid	"Time"
 msgstr	""
 
-#: fcpetition.php:704
+#: fcpetition.php:713
 msgid	"Update Options"
 msgstr	""
 
-#: fcpetition.php:38
+#: fcpetition.php:40
 msgid	"We the undersigned ask you to sign our petition."
 msgstr	""
 
-#: fcpetition.php:419
+#: fcpetition.php:421
 msgid	"You must first add a petition to import the data to."
 msgstr	""
 
-#: fcpetition.php:125 fcpetition.php:245
+#: fcpetition.php:126 fcpetition.php:246
 msgid	"Your signature has now been added to the petition. Thank you."
 msgstr	""
 
-#: fcpetition.php:612
+#: fcpetition.php:621
 msgid	"[[curl]] must appear in your confirmation email text."
 msgstr	""
