@@ -315,7 +315,7 @@ function fcpetition_form($petition){
 	foreach ($wpdb->get_results("SELECT name,comment from $signature_table WHERE confirm='' AND petition = '$petition' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
 		if ($petition_comments == 1 && $row->comment<>"") {
 			$comment = stripslashes($row->comment);
-			$form .= "<span class='signature'>$row->name, \"$comment\"</span><br/>";
+			$form .= "<p><span class='signature'>$row->name, \"$comment\"</span></p>";
 		} else {
 			$form .= "<span class='signature'>$row->name </span><br/>";
 		}
@@ -404,7 +404,7 @@ function fcpetition_main_page(){
 			?>
 			</table>
 		</div>
-		<?php $old_t =  $wpdb->get_results("SHOW TABLES FROM littledog LIKE '$old_table';"); 
+		<?php $old_t =  $wpdb->get_results("SHOW TABLES FROM ".DB_NAME." LIKE '$old_table';"); 
 			if(count($old_t) > 0) { ?>
 		<div class='wrap'><h2>Import data from version 1.</h2>
 	       <?php $plist = $wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition");
