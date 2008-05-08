@@ -4,7 +4,7 @@ Donate link: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Tags: petition, comments, activism, politics, campaign
 Requires at least: 2.5
 Tested up to: 2.5
-Stable tag: 2.0.5
+Stable tag: 2.0.6
 
 Run simple web and e-mail based petitions through WordPress.
 
@@ -33,6 +33,12 @@ page under Manage.
 
 * The entire petition can be wiped using the button on the upper right of the page.
 * Individual signatures can be deleted or manually confirmed from within the table.
+
+= How can I translate the petition? =
+
+All the information required to translate the petition is contained within the template, fcpetition.pot. You need to fill out the template into a suitable named file. For example, fcpetition-nl_NL.po for Dutch as spoken in the Netherlands or fcpetition-es_CU.po for Spanish as spoken in Cuba. You can do this manually but it's recommended that you use a tool such as Poedit (http://www.poedit.net/) instead.
+
+Once you have completed the translation, you can send the .po file to me for inclusion with the next version of the plugin. 
 
 == Getting Help ==
 
