@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-04-17 16:38+0100\n"
-"PO-Revision-Date: 2008-05-08 01:20+0100\n"
+"PO-Revision-Date: 2008-05-08 04:01+0100\n"
 "Last-Translator: Manuel Gualda Caballero <manuel@minombre.es>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -37,7 +37,7 @@ msgstr "La creación o eliminación de una petición no actualizará inmediatame
 
 #: fcpetition.php:300
 msgid "After you have added your name to this petition an e-mail will be sent to the given address to confirm your signature. Please make sure that your e-mail address is correct or you will not receive this e-mail and your name will not be counted."
-msgstr "Una vez que haya cumplimentado el formulario y haya pulsado el botón de abajo, se le enviará un correo electrónico a la dirección indicada para que confirme su apoyo. Por favor, asegúrese de que ha escrito correctamente su dirección de correo electrónico o no recibirá el mensaje de confirmación y su apoyo no podrá ser contabilizado."
+msgstr "Una vez que haya cumplimentado el formulario y haya pulsado el botón de abajo, se le enviará un correo electrónico a la dirección indicada para que confirme su apoyo. Por favor, asegúrese de que ha escrito correctamente su dirección de correo electrónico o no recibirá el mensaje de confirmación, su apoyo no podrá ser contado y su nombre no aparecerá en la lista de firmantes. NOTA: su dirección de correo no será publicada."
 
 #: fcpetition.php:696
 msgid "Allow signatories to leave a comment"
@@ -106,7 +106,7 @@ msgstr "%s firmas importadas"
 #: fcpetition.php:313
 #, php-format
 msgid "Last %d of %d signatories"
-msgstr "Últimas %d firmas de un total de %d:"
+msgstr "Últimas %d firmas de un total de %d"
 
 #: fcpetition.php:41
 #, php-format
@@ -138,7 +138,7 @@ msgstr "Administración de la petición"
 #: fcpetition.php:331
 #: fcpetition.php:665
 msgid "Petition Options"
-msgstr "Opciones de la petición"
+msgstr "Opciones de las peticiones"
 
 #: fcpetition.php:386
 msgid "Petition Title"
@@ -147,7 +147,7 @@ msgstr "Título de la petición"
 #: fcpetition.php:275
 #, php-format
 msgid "Petition: Confirm your signing of the petition '%s'"
-msgstr "Petición: confirme su firma en la petición '%s'"
+msgstr "Confirme su firma en la petición '%s'"
 
 #: fcpetition.php:666
 #, php-format
@@ -166,27 +166,27 @@ msgstr "Comentario -opcional- (máximo: %s caracteres)"
 
 #: fcpetition.php:688
 msgid "Please enter the address which the confirmation e-mail will appear to be sent from. Any replies to the confirmation e-mail will be directed to this address. This <strong>must</strong> follow the same format as the example address."
-msgstr "Por favor, indique la dirección que aparecerá como remitente del correo electrónico de confirmación. Las respuestas a los correos de confirmación serán enviadas directamente a esta dirección. Este campo <strong>debe rellenarse con el mismo formato</strong> que tiene la dirección de ejemplo."
+msgstr "Dirección que aparecerá como remitente del correo electrónico de confirmación. Las respuestas a los correos de confirmación serán enviadas directamente a esta dirección. Este campo <strong>debe rellenarse con el mismo formato</strong> que tiene la dirección de ejemplo."
 
 #: fcpetition.php:683
 msgid "Please enter the confirmation URL. This is the page or post on which the petition appears. This option <strong>must</strong> be correctly set or the confirmation e-mails will not work."
-msgstr "Por favor, indique la URL de confirmación. Ésta es la dirección de la página o entrada en la que aparece la petición. Esta opción <strong>debe rellenarse correctamente</strong> para que los correos de confirmación puedan funcionar."
+msgstr "URL de confirmación. Ésta es la dirección de la página o entrada en la que aparece la petición. Esta opción <strong>debe rellenarse correctamente</strong> para que los correos de confirmación puedan funcionar."
 
 #: fcpetition.php:679
 msgid "Please enter the confirmation email text. Insert [[curl]] where the confirmation URL is to appear. [[curl]] <strong>must</strong> appear in the text or the confirmation e-mails will not work."
-msgstr "Por favor, indique el texto del correo de confirmación que se enviará a las personas firmantes. Sitúe el código [[curl]] en el lugar en que desee que aparezca la URL de confirmación. El código [[curl]] <strong>debe aparecer</strong> en el texto o los mensajes de confirmación no funcionarán."
+msgstr "Texto del correo de confirmación que se enviará a las personas firmantes. Sitúe el código [[curl]] en el lugar en que desee que aparezca la URL de confirmación. El código [[curl]] <strong>debe aparecer</strong> en el texto o los mensajes de confirmación no funcionarán."
 
 #: fcpetition.php:692
 msgid "Please enter the maximum number of signatures to be displayed"
-msgstr "Por favor, indique el número máximo de firmas a ser desplegadas en cada página."
+msgstr "Número máximo de firmas a ser desplegadas en cada página."
 
 #: fcpetition.php:675
 msgid "Please enter the petition text"
-msgstr "Por favor, escriba el texto de la petición"
+msgstr "Texto de la petición"
 
 #: fcpetition.php:671
 msgid "Please enter the petition title"
-msgstr "Por favor, escriba el título de la petición"
+msgstr "Título de la petición"
 
 #: fcpetition.php:530
 msgid "Previous 10"
@@ -219,7 +219,7 @@ msgstr "Firmas borradas"
 
 #: fcpetition.php:239
 msgid "Sorry, someone has already attempted to sign the petition using this e-mail address."
-msgstr "Lo sentimos, alguien ha intentado ya firmar esta petición usando esta dirección de correo electrónico."
+msgstr "Lo sentimos, la dirección de correo electrónico indicada ha sido usada ya en una firma de esta petición."
 
 #: fcpetition.php:231
 msgid "Sorry, you must enter a name to sign the petition."
@@ -232,7 +232,7 @@ msgstr "Lo sentimos, su comentario supera los "
 #: fcpetition.php:132
 #, php-format
 msgid "Take me back to \"%s\""
-msgstr "Hágame regresar a \"%s\""
+msgstr "Volver a la página principal de \"%s\""
 
 #: fcpetition.php:39
 msgid ""
@@ -254,7 +254,7 @@ msgstr ""
 
 #: fcpetition.php:249
 msgid "Thank you for signing the petition. An e-mail has been sent to you so that you may confirm your signature."
-msgstr "Gracias por apoyar la petición. Acabamos de enviarle un correo electrónico a la dirección indicada para que pueda confirmar su firma. Una ve que lo haya hecho, ésta será contabilizada."
+msgstr "Gracias por apoyar esta petición. Acabamos de enviarle un correo electrónico a la dirección indicada para que pueda confirmar su firma. Una vez que lo haya hecho, su nombre será añadido a la lista de firmantes."
 
 #: fcpetition.php:127
 msgid "The confirmation code you supplied was invalid. Either it was incorrect or it has already been used."
@@ -274,7 +274,7 @@ msgstr "Fecha"
 
 #: fcpetition.php:704
 msgid "Update Options"
-msgstr "Opciones actualizadas"
+msgstr "Actualizar opciones"
 
 #: fcpetition.php:38
 msgid "We the undersigned ask you to sign our petition."
