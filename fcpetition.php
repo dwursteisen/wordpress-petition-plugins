@@ -390,7 +390,7 @@ function fcpetition_main_page(){
 			foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
 				?>
 				<tr>
-					<td><?php print $row->petition;?></td><td><?php print stripslashes($row->petition_title);?></td>
+					<td><?php print $row->petition;?></td><td><a href="<?php bloginfo('url')?>/wp-admin/options-general.php?page=fcpetition.php_options&petition_select=<?php print $row->petition;?>"><?php print stripslashes($row->petition_title);?></a></td>
 					<td>
 						<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 							<input type="hidden" name="deletepetition" value="<?php print $row->petition;?>">
@@ -449,7 +449,7 @@ function fcpetition_manage_page() {
 
     if($_POST['petition_select']) {
 		$po =  $wpdb->escape($_POST['petition_select']);
-	} else {
+	} else {	
 		$po = fcpetition_first();
 	}
 
@@ -602,6 +602,8 @@ function fcpetition_options_page() {
 
 	if($_POST['petition_select']) {
 		$po =  $wpdb->escape($_POST['petition_select']);
+	} elseif ($_GET['petition_select']) {
+		$po =  $wpdb->escape($_GET['petition_select']);
 	} else {
 		$po = fcpetition_first();
 	}
