@@ -38,7 +38,7 @@ load_plugin_textdomain("fcpetition", 'wp-content/plugins/'.plugin_basename(dirna
 $options_defaults = array (
 	"petition_title" 		=> '',
 	"petition_text"  		=> __("We the undersigned ask you to sign our petition.","fcpetition"),
-	"petition_confirmation"	=> __("Thank you for signing the petition.\n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"),
+	"petition_confirmation"	=> __("Thank you for signing the petition. You must confirm this by visiting the following address: \n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"),
 	"petition_confirmurl" 	=> __("<PLEASE ENTER THE CORRECT URL>","fcpetition"),
 	"petition_from" 		=>  sprintf(__("My Petition <%s>","fcpetition"),get_option('admin_email')),
 	"petition_maximum" 		=> 10,
@@ -539,6 +539,10 @@ function fcpetition_manage_page() {
 		/*
 		 *   Resend logic here
 		 */
+		$list = $wpdb->get_results("select email from $signature_table WHERE petition='$po' AND confirm != ''");
+		foreach($list as $addr) {
+			fcpetition_mail($addr->email,$po);
+		}
 
 		echo '<div id="message" class="updated fade"><p><strong>';
 			_e("Confirmation e-mails resent.","fcpetition");
