@@ -501,6 +501,14 @@ function fcpetition_manage_page() {
 		_e("Signature Deleted.","fcpetition");
 		echo "</p></strong></div>";
 	}
+	if($_POST['erase'] != ''){
+		$email = $_POST['erase'];
+		$wpdb->query("UPDATE $signature_table SET comment='' where  email = '$email' AND petition='$po'");
+		echo '<div id="message" class="updated fade"><p><strong>';
+		_e("Comment erased.","fcpetition");
+		echo "</p></strong></div>";
+	}
+
 	if($_POST['resend'] != ''){
 	       $email = $_POST['resend'];
 	       fcpetition_mail($email,$po); 
@@ -638,7 +646,20 @@ function fcpetition_manage_page() {
 				<td class="name"><?php echo stripslashes($row->name); ?></td>
 				<td class="email"><?php echo stripslashes($row->email); ?></td>
 	<?php
-		if ($petition_comments) { echo "<td class=\"comment\">". stripslashes($row->comment)."</td>";}
+		if ($petition_comments) { 
+		?>
+				<td class=\"comment\"><?php echo stripslashes($row->comment);?>
+				<?php if ($row->comment != "") { ?>
+				<form name='eraseform' method='post' action='<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>'>
+					<input type='hidden' name='erase' value='<?php echo $row->email;?>'/>
+					<input type='hidden' name='petition_select' value='<?php echo $po;?>'>
+					<input type='submit' name='Submit' value='<?php _e("Erase","fcpetition");?>'/>
+				</form>
+				<?php } ?>
+				</td>
+		<?php
+		}
+		
 	?>
 				<td class="time"><?php echo $row->time; ?></td>
 				<td><?php echo $confirm; ?></td>
