@@ -453,10 +453,36 @@ function fcpetition_manage_page() {
 		$po = fcpetition_first();
 	}
 
-	$n = $_GET['n']?$_GET['n']:0;
+	/* $count - number of entries to display a time
+	 * 			default to ten unless the user asks otherwise
+	 */
+	if($_POST['count']) {
+		$count = $wpdb->escape($_POST['count']);
+	} elseif ($_GET['count']) {
+		$count = $wpdb->escape($_GET['count']);
+	} else {
+		$count = 10;
+	}
 
-	$i = ($n-10>0)?$n-10:0;
-	$j = $n+10;
+	/* $n - The row number of the first entry to be displayed.
+	 *		Defaults to 0, start from the first row
+     */
+	if($_POST['n']) {
+ 		$n = $wpdb->escape($_POST['n']);
+	} elseif ($_GET['n']) {
+ 		$n = $wpdb->escape($_GET['n']);
+	} else {
+		$n = 0;
+	}
+	
+	/* $i - the row number of the first row of the previous page
+	 *       0 if there is no previous page
+	 */
+	$i = ($n-$count>0)?$n-$count:0;
+
+	/* $j - the row number of the first row of the next page
+	 */
+	$j = $n+$count;
 
 	$base_url = $_SERVER['REQUEST_URI'];
 	$base_url = preg_replace("/\&.*/","",$base_url);
@@ -482,6 +508,42 @@ function fcpetition_manage_page() {
                _e("Confirmation e-mail resent.","fcpetition");
                echo "</p></strong></div>";
         }
+
+	
+
+	if($_GET['resendall'] && !$_POST['resendall']){
+
+		$nm = $wpdb->get_results("SELECT petition_title from $petitions_table where petition = $po");
+		$name = $nm[0]->petition_title;
+		$ct = $wpdb->get_results("select count(*) as c from $signature_table WHERE petition='$po' AND confirm != ''");
+		$cu = $ct[0]->c;
+		?>
+			<div class='wrap'>
+				<h2><?php echo sprintf(__('Resend all unconfirmed e-mails for "%s"',"fcpetition"),$name);?></h2>
+				<p>
+				<?php echo sprintf(__('You are about to resend all unconfirmed e-mails for this particular petition. Doing so will
+				send %s e-mail(s)',"fcpetition"),$cu); ?>
+				</p>
+				<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
+					<input type='submit' name='submit' value='Yes I want to do this'/>
+					<input type='hidden' name='resendall' value='yes'/>
+					<input type='hidden' name='po'	value='<?php echo $po;?>'/>
+				</form>
+			</div>
+		<?php
+		return;
+	}
+
+	if($_POST['resendall']){
+
+		/*
+		 *   Resend logic here
+		 */
+
+		echo '<div id="message" class="updated fade"><p><strong>';
+			_e("Confirmation e-mails resent.","fcpetition");
+	    echo "</p></strong></div>";
+	}
 
 	?>
 		
@@ -517,7 +579,7 @@ function fcpetition_manage_page() {
 	?>
 	<h2><?php _e("Petition Management","fcpetition") ?></h2>
 
-	<?php $results = $wpdb->get_results("SELECT * FROM $signature_table WHERE petition='$po' ORDER BY time LIMIT $n,10"); 
+	<?php $results = $wpdb->get_results("SELECT * FROM $signature_table WHERE petition='$po' ORDER BY time LIMIT $n,$count"); 
 		if (count($results) < 1) {
 			_e("There are no signatures to manage yet","fcpetition");
 			return;
@@ -525,7 +587,7 @@ function fcpetition_manage_page() {
 	?>
 
 	<a href="<?php echo get_bloginfo('url') ;?>?petition_export=<?php echo $po;?>"><?php _e("Export petition results as a CSV file","fcpetition");?></a>
-	
+	| <a href="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>&resendall=yes&po=<?php echo $po;?>"><?php _e("Resend all e-mails","fcpetition"); ?></a>	
 	<?php
 		foreach ($wpdb->get_results("SELECT * FROM $petitions_table WHERE petition='$po'") as $row) {
 			foreach ($options_defaults as $option => $default){
@@ -536,8 +598,15 @@ function fcpetition_manage_page() {
 
 	<?php
 		printf(__("<p> Showing %d to %d of %d (%d confirmed)</p>","fcpetition"),$n +1,$j,fcpetition_countu(),fcpetition_count());
-		if ($n>0) { $pager .= "<a href='$base_url&n=$i'>" . __("Previous 10","fcpetition") ."</a> ... ";}
-		if (count($results)==10) { $pager .= "... <a href='$base_url&n=$j'>". __("Next 10","fcpetition") ."</a>";}
+	?>
+		<form name="changecount" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
+			<?php printf(__("Show %s entries at a time","fcpetition"),"<input type='text' name='count' value='$count' size='3'/>"); ?>
+			<input type="hidden" name="n" value="<?php echo $n;?>"/>
+			<input type="submit" name="submit" value="<?php _e("Change","fcpetition"); ?>"/>
+		</form>
+	<?php
+		if ($n>0) { $pager .= "<a href='$base_url&n=$i&count=$count'>" . __("Previous $count","fcpetition") ."</a> ... ";}
+		if (count($results)==$count) { $pager .= "... <a href='$base_url&n=$j&count=$count'>". __("Next $count","fcpetition") ."</a>";}
 		if ($pager != '') { echo "<p>".$pager."</p>";}
 	?>
 		<table class="widefat">
