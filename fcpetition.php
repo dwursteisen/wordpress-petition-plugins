@@ -83,6 +83,18 @@ $petitions_table_sql = "CREATE TABLE $petitions_table (
 						PRIMARY KEY (petition)
 					);
 ";
+
+$fields_table = $table_prefix . "petition_fields";
+$fields_table_sql = "CREATE TABLE $fields_table (
+						petition INT,
+						name	VARCHAR(100),
+						type	VARCHAR(10),
+						opt		VARCHAR(10),
+						UNIQUE KEY name (petition,name)
+					);
+";
+
+
 $old_table = $table_prefix . "petition";
 
 /*
@@ -146,6 +158,8 @@ function fcpetition_install(){
 	global $signature_table_sql;
 	global $petitions_table;
 	global $petitions_table_sql;
+	global $fields_table;
+	global $fields_table_sql;
 
 	if($wpdb->get_var("SHOW TABLES LIKE '$signature_table'") != $signature_table) {
 		require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
@@ -154,6 +168,10 @@ function fcpetition_install(){
     if($wpdb->get_var("SHOW TABLES LIKE '$petitions_table'") != $petitions_table) {
 	    require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
 	    dbDelta($petitions_table_sql);
+    }
+	if($wpdb->get_var("SHOW TABLES LIKE '$fields_table'") != $fields_table) {
+	    require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
+	    dbDelta($fields_table_sql);
     }
 }
 
@@ -738,6 +756,25 @@ function fcpetition_options_page() {
 	    </p></strong></div>
 	    <?php
     }
+
+	if ( $_GET['editfields'] && !$_POST['editfields']) {
+		?>
+		<div class='wrap'>
+			<h2><?php _e("Add custom field","fcpetition"); ?></h2>
+			<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
+				<input type="hidden" name="editfields" value="yes"/>
+
+				<input type="submit" name="Submit" value="<?php _e("Add","fcpetition")?>"/>
+			</form>
+		</div>
+		<?php
+		return;
+	} 
+	if ( $_POST['editfields']) {
+
+
+	}
+
 	    ?>
 	    <div class='wrap'>
 		<?php $plist = $wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition");
@@ -768,6 +805,7 @@ function fcpetition_options_page() {
 
 		<?php if($po != 0) { ?>
 	    	<h2><?php _e("Petition Options","fcpetition")?></h2>
+			<p><a href="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>&editfields=yes"><?php _e("Add custom field to this petition...","fcpetition"); ?></a></p>
 			<p><?php printf(__("Place [[petition-%s]] in the page or post where you wish this petition to appear.","fcpetition"),$po); ?></p>
 		<form name="optionsform" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<input type="hidden" name="submitted" value="Y">
