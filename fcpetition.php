@@ -703,6 +703,63 @@ function fcpetition_manage_page() {
 	<?php
 }
 
+function fcpetition_addfield($po,$fieldname,$fieldtype){
+	global $wpdb;
+	global $fields_table;
+	$sql = "INSERT into $fields_table (petition,name,type) values ($po,'$fieldname','$fieldtype')";
+	$wpdb->get_results($sql);
+}
+
+function fcpetition_deletefield($po,$fieldname){
+	global $wpdb;
+	global $fields_table;
+	$sql = "DELETE FROM $fields_table WHERE petition = '$po' and name = '$fieldname'";
+	$wpdb->get_results($sql);
+}
+
+function fcpetition_displayfields($po) {
+	global $wpdb;
+	global $fields_table;
+	$sql = "SELECT * FROM $fields_table WHERE petition = '$po'";
+	$res = $wpdb->get_results($sql);
+	?>
+	<table>
+		<tr><thead><th>Name</th><th>Type</th><th>Options</th><th></th></thead></tr>
+	<?php
+	foreach($res as $row){
+		?>
+		<tr>
+			<td><?php echo $row->name; ?></td>
+			<td><?php echo $row->type; ?></td>
+			<td><?php echo $row->opt; ?></td>
+			<td>
+				<form  method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
+					<input type="hidden" name="fieldname" value="<?php echo $row->name; ?>"/>
+					<input type="hidden" name="deletefield" value="yes"/>
+					<input type="hidden" name="petition_select" value="<?php echo $po; ?>"/>
+					<input type="submit" name="Submit" value="<?php _e("Delete","fcpetition")?>"/>
+				</form>
+			</td>
+		</tr>
+		<?php
+	}
+	?>
+	</table>
+	<?php
+}
+
+function fcpetition_fieldform($po) {
+	?>
+			<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
+				<input type="hidden" name="addfield" value="yes"/>
+				<input type="hidden" name="petition_select" value="<?php echo $po; ?>"/>
+				 <input type="hidden" name="fieldtype" value="text"/>
+				<input type="text" name="fieldname"/>
+				<input type="submit" name="Submit" value="<?php _e("Add","fcpetition")?>"/>
+			</form>
+	<?php
+}
+
 function fcpetition_options_page() {
 	/* Handles the petition settings
 	 */
@@ -757,22 +814,14 @@ function fcpetition_options_page() {
 	    <?php
     }
 
-	if ( $_GET['editfields'] && !$_POST['editfields']) {
-		?>
-		<div class='wrap'>
-			<h2><?php _e("Add custom field","fcpetition"); ?></h2>
-			<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
-				<input type="hidden" name="editfields" value="yes"/>
-
-				<input type="submit" name="Submit" value="<?php _e("Add","fcpetition")?>"/>
-			</form>
-		</div>
-		<?php
-		return;
-	} 
-	if ( $_POST['editfields']) {
-
-
+	if ( $_POST['addfield']) {
+		$fieldtype = $wpdb->escape($_POST['fieldtype']);
+		$fieldname = $wpdb->escape($_POST['fieldname']);
+		fcpetition_addfield($po,$fieldname,$fieldtype);
+	}
+	if ( $_POST['deletefield']) {
+		$fieldname = $wpdb->escape($_POST['fieldname']);
+		fcpetition_deletefield($po,$fieldname);
 	}
 
 	    ?>
@@ -805,7 +854,8 @@ function fcpetition_options_page() {
 
 		<?php if($po != 0) { ?>
 	    	<h2><?php _e("Petition Options","fcpetition")?></h2>
-			<p><a href="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>&editfields=yes"><?php _e("Add custom field to this petition...","fcpetition"); ?></a></p>
+			<?php fcpetition_displayfields($po);fcpetition_fieldform($po); ?>
+			<p><a href="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>&editfields=yes&petition_select=<?php echo $po; ?>"><?php _e("Add custom field to this petition...","fcpetition"); ?></a></p>
 			<p><?php printf(__("Place [[petition-%s]] in the page or post where you wish this petition to appear.","fcpetition"),$po); ?></p>
 		<form name="optionsform" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<input type="hidden" name="submitted" value="Y">
