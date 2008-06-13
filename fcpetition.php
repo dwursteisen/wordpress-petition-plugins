@@ -326,6 +326,7 @@ function fcpetition_form($petition){
 	if ($petition_comments == 1) { 
 		$form = $form . sprintf(__("Please enter an optional comment (maximum %s characters)","fcpetition"),MAX_COMMENT_SIZE).":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
 	}
+	$form = $form . fcpetition_livefields($petition);
 	$form = $form . "			<input type='hidden' name='petition' value='$petition'/><input type='submit' name='Submit' value='".__("Sign the petition","fcpetition")."'/>
 			</form>
 		<h3>
@@ -722,30 +723,46 @@ function fcpetition_displayfields($po) {
 	global $fields_table;
 	$sql = "SELECT * FROM $fields_table WHERE petition = '$po'";
 	$res = $wpdb->get_results($sql);
-	?>
-	<table>
-		<tr><thead><th>Name</th><th>Type</th><th>Options</th><th></th></thead></tr>
-	<?php
-	foreach($res as $row){
+	if (count($res) > 0) {
 		?>
-		<tr>
-			<td><?php echo $row->name; ?></td>
-			<td><?php echo $row->type; ?></td>
-			<td><?php echo $row->opt; ?></td>
-			<td>
-				<form  method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
-					<input type="hidden" name="fieldname" value="<?php echo $row->name; ?>"/>
-					<input type="hidden" name="deletefield" value="yes"/>
-					<input type="hidden" name="petition_select" value="<?php echo $po; ?>"/>
-					<input type="submit" name="Submit" value="<?php _e("Delete","fcpetition")?>"/>
-				</form>
-			</td>
-		</tr>
+		<table>
+			<tr><thead><th>Name</th><th>Type</th><th>Options</th><th></th></thead></tr>
 		<?php
+		foreach($res as $row){
+			?>
+			<tr>
+				<td><?php echo $row->name; ?></td>
+				<td><?php echo $row->type; ?></td>
+				<td><?php echo $row->opt; ?></td>
+				<td>
+					<form  method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
+						<input type="hidden" name="fieldname" value="<?php echo $row->name; ?>"/>
+						<input type="hidden" name="deletefield" value="yes"/>
+						<input type="hidden" name="petition_select" value="<?php echo $po; ?>"/>
+						<input type="submit" name="Submit" value="<?php _e("Delete","fcpetition")?>"/>
+					</form>
+				</td>
+			</tr>
+		<?php
+		}
 	}
 	?>
 	</table>
 	<?php
+}
+
+function fcpetition_livefields($po) {
+	global $wpdb;
+	global $fields_table;
+	$sql = "SELECT * FROM $fields_table WHERE petition = '$po'";
+	$res = $wpdb->get_results($sql);
+	$output = "";
+	if(count($res)>0) {
+		foreach($res as $row){
+			$output .= "$row->name:<br/><input type='$row->type' name='$row->name'/><br/>\n";
+		}
+	}
+	return $output;
 }
 
 function fcpetition_fieldform($po) {
