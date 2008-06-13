@@ -242,7 +242,7 @@ function fcpetition_filter_pages($content) {
 		$comment = wp_kses($comment,array());
 		$petition = $wpdb->escape($_POST['petition']);
 		$petition = wp_kses($petition,array());
-		$fields = serialize(fcpetition_collectfields($petition));
+		$fields = base64_encode(serialize(fcpetition_collectfields($petition)));
 
 		#Make sure that no one is cheekily sending a comment when they shouldn't be
 		$rs = $wpdb->get_results("select petition_comments from $petitions_table");
