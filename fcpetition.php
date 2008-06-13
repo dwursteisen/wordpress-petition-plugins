@@ -237,6 +237,7 @@ function fcpetition_filter_pages($content) {
 		$comment = wp_kses($comment,array());
 		$petition = $wpdb->escape($_POST['petition']);
 		$petition = wp_kses($petition,array());
+		fcpetition_collectfields($petition);
 
 		#Make sure that no one is cheekily sending a comment when they shouldn't be
 		$rs = $wpdb->get_results("select petition_comments from $petitions_table");
@@ -763,6 +764,20 @@ function fcpetition_livefields($po) {
 		}
 	}
 	return $output;
+}
+
+function fcpetition_collectfields($po) {
+	global $wpdb;
+	global $fields_table;
+	$sql = "SELECT name FROM $fields_table WHERE petition = '$po'";
+	$res = $wpdb->get_results($sql);
+	foreach($res as $field) {
+		$f = str_replace(" ","_",$field->name);
+		if($_POST[$f]){
+			$package[$f] = $wpdb->escape($_POST[$f]);
+		}
+	}
+	return $package;
 }
 
 function fcpetition_fieldform($po) {
