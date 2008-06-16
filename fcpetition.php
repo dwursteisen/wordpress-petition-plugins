@@ -653,7 +653,7 @@ function fcpetition_manage_page() {
 			echo "<th>".__("Comments","fcpetition")."</th>";
 		} 
 	?>
-		<th><?php _e('Time',"fcpetition"); ?></th><th> <?php _e('Confirmation code',"fcpetition"); ?></th><th></th></thead></tr>
+		<th><?php _e('Time',"fcpetition"); ?></th><th> <?php _e('Confirmation code',"fcpetition"); ?></th><th><?php _e('Fields',"fcpetition"); ?></th><th></th></thead></tr>
 		<?php
 		foreach ($results as $row) {
 		if ($row->confirm=='') { 
@@ -688,6 +688,7 @@ function fcpetition_manage_page() {
 	?>
 				<td class="time"><?php echo $row->time; ?></td>
 				<td><?php echo $confirm; ?></td>
+				<td><?php fcpetition_prettyfields(unserialize(base64_decode($row->fields))); ?></td>
 				<td>
 					<form name='deleteform' method='post' action='<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>'>
 						<input type='hidden' name='delete' value='<?php echo $row->email;?>'/>
@@ -710,6 +711,9 @@ function fcpetition_manage_page() {
 	<?php
 }
 
+/*
+ * Adds a custom field to the database
+ */
 function fcpetition_addfield($po,$fieldname,$fieldtype){
 	global $wpdb;
 	global $fields_table;
@@ -717,12 +721,20 @@ function fcpetition_addfield($po,$fieldname,$fieldtype){
 	$wpdb->get_results($sql);
 }
 
+/*
+ *  Deletes a custom field from the database
+ */
 function fcpetition_deletefield($po,$fieldname){
 	global $wpdb;
 	global $fields_table;
 	$sql = "DELETE FROM $fields_table WHERE petition = '$po' and name = '$fieldname'";
 	$wpdb->get_results($sql);
 }
+
+/*
+ * Displays the custom fields in a form suitable for the options page.
+ * Also defines the form for deletion of fields 
+ */
 
 function fcpetition_displayfields($po) {
 	global $wpdb;
@@ -757,6 +769,9 @@ function fcpetition_displayfields($po) {
 	<?php
 }
 
+/* 
+ *  Returns the HTML for the user to input data for defined custom fields
+ */
 function fcpetition_livefields($po) {
 	global $wpdb;
 	global $fields_table;
@@ -771,6 +786,11 @@ function fcpetition_livefields($po) {
 	return $output;
 }
 
+/*
+ *  Scans the HTTP headers for submitted data matching defined custom fields.
+ *  Places the results in an array/map. This is later stored in serialized form
+ *  in the signature's database row.
+ */
 function fcpetition_collectfields($po) {
 	global $wpdb;
 	global $fields_table;
@@ -785,6 +805,9 @@ function fcpetition_collectfields($po) {
 	return $package;
 }
 
+/*
+ * The form for adding custom fields on the options page.
+ */
 function fcpetition_fieldform($po) {
 	?>
 			<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
@@ -795,6 +818,15 @@ function fcpetition_fieldform($po) {
 				<input type="submit" name="Submit" value="<?php _e("Add","fcpetition")?>"/>
 			</form>
 	<?php
+}
+
+/*
+ * A pretty HTML representation of the custom field data
+ */
+function fcpetition_prettyfields($package) {
+	foreach ($package as $field => $value) {
+		print "<strong>$field:</strong> $value ";
+	}
 }
 
 function fcpetition_options_page() {
