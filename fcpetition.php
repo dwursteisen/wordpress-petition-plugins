@@ -457,8 +457,11 @@ function fcpetition_export(){
 	if ($_GET['petition_export'] && current_user_can('manage_options')){
 		$po = $wpdb->escape($_GET['petition_export']);
 		header('Content-Type: text/plain');
-		foreach ($wpdb->get_results("SELECT name,email,comment,time from $signature_table WHERE confirm='' and petition = '$po' ORDER BY time DESC") as $row) {
-		                print '"' . stripslashes($row->name) .'","'. stripslashes($row->email) .'","'.stripslashes($row->comment).'","'. $row->time ."\"\n";
+		foreach ($wpdb->get_results("SELECT name,email,comment,time,fields from $signature_table WHERE confirm='' and petition = '$po' ORDER BY time DESC") as $row) {
+				?>
+"<?php echo stripslashes($row->name); ?>","<?php echo stripslashes($row->email); ?>","<?php echo stripslashes($row->comment); ?>","<?php echo stripslashes($row->time); ?>"<?php fcpetition_csvfields(unserialize(base64_decode($row->fields))); ?>
+
+<?php
 		}
 		exit;
 	} else {
@@ -800,6 +803,8 @@ function fcpetition_collectfields($po) {
 		$f = str_replace(" ","_",$field->name);
 		if($_POST[$f]){
 			$package[$f] = $wpdb->escape($_POST[$f]);
+		} else {
+			$package[$f] = "";
 		}
 	}
 	return $package;
@@ -826,6 +831,15 @@ function fcpetition_fieldform($po) {
 function fcpetition_prettyfields($package) {
 	foreach ($package as $field => $value) {
 		print "<strong>$field:</strong> $value ";
+	}
+}
+
+/*
+ *  CSV output of the custom field data
+ */
+function fcpetition_csvfields($package) {
+	foreach ($package as $field => $value){
+		print ",\"$value\"";
 	}
 }
 
