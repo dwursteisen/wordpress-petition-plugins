@@ -114,6 +114,9 @@ register_activation_hook(__FILE__, fcpetition_install());
  *  Functions
  */
 
+/*
+ * Displays the confirmation page
+ */
 function fcpetition_confirm(){
 	global $wpdb;
 	global $signature_table;
@@ -152,6 +155,9 @@ function fcpetition_confirm(){
 	die();
 }
 
+/*
+ * Installs the plugin, setting up database tables where necessary
+ */
 function fcpetition_install(){
 	global $wpdb;
 	global $options_defaults;
@@ -162,28 +168,37 @@ function fcpetition_install(){
 	global $fields_table;
 	global $fields_table_sql;
 
+	// Create the table that holds the signatures
 	if($wpdb->get_var("SHOW TABLES LIKE '$signature_table'") != $signature_table) {
 		require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
 		dbDelta($signature_table_sql);
 	}
+	// Create the table that holds the individual petition settings
     if($wpdb->get_var("SHOW TABLES LIKE '$petitions_table'") != $petitions_table) {
 	    require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
 	    dbDelta($petitions_table_sql);
     }
+	// Create the table which holds the custom fields for individual petitions.
 	if($wpdb->get_var("SHOW TABLES LIKE '$fields_table'") != $fields_table) {
 	    require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
 	    dbDelta($fields_table_sql);
     }
-	# If the custom field column doesn't exist in the database then we need to add one
+	// Upgrade the petitions table if the custom fields column isn't present
 	if($wpdb->get_var("SHOW COLUMNS FROM $signature_table LIKE 'fields'") != "fields") {
 		$wpdb->get_results("ALTER TABLE $signature_table ADD fields TEXT;");
 	}
 }
 
+/* 
+ * Imports data into a specified petition, from tables created by version 1 of the plugin
+ */
 function fcpetition_import_version1($target) {
 	global $wpdb;
 	global $old_table;
 	global $signature_table;
+	/* 
+	 *  The old database tables could only store a single petition per installation. Fetch these rows from the old table
+	 */
 	$old_rows = $wpdb->get_results("select email,name,confirm,comment,name,time from $old_table");
 	$c = 0;
 	foreach($old_rows as $row) {
@@ -191,10 +206,14 @@ function fcpetition_import_version1($target) {
 		$wpdb->query($q);
 		$c++;
 	}
+	// Delete the old table
 	$wpdb->query("DROP TABLE $old_table");
 	return $c;
 }
 
+/* Show the total number of confirmed signatures. 
+ * NEEDS fixing
+ */
 function fcpetition_count(){
 	global $wpdb;
 	global $signature_table;
@@ -204,6 +223,9 @@ function fcpetition_count(){
 	return $count;
 }
 
+/* Show the total numbers of unconfirmed signatures 
+ * NEEDS fixing
+ */
 function fcpetition_countu(){
 	global $wpdb;
 	global $signature_table;
@@ -213,6 +235,10 @@ function fcpetition_countu(){
 	return $count;
 }
 
+/* Return the ID of the first petition.
+ * Used so that management and options pages are initialised to display the
+ * earliest extant petition.
+ */
 function fcpetition_first(){
 	global $wpdb;
 	global $petitions_table;
@@ -221,11 +247,10 @@ function fcpetition_first(){
 	return $results[0]->petition;
 }
 
+/*
+ * The user facing section of the code. Inserts the petition into pages/posts.
+ */
 function fcpetition_filter_pages($content) {
-	/* Filter the_content on appropriate pages. This function contains the
-	 * user facing portion of the code. 
-	 */
-	
 	global $wpdb;
 	global $signature_table;
 	global $petitions_table;
@@ -284,6 +309,9 @@ function fcpetition_filter_pages($content) {
 	}
 }
 
+/*
+ * Sends the confirmation e-mail for petition $po to $email.
+ */
 function fcpetition_mail($email,$po){
 	global $wpdb;
 	global $signature_table;
@@ -301,22 +329,25 @@ function fcpetition_mail($email,$po){
 	wp_mail($email,"$subject","$petition_confirmation","From: $petition_from");
 }
 
+/*
+ * Returns the HTML form to be presented in a page/post.
+ */ 
 function fcpetition_form($petition){
-	/* Generates the HTML form presented in the_content of the tagged
-	 * post/page 
-	 */
-
 	global $wpdb;
 	global $signature_table;
 	global $petitions_table;
 
+	// Check that the petition exists
 	$rs = $wpdb->get_results("SELECT * from $petitions_table where petition = $petition");
 	if (count($rs) != 1) return "<strong>". __("This petition does not exist","fcpetition"). "</strong>";
-	
+
+	// Fetch the petition's attributes
 	$petition_maximum = $rs[0]->petition_maximum;
 	$petition_text = wpautop(stripslashes($rs[0]->petition_text));
 	$petition_comments = $rs[0]->petition_comments;
 	$petition_enabled = $rs[0]->petition_enabled;
+
+	// Check that the petition is enabled
 	if(!$petition_enabled) return "<strong>".__("This petition is not enabled","fcpetition")."</strong>";
 
 	$form_action = str_replace( '%7E', '~', $_SERVER['REQUEST_URI']);
@@ -329,15 +360,20 @@ function fcpetition_form($petition){
 				<input type='hidden' name='petition_posted' value='Y'/>".
 				__("Name","fcpetition").":<br/><input type='text' name='petition_name' value=''/><br/>".
 				__("E-mail address","fcpetition").":<br/><input type='text' name='petition_email' value=''/><br/>";
+	// If comments are enabled, display that portion of the form
 	if ($petition_comments == 1) { 
 		$form = $form . sprintf(__("Please enter an optional comment (maximum %s characters)","fcpetition"),MAX_COMMENT_SIZE).":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
 	}
+	// If any custom fields are defined, display that part of the form
 	$form = $form . fcpetition_livefields($petition);
 	$form = $form . "			<input type='hidden' name='petition' value='$petition'/><input type='submit' name='Submit' value='".__("Sign the petition","fcpetition")."'/>
 			</form>
 		<h3>
 			". sprintf(__("Last %d of %d signatories","fcpetition"),$petition_maximum,fcpetition_count())."</h3>";
+
+	// Print the last $petition_maximum sigantures
 	foreach ($wpdb->get_results("SELECT name,comment from $signature_table WHERE confirm='' AND petition = '$petition' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
+		// Are comments enabled and a comment exists?
 		if ($petition_comments == 1 && $row->comment<>"") {
 			$comment = stripslashes($row->comment);
 			$form .= "<p><span class='signature'>$row->name, \"$comment\"</span></p>";
@@ -345,6 +381,7 @@ function fcpetition_form($petition){
 			$form .= "<span class='signature'>$row->name </span><br/>";
 		}
 	}
+	//Return the form, wrapping it in a <div> and closing and opening paragraph tags
 	return "</p><div class='petition'>".$form."</div><p>";
 }
 
@@ -359,6 +396,9 @@ function fcpetition_add_pages() {
 	add_management_page(__("Petition Management","fcpetition"), __("Petition Management","fcpetition"), 8,basename(__FILE__)."_manage", 'fcpetition_manage_page');
 }
 
+/*
+ * Page for Adding/Deleting petitions.
+ */
 function fcpetition_main_page(){
 	global $wpdb;
 	global $petitions_table;
@@ -366,9 +406,10 @@ function fcpetition_main_page(){
 	global $old_table;
 	global $options_defaults;
 
-	//print $_GET['page'];
+	//If a petition has been added
 	if ($_POST['addpetition'] != ''){
 		$petition_title = $wpdb->escape($_POST['addpetition']);
+		// Correctly form the SQL query
 		$n = "(petition_title";
 		$v = "('$petition_title'";
 		foreach ($options_defaults as $option => $default) {
@@ -381,11 +422,15 @@ function fcpetition_main_page(){
 		$wpdb->query("INSERT into $petitions_table $n values $v;");
 
 	}
+	
+	//Delete a petition
 	if ($_POST['deletepetition'] != ''){
 		$petition = $wpdb->escape($_POST['deletepetition']);
 		$wpdb->query("DELETE FROM $petitions_table WHERE petition = '$petition'");
 		$wpdb->query("DELETE FROM $signature_table WHERE petition = '$petition'");
 	}
+
+	//Import petition data from version 1's database tables into a specified new petition
 	if ($_POST['importpetition'] != ''){
 		$target = $wpdb->escape($_POST['importpetition']);
 		$rows_imp = fcpetition_import_version1($target);
@@ -450,6 +495,9 @@ function fcpetition_main_page(){
 	<?php
 }
 
+/*
+ * Export the specified petition in CSV format
+ */
 function fcpetition_export(){
 	global $wpdb;
 	global $signature_table;
@@ -463,12 +511,16 @@ function fcpetition_export(){
 
 <?php
 		}
+		// Important that we stop WordPress here. No further output after the CSV data has been displayed.
 		exit;
 	} else {
+		// Simply do nothing if the user has no rights
 		return;
 	}
 }
-
+/*
+ * A page to manage signatures to a particular petition.
+ */ 
 function fcpetition_manage_page() {
 	global $wpdb;
 	global $signature_table;
@@ -515,6 +567,7 @@ function fcpetition_manage_page() {
 	$base_url = $_SERVER['REQUEST_URI'];
 	$base_url = preg_replace("/\&.*/","",$base_url);
 
+	//Clear all signatures from a petition
 	if( $_POST['clear'] == 'Y' ) {
 	        $wpdb->query("DELETE from $signature_table WHERE petition='$po'");
 			echo '<div id="message" class="updated fade"><p><strong>';
@@ -522,6 +575,7 @@ function fcpetition_manage_page() {
 			echo "</p></strong></div>";
 
 	}
+	//Delete a specific signature from a petition
 	if($_POST['delete'] != ''){
 		$email = $_POST['delete'];
 		$wpdb->query("DELETE FROM $signature_table WHERE email = '$email' AND petition='$po'");
@@ -529,6 +583,7 @@ function fcpetition_manage_page() {
 		_e("Signature Deleted.","fcpetition");
 		echo "</p></strong></div>";
 	}
+	//Deletes a comment from a specific signature
 	if($_POST['erase'] != ''){
 		$email = $_POST['erase'];
 		$wpdb->query("UPDATE $signature_table SET comment='' where  email = '$email' AND petition='$po'");
@@ -536,7 +591,7 @@ function fcpetition_manage_page() {
 		_e("Comment erased.","fcpetition");
 		echo "</p></strong></div>";
 	}
-
+	//Resends a specific confirmation e-mail
 	if($_POST['resend'] != ''){
 	       $email = $_POST['resend'];
 	       fcpetition_mail($email,$po); 
@@ -544,13 +599,15 @@ function fcpetition_manage_page() {
                _e("Confirmation e-mail resent.","fcpetition");
                echo "</p></strong></div>";
         }
-
-	
-
+	//User asks to resend confirmation e-mails to all unconfirmed addresses from a specified petition
 	if($_GET['resendall'] && !$_POST['resendall']){
 
+		//Fetch the petition name
 		$nm = $wpdb->get_results("SELECT petition_title from $petitions_table where petition = $po");
 		$name = $nm[0]->petition_title;
+
+		//Work out how many e-mails would be sent, this is used to warn the user from
+		//spamming signatories.
 		$ct = $wpdb->get_results("select count(*) as c from $signature_table WHERE petition='$po' AND confirm != ''");
 		$cu = $ct[0]->c;
 		?>
@@ -569,12 +626,8 @@ function fcpetition_manage_page() {
 		<?php
 		return;
 	}
-
+	//Do the resending of all confirmation e-mails to all unconfirmed addresses from a specified petition.
 	if($_POST['resendall']){
-
-		/*
-		 *   Resend logic here
-		 */
 		$list = $wpdb->get_results("select email from $signature_table WHERE petition='$po' AND confirm != ''");
 		foreach($list as $addr) {
 			fcpetition_mail($addr->email,$po);
