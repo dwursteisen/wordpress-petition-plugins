@@ -138,7 +138,7 @@ function fcpetition_confirm(){
 		<h2><?php printf(__('Confirm Petition Signature - %s', "fcpetition"), get_bloginfo('name')); ?></h2>
 		<p>
 	<?php
-	if ($wpdb->query("UPDATE $signature_table SET confirm = '' WHERE confirm = '$confirm'")==1) {
+	if ($wpdb->query("UPDATE $signature_table SET `confirm` = '' WHERE `confirm` = '$confirm'")==1) {
 		print __("Your signature has now been added to the petition. Thank you.","fcpetition");
 	} else {
 		print __("The confirmation code you supplied was invalid. Either it was incorrect or it has already been used.","fcpetition");
@@ -291,7 +291,7 @@ function fcpetition_filter_pages($content) {
 			$wpdb->show_errors();
                         # Successful signature, send an e-mail asking the user to confirm
 						if (OVERRIDE_VERIFICATION) { 
-							$wpdb->query("UPDATE $signature_table SET confirm = '' WHERE confirm = '$confirm'");
+							$wpdb->query("UPDATE $signature_table SET `confirm` = '' WHERE `confirm` = '$confirm'");
 							return __("Your signature has now been added to the petition. Thank you.","fcpetition");						
 						} else {
 	                        $petition_confirmation = str_replace('[[curl]]',$confirm_url,$petition_confirmation);
@@ -586,7 +586,7 @@ function fcpetition_manage_page() {
 	//Deletes a comment from a specific signature
 	if($_POST['erase'] != ''){
 		$email = $_POST['erase'];
-		$wpdb->query("UPDATE $signature_table SET comment='' where  email = '$email' AND petition='$po'");
+		$wpdb->query("UPDATE $signature_table SET `comment`='' where  `email` = '$email' AND `petition`='$po'");
 		echo '<div id="message" class="updated fade"><p><strong>';
 		_e("Comment erased.","fcpetition");
 		echo "</p></strong></div>";
@@ -932,7 +932,7 @@ function fcpetition_options_page() {
 			//Update options table
 			$$option = $_POST[$option];
 			$foo = $wpdb->escape($_POST[$option]);
-			$wpdb->query("UPDATE $petitions_table set $option = '$foo' where petition='$po'");
+			$wpdb->query("UPDATE $petitions_table set $option = '$foo' where `petition`='$po'");
 		}
 
 	    if($p_error != "") {
