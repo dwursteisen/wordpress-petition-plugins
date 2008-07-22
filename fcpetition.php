@@ -60,37 +60,37 @@ define("OVERRIDE_VERIFICATION",0);
 // The petition table
 $signature_table = $table_prefix . "petition_signatures";
 $signature_table_sql = "CREATE TABLE $signature_table (
-						petition INT,
-                  		email VARCHAR(100),
-				        name VARCHAR(100),
-						confirm VARCHAR(100),
-						comment VARCHAR(". MAX_COMMENT_SIZE ."),
-						fields	TEXT,
-						time DATETIME,UNIQUE KEY email (email,petition)
+						`petition` INT,
+                  		`email` VARCHAR(100),
+				        `name` VARCHAR(100),
+						`confirm` VARCHAR(100),
+						`comment` VARCHAR(". MAX_COMMENT_SIZE ."),
+						`fields`	TEXT,
+						`time` DATETIME,UNIQUE KEY email (email,petition)
 					);
 ";
 
 $petitions_table = $table_prefix . "petitions";
 $petitions_table_sql = "CREATE TABLE $petitions_table (
-						petition INT AUTO_INCREMENT,
-						petition_title VARCHAR(100),
-						petition_text TEXT,
-						petition_confirmation TEXT,
-						petition_confirmurl VARCHAR(100),
-						petition_from VARCHAR(100),
-						petition_maximum INT,
-						petition_enabled TINYINT(1),
-						petition_comments TINYINT(1),
+						`petition` INT AUTO_INCREMENT,
+						`petition_title` VARCHAR(100),
+						`petition_text` TEXT,
+						`petition_confirmation` TEXT,
+						`petition_confirmurl` VARCHAR(100),
+						`petition_from` VARCHAR(100),
+						`petition_maximum` INT,
+						`petition_enabled` TINYINT(1),
+						`petition_comments` TINYINT(1),
 						PRIMARY KEY (petition)
 					);
 ";
 
 $fields_table = $table_prefix . "petition_fields";
 $fields_table_sql = "CREATE TABLE $fields_table (
-						petition INT,
-						name	VARCHAR(100),
-						type	VARCHAR(10),
-						opt		VARCHAR(10),
+						`petition` INT,
+						`name`	VARCHAR(100),
+						`type`	VARCHAR(10),
+						`opt`		VARCHAR(10),
 						UNIQUE KEY name (petition,name)
 					);
 ";
@@ -199,7 +199,7 @@ function fcpetition_import_version1($target) {
 	/* 
 	 *  The old database tables could only store a single petition per installation. Fetch these rows from the old table
 	 */
-	$old_rows = $wpdb->get_results("select email,name,confirm,comment,name,time from $old_table");
+	$old_rows = $wpdb->get_results("SELECT `email`,`name`,`confirm`,`comment`,`name`,`time` from $old_table");
 	$c = 0;
 	foreach($old_rows as $row) {
 		$q = "INSERT INTO $signature_table (petition,email,name,confirm,comment,time) values ($target,'$row->email','$row->name','$row->confirm','$row->comment','$row->time')";
@@ -218,7 +218,7 @@ function fcpetition_count(){
 	global $wpdb;
 	global $signature_table;
 	
-	$results = $wpdb->get_results("SELECT count(confirm) as c FROM $signature_table WHERE confirm = ''");
+	$results = $wpdb->get_results("SELECT count(confirm) as c FROM $signature_table WHERE `confirm` = ''");
         $count = $results[0]->c;
 	return $count;
 }
@@ -242,7 +242,7 @@ function fcpetition_countu(){
 function fcpetition_first(){
 	global $wpdb;
 	global $petitions_table;
-	$results = $wpdb->get_results("SELECT petition FROM $petitions_table ORDER by petition limit 0,1");
+	$results = $wpdb->get_results("SELECT `petition` FROM $petitions_table ORDER by `petition` limit 0,1");
 	if (count($results)==0) return false;
 	return $results[0]->petition;
 }
@@ -270,7 +270,7 @@ function fcpetition_filter_pages($content) {
 		$fields = base64_encode(serialize(fcpetition_collectfields($petition)));
 
 		#Make sure that no one is cheekily sending a comment when they shouldn't be
-		$rs = $wpdb->get_results("select petition_comments from $petitions_table");
+		$rs = $wpdb->get_results("SELECT `petition_comments` from $petitions_table");
 		if($rs[0]->petition_comments == 0) $comment = "";
 
 		#Pretty much lifted from lost password code
@@ -317,7 +317,7 @@ function fcpetition_mail($email,$po){
 	global $signature_table;
 	global $petitions_table;
 
-	$rs = $wpdb->get_results("select petition_confirmation,petition_from,petition_title,confirm from $signature_table,$petitions_table where $petitions_table.petition = $signature_table.petition and email = '$email' and $petitions_table.petition = '$po';");
+	$rs = $wpdb->get_results("SELECT `petition_confirmation`,`petition_from`,`petition_title`,`confirm` from $signature_table,$petitions_table where $petitions_table.petition = $signature_table.petition and `email` = '$email' and $petitions_table.petition = '$po';");
 	$petition_confirmation = $rs[0]->petition_confirmation;
 	$petition_from = stripslashes($rs[0]->petition_from);
 	$petition_title = stripslashes($rs[0]->petition_title);
@@ -338,7 +338,7 @@ function fcpetition_form($petition){
 	global $petitions_table;
 
 	// Check that the petition exists
-	$rs = $wpdb->get_results("SELECT * from $petitions_table where petition = $petition");
+	$rs = $wpdb->get_results("SELECT * from $petitions_table where `petition` = $petition");
 	if (count($rs) != 1) return "<strong>". __("This petition does not exist","fcpetition"). "</strong>";
 
 	// Fetch the petition's attributes
@@ -372,7 +372,7 @@ function fcpetition_form($petition){
 			". sprintf(__("Last %d of %d signatories","fcpetition"),$petition_maximum,fcpetition_count())."</h3>";
 
 	// Print the last $petition_maximum sigantures
-	foreach ($wpdb->get_results("SELECT name,comment from $signature_table WHERE confirm='' AND petition = '$petition' ORDER BY time DESC limit 0,$petition_maximum") as $row) {
+	foreach ($wpdb->get_results("SELECT `name`,`comment` from $signature_table WHERE `confirm`='' AND `petition` = '$petition' ORDER BY `time` DESC limit 0,$petition_maximum") as $row) {
 		// Are comments enabled and a comment exists?
 		if ($petition_comments == 1 && $row->comment<>"") {
 			$comment = stripslashes($row->comment);
@@ -457,7 +457,7 @@ function fcpetition_main_page(){
 			<table class="widefat">
 			<tr><thead><th><?php _e("Petition ID","fcpetition")?></th><th><?php _e("Petition Title","fcpetition")?></th><th></th></thead></tr>
 			<?php
-			foreach ($wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition") as $row) {
+			foreach ($wpdb->get_results("SELECT `petition`,`petition_title` from $petitions_table ORDER BY `petition`") as $row) {
 				?>
 				<tr>
 					<td><?php print $row->petition;?></td><td><a href="<?php bloginfo('url')?>/wp-admin/options-general.php?page=fcpetition.php_options&petition_select=<?php print $row->petition;?>"><?php print stripslashes($row->petition_title);?></a></td>
@@ -477,7 +477,7 @@ function fcpetition_main_page(){
 		<?php $old_t =  $wpdb->get_results("SHOW TABLES FROM ".DB_NAME." LIKE '$old_table';"); 
 			if(count($old_t) > 0) { ?>
 		<div class='wrap'><h2>Import data from version 1.</h2>
-	       <?php $plist = $wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition");
+	       <?php $plist = $wpdb->get_results("SELECT `petition`,`petition_title` from $petitions_table ORDER BY `petition`");
 	            if(count($plist) > 0) { ?>
 			<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 			 	<?php _e("Import to petition:","fcpetition"); ?>
@@ -505,7 +505,7 @@ function fcpetition_export(){
 	if ($_GET['petition_export'] && current_user_can('manage_options')){
 		$po = $wpdb->escape($_GET['petition_export']);
 		header('Content-Type: text/plain');
-		foreach ($wpdb->get_results("SELECT name,email,comment,time,fields from $signature_table WHERE confirm='' and petition = '$po' ORDER BY time DESC") as $row) {
+		foreach ($wpdb->get_results("SELECT `name`,`email`,`comment`,`time`,`fields` from $signature_table WHERE `confirm`='' and `petition` = '$po' ORDER BY `time` DESC") as $row) {
 				?>
 "<?php echo stripslashes($row->name); ?>","<?php echo stripslashes($row->email); ?>","<?php echo stripslashes($row->comment); ?>","<?php echo stripslashes($row->time); ?>"<?php fcpetition_csvfields(unserialize(base64_decode($row->fields))); ?>
 
@@ -603,12 +603,12 @@ function fcpetition_manage_page() {
 	if($_GET['resendall'] && !$_POST['resendall']){
 
 		//Fetch the petition name
-		$nm = $wpdb->get_results("SELECT petition_title from $petitions_table where petition = $po");
+		$nm = $wpdb->get_results("SELECT `petition_title` from $petitions_table where `petition` = $po");
 		$name = $nm[0]->petition_title;
 
 		//Work out how many e-mails would be sent, this is used to warn the user from
 		//spamming signatories.
-		$ct = $wpdb->get_results("select count(*) as c from $signature_table WHERE petition='$po' AND confirm != ''");
+		$ct = $wpdb->get_results("SELECT count(*) as c from $signature_table WHERE `petition`='$po' AND `confirm` != ''");
 		$cu = $ct[0]->c;
 		?>
 			<div class='wrap'>
@@ -628,7 +628,7 @@ function fcpetition_manage_page() {
 	}
 	//Do the resending of all confirmation e-mails to all unconfirmed addresses from a specified petition.
 	if($_POST['resendall']){
-		$list = $wpdb->get_results("select email from $signature_table WHERE petition='$po' AND confirm != ''");
+		$list = $wpdb->get_results("SELECT `email` from $signature_table WHERE `petition`='$po' AND `confirm` != ''");
 		foreach($list as $addr) {
 			fcpetition_mail($addr->email,$po);
 		}
@@ -641,7 +641,7 @@ function fcpetition_manage_page() {
 	?>
 		
 		<div class='wrap'>
-		<?php $plist = $wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition");
+		<?php $plist = $wpdb->get_results("SELECT `petition`,`petition_title` from $petitions_table ORDER BY `petition`");
 		      if (count($plist)>0) {
 		?>
 		<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
@@ -672,7 +672,7 @@ function fcpetition_manage_page() {
 	?>
 	<h2><?php _e("Petition Management","fcpetition") ?></h2>
 
-	<?php $results = $wpdb->get_results("SELECT * FROM $signature_table WHERE petition='$po' ORDER BY time LIMIT $n,$count"); 
+	<?php $results = $wpdb->get_results("SELECT * FROM $signature_table WHERE `petition`='$po' ORDER BY `time` LIMIT $n,$count"); 
 		if (count($results) < 1) {
 			_e("There are no signatures to manage yet","fcpetition");
 			return;
@@ -682,7 +682,7 @@ function fcpetition_manage_page() {
 	<a href="<?php echo get_bloginfo('url') ;?>?petition_export=<?php echo $po;?>"><?php _e("Export petition results as a CSV file","fcpetition");?></a>
 	| <a href="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>&resendall=yes&po=<?php echo $po;?>"><?php _e("Resend all e-mails","fcpetition"); ?></a>	
 	<?php
-		foreach ($wpdb->get_results("SELECT * FROM $petitions_table WHERE petition='$po'") as $row) {
+		foreach ($wpdb->get_results("SELECT * FROM $petitions_table WHERE `petition`='$po'") as $row) {
 			foreach ($options_defaults as $option => $default){
 				$$option = $row->$option;
 			}
@@ -795,7 +795,7 @@ function fcpetition_deletefield($po,$fieldname){
 function fcpetition_displayfields($po) {
 	global $wpdb;
 	global $fields_table;
-	$sql = "SELECT * FROM $fields_table WHERE petition = '$po'";
+	$sql = "SELECT * FROM $fields_table WHERE `petition` = '$po'";
 	$res = $wpdb->get_results($sql);
 	if (count($res) > 0) {
 		?>
@@ -831,7 +831,7 @@ function fcpetition_displayfields($po) {
 function fcpetition_livefields($po) {
 	global $wpdb;
 	global $fields_table;
-	$sql = "SELECT * FROM $fields_table WHERE petition = '$po'";
+	$sql = "SELECT * FROM $fields_table WHERE `petition` = '$po'";
 	$res = $wpdb->get_results($sql);
 	$output = "";
 	if(count($res)>0) {
@@ -850,7 +850,7 @@ function fcpetition_livefields($po) {
 function fcpetition_collectfields($po) {
 	global $wpdb;
 	global $fields_table;
-	$sql = "SELECT name FROM $fields_table WHERE petition = '$po'";
+	$sql = "SELECT `name` FROM $fields_table WHERE `petition` = '$po'";
 	$res = $wpdb->get_results($sql);
 	foreach($res as $field) {
 		$f = str_replace(" ","_",$field->name);
@@ -913,7 +913,7 @@ function fcpetition_options_page() {
 		$po = fcpetition_first();
 	}
 	#Fetch options
-	foreach ($wpdb->get_results("SELECT * FROM $petitions_table WHERE petition='$po'") as $row) {
+	foreach ($wpdb->get_results("SELECT * FROM $petitions_table WHERE `petition`='$po'") as $row) {
 		foreach ($options_defaults as $option => $default){
 			$$option = stripslashes($row->$option);
 		}
@@ -932,7 +932,7 @@ function fcpetition_options_page() {
 			//Update options table
 			$$option = $_POST[$option];
 			$foo = $wpdb->escape($_POST[$option]);
-			$wpdb->query("update $petitions_table set $option = '$foo' where petition='$po'");
+			$wpdb->query("UPDATE $petitions_table set $option = '$foo' where petition='$po'");
 		}
 
 	    if($p_error != "") {
@@ -962,7 +962,7 @@ function fcpetition_options_page() {
 
 	    ?>
 	    <div class='wrap'>
-		<?php $plist = $wpdb->get_results("SELECT petition,petition_title from $petitions_table ORDER BY petition");
+		<?php $plist = $wpdb->get_results("SELECT `petition`,`petition_title` from $petitions_table ORDER BY `petition`");
 			if(count($plist) > 0) {
 		?>
 		<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
@@ -991,7 +991,7 @@ function fcpetition_options_page() {
 		<?php if($po != 0) { ?>
 	    	<h2><?php _e("Petition Options","fcpetition")?></h2>
 			<?php fcpetition_displayfields($po);fcpetition_fieldform($po); ?>
-			<p><a href="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>&editfields=yes&petition_select=<?php echo $po; ?>"><?php _e("Add custom field to this petition...","fcpetition"); ?></a></p>
+			<!-- <p><a href="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>&editfields=yes&petition_select=<?php echo $po; ?>"><?php _e("Add custom field to this petition...","fcpetition"); ?></a></p>-->
 			<p><?php printf(__("Place [[petition-%s]] in the page or post where you wish this petition to appear.","fcpetition"),$po); ?></p>
 		<form name="optionsform" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<input type="hidden" name="submitted" value="Y">
