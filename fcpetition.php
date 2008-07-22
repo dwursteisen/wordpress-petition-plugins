@@ -202,7 +202,7 @@ function fcpetition_import_version1($target) {
 	$old_rows = $wpdb->get_results("SELECT `email`,`name`,`confirm`,`comment`,`name`,`time` from $old_table");
 	$c = 0;
 	foreach($old_rows as $row) {
-		$q = "INSERT INTO $signature_table (petition,email,name,confirm,comment,time) values ($target,'$row->email','$row->name','$row->confirm','$row->comment','$row->time')";
+		$q = "INSERT INTO $signature_table (`petition`,`email`,`name`,`confirm`,`comment`,`time`) values ($target,'$row->email','$row->name','$row->confirm','$row->comment','$row->time')";
 		$wpdb->query($q);
 		$c++;
 	}
@@ -283,7 +283,7 @@ function fcpetition_filter_pages($content) {
 			return __("Sorry, \"$email\" does not appear to be a valid e-mail address.","fcpetition");
 		} else if (strlen($comment) > MAX_COMMENT_SIZE) {
 			return __("Sorry, your comment is longer than ".MAX_COMMENT_SIZE." characters.","fcpetition");
-		} elseif ($wpdb->query("INSERT INTO $signature_table (petition,email,name,confirm,comment,time,fields) VALUES ('$petition','$email','$name','$confirm','$comment',NOW(),'$fields')")===FALSE){
+		} elseif ($wpdb->query("INSERT INTO $signature_table (`petition`,`email`,`name`,`confirm`,`comment`,`time`,`fields`) VALUES ('$petition','$email','$name','$confirm','$comment',NOW(),'$fields')")===FALSE){
 			# This has almost certainly occured due to a duplicate email key
                         $wpdb->show_errors();
                         return __("Sorry, someone has already attempted to sign the petition using this e-mail address.","fcpetition");
@@ -414,7 +414,7 @@ function fcpetition_main_page(){
 		$v = "('$petition_title'";
 		foreach ($options_defaults as $option => $default) {
 			if ($option == "petition_title") continue;
-			$n .= ",$option"; 
+			$n .= ",`$option`"; 
 			$v .= ",'$default'";
 		}
 		$n .= ")";
@@ -426,8 +426,8 @@ function fcpetition_main_page(){
 	//Delete a petition
 	if ($_POST['deletepetition'] != ''){
 		$petition = $wpdb->escape($_POST['deletepetition']);
-		$wpdb->query("DELETE FROM $petitions_table WHERE petition = '$petition'");
-		$wpdb->query("DELETE FROM $signature_table WHERE petition = '$petition'");
+		$wpdb->query("DELETE FROM $petitions_table WHERE `petition` = '$petition'");
+		$wpdb->query("DELETE FROM $signature_table WHERE `petition` = '$petition'");
 	}
 
 	//Import petition data from version 1's database tables into a specified new petition
@@ -569,7 +569,7 @@ function fcpetition_manage_page() {
 
 	//Clear all signatures from a petition
 	if( $_POST['clear'] == 'Y' ) {
-	        $wpdb->query("DELETE from $signature_table WHERE petition='$po'");
+	        $wpdb->query("DELETE from $signature_table WHERE `petition`='$po'");
 			echo '<div id="message" class="updated fade"><p><strong>';
 			_e("Signatures cleared","fcpetition");
 			echo "</p></strong></div>";
@@ -578,7 +578,7 @@ function fcpetition_manage_page() {
 	//Delete a specific signature from a petition
 	if($_POST['delete'] != ''){
 		$email = $_POST['delete'];
-		$wpdb->query("DELETE FROM $signature_table WHERE email = '$email' AND petition='$po'");
+		$wpdb->query("DELETE FROM $signature_table WHERE `email` = '$email' AND `petition`='$po'");
 		echo '<div id="message" class="updated fade"><p><strong>';
 		_e("Signature Deleted.","fcpetition");
 		echo "</p></strong></div>";
@@ -773,7 +773,7 @@ function fcpetition_manage_page() {
 function fcpetition_addfield($po,$fieldname,$fieldtype){
 	global $wpdb;
 	global $fields_table;
-	$sql = "INSERT into $fields_table (petition,name,type) values ($po,'$fieldname','$fieldtype')";
+	$sql = "INSERT into $fields_table (`petition`,`name`,`type`) values ($po,'$fieldname','$fieldtype')";
 	$wpdb->get_results($sql);
 }
 
@@ -783,7 +783,7 @@ function fcpetition_addfield($po,$fieldname,$fieldtype){
 function fcpetition_deletefield($po,$fieldname){
 	global $wpdb;
 	global $fields_table;
-	$sql = "DELETE FROM $fields_table WHERE petition = '$po' and name = '$fieldname'";
+	$sql = "DELETE FROM $fields_table WHERE `petition` = '$po' and `name` = '$fieldname'";
 	$wpdb->get_results($sql);
 }
 
