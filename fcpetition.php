@@ -932,7 +932,7 @@ function fcpetition_options_page() {
 			//Update options table
 			$$option = $_POST[$option];
 			$foo = $wpdb->escape($_POST[$option]);
-			$wpdb->query("UPDATE $petitions_table set $option = '$foo' where `petition`='$po'");
+			$wpdb->query("UPDATE $petitions_table set `$option` = '$foo' where `petition`='$po'");
 		}
 
 	    if($p_error != "") {
