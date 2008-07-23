@@ -185,7 +185,7 @@ function fcpetition_install(){
     }
 	// Upgrade the petitions table if the custom fields column isn't present
 	if($wpdb->get_var("SHOW COLUMNS FROM $signature_table LIKE 'fields'") != "fields") {
-		$wpdb->get_results("ALTER TABLE $signature_table ADD fields TEXT;");
+		$wpdb->get_results("ALTER TABLE $signature_table ADD `fields` TEXT;");
 	}
 }
 
