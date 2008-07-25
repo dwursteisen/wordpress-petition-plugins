@@ -9,7 +9,9 @@ Author URI: http://www.freecharity.org.uk/
 */
 ?>
 <?php
-/*  Copyright 2007 James Davis (email: james@freecharity.org.uk)
+/*  Copyright 2007-2008 James Davis (email: james@freecharity.org.uk)
+	Some parts copyright 2008 Nart Villeneuve (email:
+	nart.villeneuve@gmail.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -66,7 +68,9 @@ $signature_table_sql = "CREATE TABLE $signature_table (
 						`confirm` VARCHAR(100),
 						`comment` VARCHAR(". MAX_COMMENT_SIZE ."),
 						`fields`	TEXT,
-						`time` DATETIME,UNIQUE KEY email (email,petition)
+						`time` DATETIME,
+						`keep_private` enum('on','off') NOT NULL default 'off',
+						 UNIQUE KEY email (email,petition)
 					);
 ";
 
@@ -187,6 +191,10 @@ function fcpetition_install(){
 	if($wpdb->get_var("SHOW COLUMNS FROM $signature_table LIKE 'fields'") != "fields") {
 		$wpdb->get_results("ALTER TABLE $signature_table ADD `fields` TEXT;");
 	}
+	// Upgrade the signatures table if the keep_private column isn't present
+	if($wpdb->get_var("SHOW COLUMNS FROM $signature_table LIKE 'keep_private'") != "keep_private") {
+		$wpdb->get_results("ALTER TABLE $signature_table ADD `keep_private` enum('on','off') NOT NULL default 'off';");
+	}
 }
 
 /* 
@@ -268,6 +276,8 @@ function fcpetition_filter_pages($content) {
 		$comment = wp_kses($comment,array());
 		$petition = $wpdb->escape($_POST['petition']);
 		$petition = wp_kses($petition,array());
+		$keep_private = $wpdb->escape($_POST['petition_keep_private']);
+		$keep_private = wp_kses($keep_private,array());
 		$fields = base64_encode(serialize(fcpetition_collectfields($petition)));
 
 		#Make sure that no one is cheekily sending a comment when they shouldn't be
@@ -284,7 +294,7 @@ function fcpetition_filter_pages($content) {
 			return __("Sorry, \"$email\" does not appear to be a valid e-mail address.","fcpetition");
 		} else if (strlen($comment) > MAX_COMMENT_SIZE) {
 			return __("Sorry, your comment is longer than ".MAX_COMMENT_SIZE." characters.","fcpetition");
-		} elseif ($wpdb->query("INSERT INTO $signature_table (`petition`,`email`,`name`,`confirm`,`comment`,`time`,`fields`) VALUES ('$petition','$email','$name','$confirm','$comment',NOW(),'$fields')")===FALSE){
+		} elseif ($wpdb->query("INSERT INTO $signature_table (`petition`,`email`,`name`,`confirm`,`comment`,`time`,`fields`,`keep_private`) VALUES ('$petition','$email','$name','$confirm','$comment',NOW(),'$fields','$keep_private')")===FALSE){
 			# This has almost certainly occured due to a duplicate email key
                         $wpdb->show_errors();
                         return __("Sorry, someone has already attempted to sign the petition using this e-mail address.","fcpetition");
@@ -367,20 +377,39 @@ function fcpetition_form($petition){
 	}
 	// If any custom fields are defined, display that part of the form
 	$form = $form . fcpetition_livefields($petition);
-	$form = $form . "			<input type='hidden' name='petition' value='$petition'/><input type='submit' name='Submit' value='".__("Sign the petition","fcpetition")."'/>
-			</form>
-		<h3>
-			". sprintf(__("Last %d of %d signatories","fcpetition"),$petition_maximum,fcpetition_count())."</h3>";
-
-	// Print the last $petition_maximum sigantures
-	foreach ($wpdb->get_results("SELECT `name`,`comment` from $signature_table WHERE `confirm`='' AND `petition` = '$petition' ORDER BY `time` DESC limit 0,$petition_maximum") as $row) {
-		// Are comments enabled and a comment exists?
-		if ($petition_comments == 1 && $row->comment<>"") {
-			$comment = stripslashes($row->comment);
-			$form .= "<p><span class='signature'>$row->name, \"$comment\"</span></p>";
-		} else {
-			$form .= "<span class='signature'>$row->name </span><br/>";
+	$form = $form . __("Do not display name on website","fcpetition").": <input type='checkbox' name='petition_keep_private'/><br/>";
+	$form = $form . "			<input type='hidden' name='petition' value='$petition'/><input type='submit' name='Submit' value='".__("Sign the petition","fcpetition")."'/></form>";
+    
+	// Only display signatures (and comments if enabled) if petition_maximum  is greater than 0
+	if ($petition_maximum > 0) {
+	    $form .= "<h3>". sprintf(__("Last %d of %d signatories","fcpetition"),$petition_maximum,fcpetition_count())."</h3>";
+		// Print the last $petition_maximum sigantures
+		foreach ($wpdb->get_results("SELECT `name`,`comment`,`fields`,`keep_private` from $signature_table WHERE `confirm`='' AND `petition` = '$petition' ORDER BY `time` DESC limit 0,$petition_maximum") as $row) {
+			// Is the name private?
+			if ($row->keep_private == 'on') {
+				$the_name = "xxxxxxxx";
+			} else {
+				$the_name = $row->name;
+			}
+			// Are comments enabled and a comment exists?
+			if ($petition_comments == 1 && $row->comment<>"") {
+				$comment = stripslashes($row->comment);
+				$form .= "<p><span class='signature'>$the_name, ";
+				if ($row->fields<>"") {
+				    $form .= fcpetition_prettyvalues(unserialize(base64_decode($row->fields)));
+				}
+				$form .= "<br/>\"$comment\"</span></p>";
+			} else {
+				$form .= "<p><span class='signature'>$the_name ";
+				if ($row->fields<>"") {
+				    $form .= fcpetition_prettyvalues(unserialize(base64_decode($row->fields)));
+				}
+				$form .= "</span></p>";
+			}
 		}
+	} else {
+	    // else, simply display signature count
+	    $form .= "<h3>". sprintf(__("Join the %d people who have signed this petition.","fcpetition"),fcpetition_count())."</h3>";
 	}
 	//Return the form, wrapping it in a <div> and closing and opening paragraph tags
 	return "</p><div class='petition'>".$form."</div><p>";
@@ -710,7 +739,8 @@ function fcpetition_manage_page() {
 			echo "<th>".__("Comments","fcpetition")."</th>";
 		} 
 	?>
-		<th><?php _e('Time',"fcpetition"); ?></th><th> <?php _e('Confirmation code',"fcpetition"); ?></th><th><?php _e('Fields',"fcpetition"); ?></th><th></th></thead></tr>
+		<th><?php _e('Time',"fcpetition"); ?></th><th> <?php _e('Confirmation code',"fcpetition"); ?></th>
+		<th><?php _e("Keep Private","fcpetition"); ?></th><th><?php _e('Fields',"fcpetition"); ?></th><th></th></thead></tr>
 		<?php
 		foreach ($results as $row) {
 		if ($row->confirm=='') { 
@@ -745,6 +775,7 @@ function fcpetition_manage_page() {
 	?>
 				<td class="time"><?php echo $row->time; ?></td>
 				<td><?php echo $confirm; ?></td>
+				<td><?php echo $row->keep_private; ?></td>
 				<td><?php fcpetition_prettyfields(unserialize(base64_decode($row->fields))); ?></td>
 				<td>
 					<form name='deleteform' method='post' action='<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>'>
@@ -886,6 +917,14 @@ function fcpetition_prettyfields($package) {
 	foreach ($package as $field => $value) {
 		print "<strong>$field:</strong> $value ";
 	}
+}
+
+function fcpetition_prettyvalues($package) {
+    $custom_fields = "";
+	foreach ($package as $field => $value) {
+		$custom_fields .= "$value ";
+	}
+	return $custom_fields;
 }
 
 /*
