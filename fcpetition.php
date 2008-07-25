@@ -892,6 +892,7 @@ function fcpetition_prettyfields($package) {
  *  CSV output of the custom field data
  */
 function fcpetition_csvfields($package) {
+	if(!$package) return;
 	foreach ($package as $field => $value){
 		print ",\"$value\"";
 	}
