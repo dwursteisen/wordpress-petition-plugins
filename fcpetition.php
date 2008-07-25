@@ -255,6 +255,7 @@ function fcpetition_filter_pages($content) {
 	global $signature_table;
 	global $petitions_table;
 
+	print_r($_POST);
 	if( $_POST['petition_posted'] == 'Y' && preg_match('/\[\[petition-(.*)\]\]/',$content)) {
 		#If the petition has been posted
 
@@ -672,7 +673,7 @@ function fcpetition_manage_page() {
 	?>
 	<h2><?php _e("Petition Management","fcpetition") ?></h2>
 
-	<?php $results = $wpdb->get_results("SELECT * FROM $signature_table WHERE `petition`='$po' ORDER BY `time` LIMIT $n,$count"); 
+	<?php $results = $wpdb->get_results("SELECT * FROM $signature_table WHERE `petition`='$po' ORDER BY `time` DESC LIMIT $n,$count"); 
 		if (count($results) < 1) {
 			_e("There are no signatures to manage yet","fcpetition");
 			return;
