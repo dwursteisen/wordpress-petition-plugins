@@ -1034,6 +1034,7 @@ function fcpetition_options_page() {
 
 		<?php if($po != 0) { ?>
 	    	<h2><?php _e("Petition Options","fcpetition")?></h2>
+			<h3><?php _e("Custom Fields","fcpetition")?></h3>
 			<?php fcpetition_displayfields($po);fcpetition_fieldform($po); ?>
 			<!-- <p><a href="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>&editfields=yes&petition_select=<?php echo $po; ?>"><?php _e("Add custom field to this petition...","fcpetition"); ?></a></p>-->
 			<p><?php printf(__("Place [[petition-%s]] in the page or post where you wish this petition to appear.","fcpetition"),$po); ?></p>
