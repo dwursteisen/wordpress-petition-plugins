@@ -884,6 +884,7 @@ function fcpetition_collectfields($po) {
 	global $fields_table;
 	$sql = "SELECT `name` FROM $fields_table WHERE `petition` = '$po'";
 	$res = $wpdb->get_results($sql);
+	if(!$res) return;
 	foreach($res as $field) {
 		$f = str_replace(" ","_",$field->name);
 		if($_POST[$f]){
@@ -914,12 +915,14 @@ function fcpetition_fieldform($po) {
  * A pretty HTML representation of the custom field data
  */
 function fcpetition_prettyfields($package) {
+	if(!$package) return;
 	foreach ($package as $field => $value) {
 		print "<strong>$field:</strong> $value ";
 	}
 }
 
 function fcpetition_prettyvalues($package) {
+	if(!$package) return;
     $custom_fields = "";
 	foreach ($package as $field => $value) {
 		$custom_fields .= "$value ";
