@@ -894,7 +894,11 @@ function fcpetition_livefields($po) {
 			if($row->type == "text") {
 				$output .= "$row->name:<br/><input type='$row->type' name='$row->name'/><br/>\n";
 			} elseif($row->type == "select") {
-				$output .= "$row->name:<br/><select name='$row->name'></select><br/>";
+				$output .= "$row->name:<br/><select name='$row->name'>";
+				foreach(split(",",$row->opt) as $d){
+					$output .= "<option value='$d'>$d</option>\n";
+				}
+				$output .= "</select><br/>";
 			} else {
 				$output .= "Sorry, the type '$row->type' has not been implemented yet<br/>";
 			}
