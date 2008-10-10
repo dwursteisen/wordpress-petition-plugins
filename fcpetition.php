@@ -801,10 +801,10 @@ function fcpetition_manage_page() {
 /*
  * Adds a custom field to the database
  */
-function fcpetition_addfield($po,$fieldname,$fieldtype){
+function fcpetition_addfield($po,$fieldname,$fieldtype,$options){
 	global $wpdb;
 	global $fields_table;
-	$sql = "INSERT into $fields_table (`petition`,`name`,`type`) values ($po,'$fieldname','$fieldtype')";
+	$sql = "INSERT into $fields_table (`petition`,`name`,`type`,`opt`) values ($po,'$fieldname','$fieldtype','$options')";
 	$wpdb->get_results($sql);
 }
 
@@ -837,8 +837,21 @@ function fcpetition_displayfields($po) {
 			?>
 			<tr>
 				<td><?php echo $row->name; ?></td>
-				<td><?php echo $row->type; ?></td>
-				<td><?php echo $row->opt; ?></td>
+				<td>
+	                	<?php echo $row->type; ?>
+                </td>
+				<td>
+					<?php if ($row->type != "select") { ?>
+	                	<?php echo $row->opt; ?>
+	            	<?php } else { ?>
+		           		<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
+			               	<input type="text" name="fieldoptions" value="<?php echo $row->opt; ?>"/>
+							<input type="hidden" name="fieldname" value="<?php echo $row->name; ?>"/>
+					        <input type="hidden" name="editfieldoptions" value="yes"/>
+		            		<input type="submit" name="Submit" value="<?php _e("Change","fcpetition")?>"/>
+			 			</form>
+					<?php } ?>
+				</td>
 				<td>
 					<form  method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
 						<input type="hidden" name="fieldname" value="<?php echo $row->name; ?>"/>
@@ -856,6 +869,17 @@ function fcpetition_displayfields($po) {
 	<?php
 }
 
+/*
+ *  Updates the options for a particular field
+ */
+
+function fcpetition_changefieldoptions($po,$fieldname,$fieldoptions){
+	global $wpdb;
+	global $fields_table;
+	$sql = "UPDATE $fields_table SET `opt` = '$fieldoptions' WHERE `petition` = $po AND `name` = '$fieldname'";
+	$wpdb->query($sql);
+}
+
 /* 
  *  Returns the HTML for the user to input data for defined custom fields
  */
@@ -867,7 +891,13 @@ function fcpetition_livefields($po) {
 	$output = "";
 	if(count($res)>0) {
 		foreach($res as $row){
-			$output .= "$row->name:<br/><input type='$row->type' name='$row->name'/><br/>\n";
+			if($row->type == "text") {
+				$output .= "$row->name:<br/><input type='$row->type' name='$row->name'/><br/>\n";
+			} elseif($row->type == "select") {
+				$output .= "$row->name:<br/><select name='$row->name'></select><br/>";
+			} else {
+				$output .= "Sorry, the type '$row->type' has not been implemented yet<br/>";
+			}
 		}
 	}
 	return $output;
@@ -903,8 +933,13 @@ function fcpetition_fieldform($po) {
 			<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
 				<input type="hidden" name="addfield" value="yes"/>
 				<input type="hidden" name="petition_select" value="<?php echo $po; ?>"/>
-				 <input type="hidden" name="fieldtype" value="text"/>
-				<input type="text" name="fieldname"/>
+				Type: <select name = "fieldtype">
+						<option value="text">Text box</option>
+						<option value="select">Drop down box</option>
+                 	  </select>
+				 <br/>
+				Name:<input type="text" name="fieldname"/><br/>
+				Options:<input type="text" name="options"/>
 				<input type="submit" name="Submit" value="<?php _e("Add","fcpetition")?>"/>
 			</form>
 	<?php
@@ -996,11 +1031,17 @@ function fcpetition_options_page() {
 	if ( $_POST['addfield']) {
 		$fieldtype = $wpdb->escape($_POST['fieldtype']);
 		$fieldname = $wpdb->escape($_POST['fieldname']);
-		fcpetition_addfield($po,$fieldname,$fieldtype);
+		$fieldoptions = $wpdb->escape($_POST['options']);
+		fcpetition_addfield($po,$fieldname,$fieldtype,$fieldoptions);
 	}
 	if ( $_POST['deletefield']) {
 		$fieldname = $wpdb->escape($_POST['fieldname']);
 		fcpetition_deletefield($po,$fieldname);
+	}
+	if ( $_POST['editfieldoptions']){
+		$fieldname = $wpdb->escape($_POST['fieldname']);
+		$fieldoptions =  $wpdb->escape($_POST['fieldoptions']);
+		fcpetition_changefieldoptions($po,$fieldname,$fieldoptions);
 	}
 
 	    ?>
