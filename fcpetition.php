@@ -66,7 +66,7 @@ $signature_table_sql = "CREATE TABLE $signature_table (
                   		`email` VARCHAR(100),
 				        `name` VARCHAR(100),
 						`confirm` VARCHAR(100),
-						`comment` VARCHAR(". MAX_COMMENT_SIZE ."),
+						`comment` TEXT,
 						`fields`	TEXT,
 						`time` DATETIME,
 						`keep_private` enum('on','off') NOT NULL default 'off',
@@ -94,7 +94,7 @@ $fields_table_sql = "CREATE TABLE $fields_table (
 						`petition` INT,
 						`name`	VARCHAR(100),
 						`type`	VARCHAR(10),
-						`opt`		VARCHAR(10),
+						`opt`		TEXT,
 						UNIQUE KEY name (petition,name)
 					);
 ";
@@ -195,6 +195,9 @@ function fcpetition_install(){
 	if($wpdb->get_var("SHOW COLUMNS FROM $signature_table LIKE 'keep_private'") != "keep_private") {
 		$wpdb->get_results("ALTER TABLE $signature_table ADD `keep_private` enum('on','off') NOT NULL default 'off';");
 	}
+	// Change options to TEXT
+	$wpdb->query("ALTER TABLE $fields_table MODIFY opt TEXT");
+	$wpdb->query("ALTER TABLE $signature_table MODIFY comment TEXT");
 }
 
 /* 
@@ -291,7 +294,7 @@ function fcpetition_filter_pages($content) {
 			return __("Sorry, you must enter a name to sign the petition.","fcpetition");
 		} elseif (!is_email($email)){
 			return __("Sorry, \"$email\" does not appear to be a valid e-mail address.","fcpetition");
-		} else if (strlen($comment) > MAX_COMMENT_SIZE) {
+		} else if (0) {
 			return __("Sorry, your comment is longer than ".MAX_COMMENT_SIZE." characters.","fcpetition");
 		} elseif ($wpdb->query("INSERT INTO $signature_table (`petition`,`email`,`name`,`confirm`,`comment`,`time`,`fields`,`keep_private`) VALUES ('$petition','$email','$name','$confirm','$comment',NOW(),'$fields','$keep_private')")===FALSE){
 			# This has almost certainly occured due to a duplicate email key
@@ -372,7 +375,7 @@ function fcpetition_form($petition){
 				__("E-mail address","fcpetition").":<br/><input type='text' name='petition_email' value=''/><br/>";
 	// If comments are enabled, display that portion of the form
 	if ($petition_comments == 1) { 
-		$form = $form . sprintf(__("Please enter an optional comment (maximum %s characters)","fcpetition"),MAX_COMMENT_SIZE).":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
+		$form = $form . sprintf(__("Please enter an optional comment","fcpetition")).":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
 	}
 	// If any custom fields are defined, display that part of the form
 	$form = $form . fcpetition_livefields($petition);
