@@ -4,7 +4,7 @@ Donate link: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Tags: petition, comments, activism, politics, campaign
 Requires at least: 2.5
 Tested up to: 2.6
-Stable tag: 2.1.3
+Stable tag: 2.2
 
 Run simple web and e-mail based petitions through WordPress.
 
@@ -33,6 +33,10 @@ page under Manage.
 
 * The entire petition can be wiped using the button on the upper right of the page.
 * Individual signatures can be deleted or manually confirmed from within the table.
+
+= How can I add another field to the petition? =
+
+Under the petition options page you can add custom fields to a particular petition. You could use this to gather a person's home town, postal code or state for example. When adding a drop down field, the choices offered to the user should be entered as a comma separated list into the options box e.g. Orange,Apple,Lemon.
 
 = How can I translate the petition? =
 
