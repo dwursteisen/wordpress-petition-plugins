@@ -382,11 +382,15 @@ function fcpetition_form($petition){
 	$form = $form . __("Do not display name on website","fcpetition").": <input type='checkbox' name='petition_keep_private'/><br/>";
 	$form = $form . "			<input type='hidden' name='petition' value='$petition'/><input type='submit' name='Submit' value='".__("Sign the petition","fcpetition")."'/></form>";
     
-	// Only display signatures (and comments if enabled) if petition_maximum  is greater than 0
-	if ($petition_maximum > 0) {
-	    $form .= "<h3>". sprintf(__("Last %d of %d signatories","fcpetition"),$petition_maximum,fcpetition_count())."</h3>";
 		// Print the last $petition_maximum sigantures
-		foreach ($wpdb->get_results("SELECT `name`,`comment`,`fields`,`keep_private` from $signature_table WHERE `confirm`='' AND `petition` = '$petition' ORDER BY `time` DESC limit 0,$petition_maximum") as $row) {
+		if($petition_maximum == 0) {
+			$sql = "SELECT `name`,`comment`,`fields`,`keep_private` from $signature_table WHERE `confirm`='' AND `petition` = '$petition' ORDER BY `time`";
+			$sub_title = __("Signatories");
+		} else {
+			$sql = "SELECT `name`,`comment`,`fields`,`keep_private` from $signature_table WHERE `confirm`='' AND `petition` = '$petition' ORDER BY `time` DESC limit 0,$petition_maximum";
+			$sub_title = sprintf(__("Last %d of %d signatories","fcpetition"),min(fcpetition_count(),$petition_maximum),fcpetition_count());
+		}
+		foreach ($wpdb->get_results($sql) as $row) {
 			// Is the name private?
 			if ($row->keep_private == 'on') {
 				$the_name = "xxxxxxxx";
@@ -396,25 +400,20 @@ function fcpetition_form($petition){
 			// Are comments enabled and a comment exists?
 			if ($petition_comments == 1 && $row->comment<>"") {
 				$comment = stripslashes($row->comment);
-				$form .= "<p><span class='signature'>$the_name, ";
+				$sub_form .= "<p><span class='signature'>$the_name, ";
 				if ($row->fields<>"") {
-				    $form .= fcpetition_prettyvalues(unserialize(base64_decode($row->fields)));
+				    $sub_form .= fcpetition_prettyvalues(unserialize(base64_decode($row->fields)));
 				}
-				$form .= "<br/>\"$comment\"</span></p>";
+				$sub_form .= "<br/>\"$comment\"</span></p>";
 			} else {
-				$form .= "<p><span class='signature'>$the_name ";
+				$sub_form .= "<p><span class='signature'>$the_name ";
 				if ($row->fields<>"") {
 				    $form .= fcpetition_prettyvalues(unserialize(base64_decode($row->fields)));
 				}
-				$form .= "</span></p>";
+				$sub_form .= "</span></p>";
 			}
 		}
-	} else {
-	    // else, simply display signature count
-	    $form .= "<h3>". sprintf(__("Join the %d people who have signed this petition.","fcpetition"),fcpetition_count())."</h3>";
-	}
-	//Return the form, wrapping it in a <div> and closing and opening paragraph tags
-	return "</p><div class='petition'>".$form."</div><p>";
+	return "</p><div class='petition'>".$form."<h3>".$sub_title."</h3>".$sub_form."</div><p>";
 }
 
 function fcpetition_add_pages() {
@@ -944,8 +943,7 @@ function fcpetition_fieldform($po) {
 						<option value="text">Text box</option>
 						<option value="select">Drop down box</option>
                  	  </select>
-				 <br/>
-				Name:<input type="text" name="fieldname"/><br/>
+				Name:<input type="text" name="fieldname"/>
 				Options:<input type="text" name="options"/>
 				<input type="submit" name="Submit" value="<?php _e("Add","fcpetition")?>"/>
 			</form>
@@ -1081,9 +1079,6 @@ function fcpetition_options_page() {
 
 		<?php if($po != 0) { ?>
 	    	<h2><?php _e("Petition Options","fcpetition")?></h2>
-			<h3><?php _e("Custom Fields","fcpetition")?></h3>
-			<?php fcpetition_displayfields($po);fcpetition_fieldform($po); ?>
-			<!-- <p><a href="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>&editfields=yes&petition_select=<?php echo $po; ?>"><?php _e("Add custom field to this petition...","fcpetition"); ?></a></p>-->
 			<p><?php printf(__("Place [[petition-%s]] in the page or post where you wish this petition to appear.","fcpetition"),$po); ?></p>
 		<form name="optionsform" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<input type="hidden" name="submitted" value="Y">
@@ -1110,7 +1105,7 @@ function fcpetition_options_page() {
 			<input type="text" name="petition_from" value="<?php echo stripslashes($petition_from); ?>" size="72"/>
 		</p>
 		<p>
-			<?php _e("Please enter the maximum number of signatures to be displayed","fcpetition")?><br/>
+			<?php _e("Please enter the maximum number of signatures to be displayed. Set to 0 to show all signatures.","fcpetition")?><br/>
 			<input type="text" name="petition_maximum" value="<?php echo $petition_maximum; ?>"/>
 		</p>
 		<p>
@@ -1125,6 +1120,9 @@ function fcpetition_options_page() {
 			<input type="submit" name="Submit" value="<?php _e("Update Options","fcpetition")?>" />
 		</p>
 		</form>
+			<h3><?php _e("Custom Fields","fcpetition")?></h3>
+			<p><?php _e("If you are an expert user, you may add custom fields to your petition. You could use this to gather the name of the city or state someone lives in. For the drop down box, place a comma seperated list of choices in the options field e.g. Apples,Oranges,Lemons","fcpetition");?></p>
+			<?php fcpetition_displayfields($po);?><hr/><?php fcpetition_fieldform($po); ?>
 		<?php } ?>
 			<hr/>
 			<p>Written by James Davis and licensed under the GNU GPL. For assistance please visit this plugin's <a href="http://www.freecharity.org.uk/wordpress-petition-plugin/">web page</a>.
