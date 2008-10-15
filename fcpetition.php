@@ -80,7 +80,7 @@ $petitions_table_sql = "CREATE TABLE $petitions_table (
 						`petition_title` VARCHAR(100),
 						`petition_text` TEXT,
 						`petition_confirmation` TEXT,
-						`petition_confirmurl` VARCHAR(100),
+						`petition_confirmurl` TEXT,
 						`petition_from` VARCHAR(100),
 						`petition_maximum` INT,
 						`petition_enabled` TINYINT(1),
@@ -198,6 +198,7 @@ function fcpetition_install(){
 	// Change options to TEXT
 	$wpdb->query("ALTER TABLE $fields_table MODIFY opt TEXT");
 	$wpdb->query("ALTER TABLE $signature_table MODIFY comment TEXT");
+	$wpdb->query("ALTER TABLE $petitions_table MODIFY petition_confirmurl TEXT");
 }
 
 /* 
