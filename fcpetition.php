@@ -71,7 +71,7 @@ $signature_table_sql = "CREATE TABLE $signature_table (
 						`time` DATETIME,
 						`keep_private` enum('on','off') NOT NULL default 'off',
 						 UNIQUE KEY email (email,petition)
-					);
+					) %s;
 ";
 
 $petitions_table = $table_prefix . "petitions";
@@ -86,7 +86,7 @@ $petitions_table_sql = "CREATE TABLE $petitions_table (
 						`petition_enabled` TINYINT(1),
 						`petition_comments` TINYINT(1),
 						PRIMARY KEY (petition)
-					);
+					) %s;
 ";
 
 $fields_table = $table_prefix . "petition_fields";
@@ -96,7 +96,7 @@ $fields_table_sql = "CREATE TABLE $fields_table (
 						`type`	VARCHAR(10),
 						`opt`		TEXT,
 						UNIQUE KEY name (petition,name)
-					);
+					) %s;
 ";
 
 
@@ -172,20 +172,27 @@ function fcpetition_install(){
 	global $fields_table;
 	global $fields_table_sql;
 
+	if ( $wpdb->has_cap( 'collation' ) ) {
+    if ( ! empty($wpdb->charset) )
+		$charset_collate = "DEFAULT CHARACTER SET $wpdb->charset";
+	if ( ! empty($wpdb->collate) )
+	    $charset_collate .= " COLLATE $wpdb->collate";
+	}
+
 	// Create the table that holds the signatures
 	if($wpdb->get_var("SHOW TABLES LIKE '$signature_table'") != $signature_table) {
 		require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
-		dbDelta($signature_table_sql);
+		dbDelta(sprintf($signature_table_sql,$charset_collate));
 	}
 	// Create the table that holds the individual petition settings
     if($wpdb->get_var("SHOW TABLES LIKE '$petitions_table'") != $petitions_table) {
 	    require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
-	    dbDelta($petitions_table_sql);
+	    dbDelta(sprintf($petitions_table_sql,$charset_collate));
     }
 	// Create the table which holds the custom fields for individual petitions.
 	if($wpdb->get_var("SHOW TABLES LIKE '$fields_table'") != $fields_table) {
 	    require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
-	    dbDelta($fields_table_sql);
+	    dbDelta(sprintf($fields_table_sql,$charset_collate));
     }
 	// Upgrade the petitions table if the custom fields column isn't present
 	if($wpdb->get_var("SHOW COLUMNS FROM $signature_table LIKE 'fields'") != "fields") {
