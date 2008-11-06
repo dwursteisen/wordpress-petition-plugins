@@ -416,7 +416,7 @@ function fcpetition_form($petition){
 			} else {
 				$sub_form .= "<p><span class='signature'>$the_name ";
 				if ($row->fields<>"") {
-				    $form .= fcpetition_prettyvalues(unserialize(base64_decode($row->fields)));
+				    $sub_form .= fcpetition_prettyvalues(unserialize(base64_decode($row->fields)));
 				}
 				$sub_form .= "</span></p>";
 			}
