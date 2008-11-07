@@ -3,7 +3,7 @@
 Plugin Name: FreeCharity.org.uk WordPress Petition
 Plugin URI: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Description: Simple petitions with e-mail based confirmation to your WordPress installation.
-Version: 2.2.1
+Version: 2.2.2
 Author: James Davis
 Author URI: http://www.freecharity.org.uk/
 */
@@ -172,7 +172,7 @@ function fcpetition_install(){
 	global $fields_table;
 	global $fields_table_sql;
 
-	if ( $wpdb->has_cap( 'collation' ) ) {
+	if ( $wpdb->supports_collation() ) {
     if ( ! empty($wpdb->charset) )
 		$charset_collate = "DEFAULT CHARACTER SET $wpdb->charset";
 	if ( ! empty($wpdb->collate) )
