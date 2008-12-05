@@ -398,6 +398,9 @@ function fcpetition_form($petition){
 			$sql = "SELECT `name`,`comment`,`fields`,`keep_private` from $signature_table WHERE `confirm`='' AND `petition` = '$petition' ORDER BY `time` DESC limit 0,$petition_maximum";
 			$sub_title = sprintf(__("Last %d of %d signatories","fcpetition"),min(fcpetition_count($petition),$petition_maximum),fcpetition_count($petition));
 		}
+		# You can edit the following emtpy string if you wish. For instance:
+		# $sub_form .= sprintf("<table>");
+		$sub_form .= sprintf("");
 		foreach ($wpdb->get_results($sql) as $row) {
 			// Is the name private?
 			if ($row->keep_private == 'on') {
@@ -405,22 +408,22 @@ function fcpetition_form($petition){
 			} else {
 				$the_name = $row->name;
 			}
+			if ($row->fields<>""){
+				$fields = fcpetition_prettyvalues(unserialize(base64_decode($row->fields)));
+			}
 			// Are comments enabled and a comment exists?
 			if ($petition_comments == 1 && $row->comment<>"") {
 				$comment = stripslashes($row->comment);
-				$sub_form .= "<p><span class='signature'>$the_name, ";
-				if ($row->fields<>"") {
-				    $sub_form .= fcpetition_prettyvalues(unserialize(base64_decode($row->fields)));
-				}
-				$sub_form .= "<br/>\"$comment\"</span></p>";
+				# The following format strings can be editted if you wish. For instance:
+				# $sub_form  .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td></tr>",$the_name,$fields,$comment);
+				$sub_form  .= sprintf("<p><span class='signature'>%s, %s<br/>%s</span></p>",$the_name,$fields,$comment);
 			} else {
-				$sub_form .= "<p><span class='signature'>$the_name ";
-				if ($row->fields<>"") {
-				    $sub_form .= fcpetition_prettyvalues(unserialize(base64_decode($row->fields)));
-				}
-				$sub_form .= "</span></p>";
+				$sub_form  .= sprintf("<p><span class='signature'>%s, %s</span></p>",$the_name,$fields);
 			}
 		}
+		# You can edit the following emtpy string if you wish. For instance:
+        # $sub_form .= sprintf("</table>");
+		$sub_form .= sprintf("");
 	return "</p><div class='petition'>".$form."<h3>".$sub_title."</h3>".$sub_form."</div><p>";
 }
 
