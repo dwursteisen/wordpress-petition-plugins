@@ -233,11 +233,11 @@ function fcpetition_import_version1($target) {
 /* Show the total number of confirmed signatures. 
  * NEEDS fixing
  */
-function fcpetition_count(){
+function fcpetition_count($petition){
 	global $wpdb;
 	global $signature_table;
 	
-	$results = $wpdb->get_results("SELECT count(confirm) as c FROM $signature_table WHERE `confirm` = ''");
+	$results = $wpdb->get_results("SELECT count(confirm) as c FROM $signature_table WHERE `confirm` = '' AND `petition` = $petition");
         $count = $results[0]->c;
 	return $count;
 }
@@ -245,11 +245,11 @@ function fcpetition_count(){
 /* Show the total numbers of unconfirmed signatures 
  * NEEDS fixing
  */
-function fcpetition_countu(){
+function fcpetition_countu($petition){
 	global $wpdb;
 	global $signature_table;
 	
-	$results = $wpdb->get_results("SELECT count(confirm) as c FROM $signature_table");
+	$results = $wpdb->get_results("SELECT count(confirm) as c FROM $signature_table WHERE `petition`= $petition");
         $count = $results[0]->c;
 	return $count;
 }
@@ -396,7 +396,7 @@ function fcpetition_form($petition){
 			$sub_title = __("Signatories");
 		} else {
 			$sql = "SELECT `name`,`comment`,`fields`,`keep_private` from $signature_table WHERE `confirm`='' AND `petition` = '$petition' ORDER BY `time` DESC limit 0,$petition_maximum";
-			$sub_title = sprintf(__("Last %d of %d signatories","fcpetition"),min(fcpetition_count(),$petition_maximum),fcpetition_count());
+			$sub_title = sprintf(__("Last %d of %d signatories","fcpetition"),min(fcpetition_count($petition),$petition_maximum),fcpetition_count($petition));
 		}
 		foreach ($wpdb->get_results($sql) as $row) {
 			// Is the name private?
