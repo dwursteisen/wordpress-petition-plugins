@@ -58,6 +58,13 @@ define("MAX_COMMENT_SIZE",255);
  *  This option is purposely hidden to ordinary users.
  */ 
 define("OVERRIDE_VERIFICATION",0);
+/*  Allow the administrator to manually confirm sigatures. 
+ *  THIS IS A BAD THING AND MAY DECREASE TRUST PLACED IN THE RESULTS OF YOUR PETITION
+ *  (saying that, you could do the same by manually editting the database).
+ *  Set the option to 1 if you really want to do this.
+ *  This option is purposely hidden to ordinary users.
+ */
+define("OVERRIDE_CONFIRMATION",0);
 
 // The petition table
 $signature_table = $table_prefix . "petition_signatures";
@@ -639,8 +646,15 @@ function fcpetition_manage_page() {
 	       fcpetition_mail($email,$po); 
 	       echo '<div id="message" class="updated fade"><p><strong>';
                _e("Confirmation e-mail resent.","fcpetition");
-               echo "</p></strong></div>";
+              echo "</p></strong></div>";
         }
+	if($_POST['manualconfirm'] != ''){
+		$email = $_POST['manualconfirm'];
+		$wpdb->query("UPDATE $signature_table SET `confirm`='' where  `email` = '$email' AND `petition`='$po'");
+		echo '<div id="message" class="updated fade"><p><strong>';
+			_e(sprintf("%s manually confirmed",$email),"fcpetition");
+		echo "</p></strong></div>";
+	}
 	//User asks to resend confirmation e-mails to all unconfirmed addresses from a specified petition
 	if($_GET['resendall'] && !$_POST['resendall']){
 
@@ -764,6 +778,13 @@ function fcpetition_manage_page() {
 									<input type='hidden' name='petition_select' value='$po'/>
 		                            <input type='submit' name='Submit' value='".__("Resend Confirmation e-mail","fcpetition")."'/>
 								   </form>";
+			if(OVERRIDE_CONFIRMATION) {
+				$confirm .= "<form name='resendform' method='post' action='".str_replace( '%7E', '~', $_SERVER['REQUEST_URI'])."'>
+								 <input type='hidden' name='manualconfirm' value='$row->email'/>
+								 <input type='hidden' name='petition_select' value='$po'/>
+								 <input type='submit' name='Submit' value='".__("Manually confirm","fcpetition")."'/>
+							</form>";
+			}
 		}
     ?>
 			<tr>
