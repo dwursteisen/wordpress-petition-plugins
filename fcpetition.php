@@ -434,7 +434,7 @@ function fcpetition_add_pages() {
 	global $wpdb;
 
 	add_options_page(__("Add/Delete Petitions","fcpetition"), __("Add/Delete Petitions","fcpetition"), 8,basename(__FILE__)."_main", 'fcpetition_main_page');
-	add_options_page(__("Petition Options","fcpetition"), __("Petition Options","fcpetition"), 8,basename(__FILE__)."_options", 'fcpetition_options_page');
+	add_options_page(__("Petition Settings","fcpetition"), __("Petition Settings","fcpetition"), 8,basename(__FILE__)."_options", 'fcpetition_options_page');
 	add_management_page(__("Petition Management","fcpetition"), __("Petition Management","fcpetition"), 8,basename(__FILE__)."_manage", 'fcpetition_manage_page');
 }
 
@@ -732,7 +732,7 @@ function fcpetition_manage_page() {
 	?>
 
 	<?php
-		printf(__("<p> Showing %d to %d of %d (%d confirmed)</p>","fcpetition"),$n +1,$j,fcpetition_countu(),fcpetition_count());
+		printf(__("<p> Showing %d to %d of %d (%d confirmed)</p>","fcpetition"),$n +1,$j,fcpetition_countu($po),fcpetition_count($po));
 	?>
 		<form name="changecount" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 			<?php printf(__("Show %s entries at a time","fcpetition"),"<input type='text' name='count' value='$count' size='3'/>"); ?>
@@ -1089,7 +1089,7 @@ function fcpetition_options_page() {
 		<?php } ?>
 
 		<?php if($po != 0) { ?>
-	    	<h2><?php _e("Petition Options","fcpetition")?></h2>
+	    	<h2><?php _e("Petition Settings","fcpetition")?></h2>
 			<p><?php printf(__("Place [[petition-%s]] in the page or post where you wish this petition to appear.","fcpetition"),$po); ?></p>
 		<form name="optionsform" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<input type="hidden" name="submitted" value="Y">
