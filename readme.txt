@@ -22,9 +22,9 @@ The plugin allows you to run a petition through your WordPress installation. The
 = How do I use the plugin? =
 
 1. Petitions can be added and removed on the "Add/Delete Petitions" page in the Settings administration page (Options prior to 2.5).
-2. Settings for individual petitions can be changed on the adjacent "Petition Options" page. The settings should be self explanatory.
+2. Settings for individual petitions can be changed on the adjacent "Petition Settings" page. The settings should be self explanatory.
 3. When setting the confirmation e-mail text, placing [[curl]] within the text will insert the confirmation URL at that point in the text. Failure to place the URL within the text will result in a useless confirmation e-mail.
-4. Within the post or page where you wish the petition to appear, insert [[petition-n]] where n is the number of the petition. The petition will not appear until you enable the petition on the options page.
+4. Within the post or page where you wish the petition to appear, insert [[petition-n]] where n is the number of the petition. The petition will not appear until you enable the petition on the settings page.
 
 = How can I manage the petition data? =
 
@@ -36,7 +36,7 @@ page under Manage.
 
 = How can I add another field to the petition? =
 
-Under the petition options page you can add custom fields to a particular petition. You could use this to gather a person's home town, postal code or state for example. When adding a drop down field, the choices offered to the user should be entered as a comma separated list into the options box e.g. Orange,Apple,Lemon.
+Under the petition settings page you can add custom fields to a particular petition. You could use this to gather a person's home town, postal code or state for example. When adding a drop down field, the choices offered to the user should be entered as a comma separated list into the options box e.g. Orange,Apple,Lemon.
 
 = How can I translate the petition? =
 
