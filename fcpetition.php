@@ -3,7 +3,7 @@
 Plugin Name: FreeCharity.org.uk WordPress Petition
 Plugin URI: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Description: Simple petitions with e-mail based confirmation to your WordPress installation.
-Version: 2.2.2
+Version: 2.2.3
 Author: James Davis
 Author URI: http://www.freecharity.org.uk/
 */
@@ -440,9 +440,10 @@ function fcpetition_add_pages() {
 	global $petitions_table;
 	global $wpdb;
 
-	add_options_page(__("Add/Delete Petitions","fcpetition"), __("Add/Delete Petitions","fcpetition"), 8,basename(__FILE__)."_main", 'fcpetition_main_page');
-	add_options_page(__("Petition Settings","fcpetition"), __("Petition Settings","fcpetition"), 8,basename(__FILE__)."_options", 'fcpetition_options_page');
-	add_management_page(__("Petition Management","fcpetition"), __("Petition Management","fcpetition"), 8,basename(__FILE__)."_manage", 'fcpetition_manage_page');
+	add_options_page(__("Petition Add/Delete/Edit","fcpetition"), __("Petition Add/Delete/Edit","fcpetition"), 8,basename(__FILE__)."_main", 'fcpetition_main_page');
+	//Remove the options page, it doesn't really maintain the look and feel in 2.7.
+	//add_options_page(__("Petition Settings","fcpetition"), __("Petition Settings","fcpetition"), 8,basename(__FILE__)."_settings", 'fcpetition_settings_page');
+	add_options_page(__("Petition Management","fcpetition"), __("Petition Management","fcpetition"), 8,basename(__FILE__)."_manage", 'fcpetition_manage_page');
 }
 
 /*
@@ -491,7 +492,12 @@ function fcpetition_main_page(){
 		<?php
 
 	}
-
+	if($_POST['editpetition']){
+		// Ideally we'd refactor this function so that the code was inline.
+		// Comes from when the settings were on a seperate page to this one.
+		fcpetition_settings_page();
+	} else {
+		
 	?>
 		<div class='wrap'><h2><?php _e("Add New Petition","fcpetition") ?> </h2>
 		<p><?php _e("Adding or deleting a petition will not immediately update the structure of the administration menus.","fcpetition"); ?></p>
@@ -504,12 +510,18 @@ function fcpetition_main_page(){
 		</div>
 		<div class='wrap'><h2><?php _e("Current Petitions","fcpetition") ?> </h2>
 			<table class="widefat">
-			<tr><thead><th><?php _e("Petition ID","fcpetition")?></th><th><?php _e("Petition Title","fcpetition")?></th><th></th></thead></tr>
+			<tr><thead><th><?php _e("Petition ID","fcpetition")?></th><th><?php _e("Petition Title","fcpetition")?></th><th></th><th></th></thead></tr>
 			<?php
 			foreach ($wpdb->get_results("SELECT `petition`,`petition_title` from $petitions_table ORDER BY `petition`") as $row) {
 				?>
 				<tr>
-					<td><?php print $row->petition;?></td><td><a href="<?php bloginfo('url')?>/wp-admin/options-general.php?page=fcpetition.php_options&petition_select=<?php print $row->petition;?>"><?php print stripslashes($row->petition_title);?></a></td>
+					<td><?php print $row->petition;?></td><td><?php print stripslashes($row->petition_title);?></td>
+					<td>
+						<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
+							 <input type="hidden" name="editpetition" value="<?php print $row->petition;?>">
+						     <input type='submit' name='Submit' value='<?php _e("Edit Petition","fcpetition")?>'/>
+						</form>
+					</td>
 					<td>
 						<form name="petitionmain" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 							<input type="hidden" name="deletepetition" value="<?php print $row->petition;?>">
@@ -542,6 +554,7 @@ function fcpetition_main_page(){
 		</div>
 		<?php } ?>
 	<?php
+	}
 }
 
 /*
@@ -971,6 +984,7 @@ function fcpetition_fieldform($po) {
 			<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
 				<input type="hidden" name="addfield" value="yes"/>
 				<input type="hidden" name="petition_select" value="<?php echo $po; ?>"/>
+				<input type="hidden" name="editpetition" value="<?php print $po;?>">
 				Type: <select name = "fieldtype">
 						<option value="text">Text box</option>
 						<option value="select">Drop down box</option>
@@ -1011,7 +1025,7 @@ function fcpetition_csvfields($package) {
 	}
 }
 
-function fcpetition_options_page() {
+function fcpetition_settings_page() {
 	/* Handles the petition settings
 	 */
 
@@ -1024,6 +1038,8 @@ function fcpetition_options_page() {
 		$po =  $wpdb->escape($_POST['petition_select']);
 	} elseif ($_GET['petition_select']) {
 		$po =  $wpdb->escape($_GET['petition_select']);
+	} elseif ($_POST['editpetition']) {
+		$po = $wpdb->escape($_POST['editpetition']);
 	} else {
 		$po = fcpetition_first();
 	}
@@ -1149,6 +1165,7 @@ function fcpetition_options_page() {
 			<input type="checkbox" name="petition_enabled" value="1" <?php echo ($petition_enabled)?'checked':'';?>>
 		</p>
 			<p class="submit">
+			<input type="hidden" name="editpetition" value="<?php print $po;?>">
 			<input type="submit" name="Submit" value="<?php _e("Update Options","fcpetition")?>" />
 		</p>
 		</form>
