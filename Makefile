@@ -14,3 +14,5 @@ fcpetition-fr_FR.mo:	fcpetition-fr_FR.po
 	msgfmt -o fcpetition-fr_FR.mo fcpetition-fr_FR.po
 fcpetition-fi_FI.mo:	fcpetition-fi_FI.po
 	msgfmt -o fcpetition-fi_FI.mo fcpetition-fi_FI.po
+fcpetition-nb_NO.mo:	fcpetition-nb_NO.po
+	msgfmt -o fcpetition-nb_NO.mo fcpetition-nb_NO.po
