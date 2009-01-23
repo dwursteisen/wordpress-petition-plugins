@@ -359,43 +359,68 @@ function fcpetition_mail($email,$po){
 
 /*
  * Returns the HTML form to be presented in a page/post.
- */ 
+ */
+
+function fcpetition_fetchattributes($petition){
+	global $wpdb;
+	global $petitions_table;
+
+	$rs = $wpdb->get_results("SELECT * from $petitions_table where `petition` = $petition");
+    if (count($rs) != 1) { 
+		return 0; 
+	} else {
+		return $rs[0];
+	}
+}
+
+function fcpetition_form_top($petition,$action){
+    
+	$pa =  fcpetition_fetchattributes($petition);
+	if($pa == 0)  return "<strong>". __("This petition does not exist","fcpetition"). "</strong>";
+
+	$text =   wpautop(stripslashes($pa->petition_text));
+	$comments_enabled = $pa->petition_comments;
+
+	$name = __("Name","fcpetition");
+	$email = __("E-mail address","fcpetition");
+	$privacy =  __("Do not display name on website","fcpetition");
+	$button = __("Sign the petition","fcpetition");
+	if($comments_enabled){
+		$comments_form = sprintf(__("Please enter an optional comment","fcpetition")).":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
+	}
+	$custom_fields =  fcpetition_livefields($petition);
+	return "
+		$text
+		<form name='petition' method='post' action='$action' class='petition'>
+			<input type='hidden' name='petition_posted' value='Y'/>
+			$name :<br/><input type='text' name='petition_name' value=''/><br/>
+			$email:<br/><input type='text' name='petition_email' value=''/><br/>
+			$custom_fields
+			$comments_form
+			$privacy: <input type='checkbox' name='petition_keep_private'/><br/>
+			 <input type='hidden' name='petition' value='$petition'/>
+			 <input type='submit' name='Submit' value='$button'/>
+		</form>
+	";
+}
+
 function fcpetition_form($petition){
 	global $wpdb;
 	global $signature_table;
 	global $petitions_table;
 
-	// Check that the petition exists
-	$rs = $wpdb->get_results("SELECT * from $petitions_table where `petition` = $petition");
-	if (count($rs) != 1) return "<strong>". __("This petition does not exist","fcpetition"). "</strong>";
+	$pa =  fcpetition_fetchattributes($petition);
+    if($pa == 0)  return "<strong>". __("This petition does not exist","fcpetition"). "</strong>";
 
 	// Fetch the petition's attributes
-	$petition_maximum = $rs[0]->petition_maximum;
-	$petition_text = wpautop(stripslashes($rs[0]->petition_text));
-	$petition_comments = $rs[0]->petition_comments;
-	$petition_enabled = $rs[0]->petition_enabled;
+	$petition_maximum = $pa->petition_maximum;
+	$petition_enabled = $pa->petition_enabled;
 
 	// Check that the petition is enabled
 	if(!$petition_enabled) return "<strong>".__("This petition is not enabled","fcpetition")."</strong>";
 
-	$form_action = str_replace( '%7E', '~', $_SERVER['REQUEST_URI']);
-	$form  = "
-		$petition_text<br/><br/>
-			<em>". __("After you have added your name to this petition an e-mail will be sent to the given address to confirm your signature. Please make sure that your e-mail address is correct or you will not receive this e-mail and your name will not be counted.","fcpetition") ."
-			</em>
-		<br/><br/>
-			<form name='petition' method='post' action='$form_action' class='petition'>
-				<input type='hidden' name='petition_posted' value='Y'/>".
-				__("Name","fcpetition").":<br/><input type='text' name='petition_name' value=''/><br/>".
-				__("E-mail address","fcpetition").":<br/><input type='text' name='petition_email' value=''/><br/>";
-	// If comments are enabled, display that portion of the form
-	if ($petition_comments == 1) { 
-		$form = $form . sprintf(__("Please enter an optional comment","fcpetition")).":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
-	}
-	// If any custom fields are defined, display that part of the form
-	$form = $form . fcpetition_livefields($petition);
-	$form = $form . __("Do not display name on website","fcpetition").": <input type='checkbox' name='petition_keep_private'/><br/>";
-	$form = $form . "			<input type='hidden' name='petition' value='$petition'/><input type='submit' name='Submit' value='".__("Sign the petition","fcpetition")."'/></form>";
+	$action = str_replace( '%7E', '~', $_SERVER['REQUEST_URI']);
+	$form =  fcpetition_form_top($petition,$action);
     
 		// Print the last $petition_maximum sigantures
 		if($petition_maximum == 0) {
