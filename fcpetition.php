@@ -41,7 +41,7 @@ $options_defaults = array (
 	"petition_title" 		=> '',
 	"petition_text"  		=> __("We the undersigned ask you to sign our petition.","fcpetition"),
 	"petition_confirmation"	=> __("Thank you for signing the petition. You must confirm this by visiting the following address: \n\n[[curl]]\n\nRegards,\n\nJames","fcpetition"),
-	"petition_confirmurl" 	=> __("<PLEASE ENTER THE CORRECT URL>","fcpetition"),
+	//"petition_confirmurl" 	=> __("<PLEASE ENTER THE CORRECT URL>","fcpetition"),
 	"petition_from" 		=>  sprintf(__("My Petition <%s>","fcpetition"),get_option('admin_email')),
 	"petition_maximum" 		=> 10,
 	"petition_enabled" 		=> 0,
@@ -87,7 +87,6 @@ $petitions_table_sql = "CREATE TABLE $petitions_table (
 						`petition_title` VARCHAR(100),
 						`petition_text` TEXT,
 						`petition_confirmation` TEXT,
-						`petition_confirmurl` TEXT,
 						`petition_from` VARCHAR(100),
 						`petition_maximum` INT,
 						`petition_enabled` TINYINT(1),
@@ -212,7 +211,7 @@ function fcpetition_install(){
 	// Change options to TEXT
 	$wpdb->query("ALTER TABLE $fields_table MODIFY opt TEXT");
 	$wpdb->query("ALTER TABLE $signature_table MODIFY comment TEXT");
-	$wpdb->query("ALTER TABLE $petitions_table MODIFY petition_confirmurl TEXT");
+	//$wpdb->query("ALTER TABLE $petitions_table MODIFY petition_confirmurl TEXT");
 }
 
 /* 
@@ -1179,10 +1178,6 @@ function fcpetition_settings_page() {
 		<p>
 			<?php _e("Please enter the confirmation email text. Insert [[curl]] where the confirmation URL is to appear. [[curl]] <strong>must</strong> appear in the text or the confirmation e-mails will not work.","fcpetition")?><br/>
         	        <textarea name="petition_confirmation" rows="10" cols="72"><?php echo stripslashes($petition_confirmation); ?></textarea>
-		</p>
-		<p>
-		        <?php _e("Please enter the confirmation URL. This is the page or post on which the petition appears. This option <strong>must</strong> be correctly set or the confirmation e-mails will not work.","fcpetition")?><br/>
-		        <input type="text" name="petition_confirmurl" size="72" value="<?php echo stripslashes($petition_confirmurl); ?>"/>
 		</p>
 
 		<p>
