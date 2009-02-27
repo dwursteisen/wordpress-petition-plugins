@@ -302,8 +302,9 @@ function fcpetition_filter_pages($content) {
 	global $signature_table;
 	global $petitions_table;
 
-	 $petition = $wpdb->escape($_POST['petition']);
-     $petition = wp_kses($petition,array());
+	#Grab these first. This allows us to only match on the precise post. Otherwise the next regex would match on all posts with petitions.
+	$petition = $wpdb->escape($_POST['petition']);
+    $petition = wp_kses($petition,array());
 
 	if( $_POST['petition_posted'] == 'Y' && preg_match("/\[\[petition-$petition\]\]/",$content)) {
 		#If the petition has been posted
