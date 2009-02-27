@@ -4,7 +4,7 @@ Donate link: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Tags: petition, comments, activism, politics, campaign
 Requires at least: 2.5
 Tested up to: 2.7
-Stable tag: 2.2.3
+Stable tag: 2.3
 
 Run simple web and e-mail based petitions through WordPress.
 
@@ -44,6 +44,10 @@ Under the petition settings page you can add custom fields to a particular petit
 All the information required to translate the petition is contained within the template, fcpetition.pot. You need to fill out the template into a suitable named file. For example, fcpetition-nl_NL.po for Dutch as spoken in the Netherlands or fcpetition-es_CU.po for Spanish as spoken in Cuba. You can do this manually but it's recommended that you use a tool such as Poedit (http://www.poedit.net/) instead.
 
 Once you have completed the translation, you can send the .po file to me for inclusion with the next version of the plugin. 
+
+= How do I change the appearance of the petition? =
+
+The plugin purposely avoids forcing any style upon the petition. The styling of the HTML elements displayed in WordPress is controlled by your Theme.
 
 = Help! My confirmation e-mails aren't being sent! =
 
