@@ -112,6 +112,7 @@ $old_table = $table_prefix . "petition";
  *  Actions
  */
 
+add_action('init','fcpetition_widget_register');
 add_action('admin_menu', 'fcpetition_add_pages');			//Action adds pages
 add_action('the_content','fcpetition_filter_pages');		//Action to display the petition to the user
 add_action('get_header','fcpetition_export');				//Action for exporting the petition
@@ -123,6 +124,27 @@ register_activation_hook(__FILE__, fcpetition_install());
 /*
  *  Functions
  */
+
+function fcpetition_widget($args){
+	global $wpdb;
+	global $signature_table;
+	global $petitions_table;
+
+	extract($args);
+	echo $before_widget;
+	echo $before_title . 'Total Petition Signatures' . $after_title; 
+		$sql = "SELECT count($signature_table.email) as count,petition_title FROM $signature_table,$petitions_table where $signature_table.petition = $petitions_table.petition and $signature_table.confirm = '' and petition_enabled = 1 group by petition_title;";
+		?><ul><?php
+		foreach ($wpdb->get_results($sql) as $row) {
+			print "<li>".$row->petition_title . ": " . $row->count . "</li>";
+		}
+		?></ul>
+	<?php echo $after_widget;
+}
+
+function fcpetition_widget_register() {
+	register_sidebar_widget('Petition Count Widget','fcpetition_widget');
+}
 
 /*
  * Displays the confirmation page
@@ -280,7 +302,10 @@ function fcpetition_filter_pages($content) {
 	global $signature_table;
 	global $petitions_table;
 
-	if( $_POST['petition_posted'] == 'Y' && preg_match('/\[\[petition-(.*)\]\]/',$content)) {
+	 $petition = $wpdb->escape($_POST['petition']);
+     $petition = wp_kses($petition,array());
+
+	if( $_POST['petition_posted'] == 'Y' && preg_match("/\[\[petition-$petition\]\]/",$content)) {
 		#If the petition has been posted
 
 		#Clean some of the input, make SQL safe and remove HTML from name and comment which may be displayed later.
@@ -290,8 +315,8 @@ function fcpetition_filter_pages($content) {
 		$email =  wp_kses($email,array());
 		$comment = $wpdb->escape($_POST['petition_comment']);
 		$comment = wp_kses($comment,array());
-		$petition = $wpdb->escape($_POST['petition']);
-		$petition = wp_kses($petition,array());
+		#$petition = $wpdb->escape($_POST['petition']);
+		#$petition = wp_kses($petition,array());
 		$keep_private = $wpdb->escape($_POST['petition_keep_private']);
 		$keep_private = wp_kses($keep_private,array());
 		$fields = base64_encode(serialize(fcpetition_collectfields($petition)));
