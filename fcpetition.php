@@ -132,7 +132,7 @@ function fcpetition_widget($args){
 
 	extract($args);
 	echo $before_widget;
-	echo $before_title . 'Total Petition Signatures' . $after_title; 
+	echo $before_title . __("Total Petition Signatures","fcpetition") . $after_title; 
 		$sql = "SELECT count($signature_table.email) as count,petition_title FROM $signature_table,$petitions_table where $signature_table.petition = $petitions_table.petition and $signature_table.confirm = '' and petition_enabled = 1 group by petition_title;";
 		?><ul><?php
 		foreach ($wpdb->get_results($sql) as $row) {
