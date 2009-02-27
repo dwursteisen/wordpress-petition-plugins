@@ -101,6 +101,7 @@ $fields_table_sql = "CREATE TABLE $fields_table (
 						`name`	VARCHAR(100),
 						`type`	VARCHAR(10),
 						`opt`		TEXT,
+						`ts`	TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 						UNIQUE KEY name (petition,name)
 					) %s;
 ";
@@ -225,6 +226,10 @@ function fcpetition_install(){
 	// Upgrade the petitions table if the custom fields column isn't present
 	if($wpdb->get_var("SHOW COLUMNS FROM $signature_table LIKE 'fields'") != "fields") {
 		$wpdb->get_results("ALTER TABLE $signature_table ADD `fields` TEXT;");
+	}	
+	// Upgrade the petitions table if the custom fields column isn't present
+	if($wpdb->get_var("SHOW COLUMNS FROM $fields_table LIKE 'ts'") != "fields") {
+		$wpdb->get_results("ALTER TABLE $fields_table ADD `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;");
 	}
 	// Upgrade the signatures table if the keep_private column isn't present
 	if($wpdb->get_var("SHOW COLUMNS FROM $signature_table LIKE 'keep_private'") != "keep_private") {
@@ -935,7 +940,7 @@ function fcpetition_deletefield($po,$fieldname){
 function fcpetition_displayfields($po) {
 	global $wpdb;
 	global $fields_table;
-	$sql = "SELECT * FROM $fields_table WHERE `petition` = '$po'";
+	$sql = "SELECT * FROM $fields_table WHERE `petition` = '$po' ORDER BY ts";
 	$res = $wpdb->get_results($sql);
 	if (count($res) > 0) {
 		?>
@@ -955,6 +960,7 @@ function fcpetition_displayfields($po) {
 	            	<?php } else { ?>
 		           		<form method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
 			               	<input type="text" name="fieldoptions" value="<?php echo $row->opt; ?>"/>
+							<input type="hidden" name="editpetition" value="<?php print $po;?>">
 							<input type="hidden" name="fieldname" value="<?php echo $row->name; ?>"/>
 					        <input type="hidden" name="editfieldoptions" value="yes"/>
 		            		<input type="submit" name="Submit" value="<?php _e("Change","fcpetition")?>"/>
@@ -964,6 +970,7 @@ function fcpetition_displayfields($po) {
 				<td>
 					<form  method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
 						<input type="hidden" name="fieldname" value="<?php echo $row->name; ?>"/>
+						<input type="hidden" name="editpetition" value="<?php print $po;?>">
 						<input type="hidden" name="deletefield" value="yes"/>
 						<input type="hidden" name="petition_select" value="<?php echo $po; ?>"/>
 						<input type="submit" name="Submit" value="<?php _e("Delete","fcpetition")?>"/>
@@ -995,7 +1002,7 @@ function fcpetition_changefieldoptions($po,$fieldname,$fieldoptions){
 function fcpetition_livefields($po) {
 	global $wpdb;
 	global $fields_table;
-	$sql = "SELECT * FROM $fields_table WHERE `petition` = '$po'";
+	$sql = "SELECT * FROM $fields_table WHERE `petition` = '$po' ORDER by ts";
 	$res = $wpdb->get_results($sql);
 	$output = "";
 	if(count($res)>0) {
@@ -1024,7 +1031,7 @@ function fcpetition_livefields($po) {
 function fcpetition_collectfields($po) {
 	global $wpdb;
 	global $fields_table;
-	$sql = "SELECT `name` FROM $fields_table WHERE `petition` = '$po'";
+	$sql = "SELECT `name` FROM $fields_table WHERE `petition` = '$po' ORDER by ts";
 	$res = $wpdb->get_results($sql);
 	if(!$res) return;
 	foreach($res as $field) {
