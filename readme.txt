@@ -4,7 +4,7 @@ Donate link: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Tags: petition, comments, activism, politics, campaign
 Requires at least: 2.5
 Tested up to: 2.7
-Stable tag: 2.3
+Stable tag: 2.3.1
 
 Run simple web and e-mail based petitions through WordPress.
 
