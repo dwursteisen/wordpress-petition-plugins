@@ -3,7 +3,7 @@
 Plugin Name: FreeCharity.org.uk WordPress Petition
 Plugin URI: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Description: Simple petitions with e-mail based confirmation to your WordPress installation.
-Version: 2.3
+Version: 2.3.1
 Author: James Davis
 Author URI: http://www.freecharity.org.uk/
 */
@@ -316,11 +316,11 @@ function fcpetition_filter_pages($content) {
 
 		#Clean some of the input, make SQL safe and remove HTML from name and comment which may be displayed later.
 		$name = $wpdb->escape($_POST['petition_name']);
-		$name = wp_kses($name,array());
+		$name = htmlchars(wp_kses($name,array()));
 		$email = $wpdb->escape($_POST['petition_email']);
-		$email =  wp_kses($email,array());
+		$email =  htmlchars(wp_kses($email,array()));
 		$comment = $wpdb->escape($_POST['petition_comment']);
-		$comment = wp_kses($comment,array());
+		$comment = htmlchars(wp_kses($comment,array()));
 		#$petition = $wpdb->escape($_POST['petition']);
 		#$petition = wp_kses($petition,array());
 		$keep_private = $wpdb->escape($_POST['petition_keep_private']);
@@ -1071,18 +1071,21 @@ function fcpetition_fieldform($po) {
 function fcpetition_prettyfields($package) {
 	if(!$package) return;
 	foreach ($package as $field => $value) {
-		print "<strong>$field:</strong> $value ";
+		print "<strong>$field:</strong> ".htmlchars($value)." ";
 	}
 }
 
 function fcpetition_prettyvalues($package) {
 	if(!$package) return;
-    $custom_fields = "";
-	foreach ($package as $field => $value) {
-		$custom_fields .= "$value ";
-	}
+	$custom_fields = "";
+	$custom_fields = htmlchars(implode(", ",$package));
 	return $custom_fields;
 }
+
+function htmlchars( $string ) {
+  return str_replace("\n","<br/>",htmlspecialchars(trim($string),ENT_QUOTES));
+}
+
 
 /*
  *  CSV output of the custom field data
