@@ -3,7 +3,7 @@
 Plugin Name: FreeCharity.org.uk WordPress Petition
 Plugin URI: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Description: Simple petitions with e-mail based confirmation to your WordPress installation.
-Version: 2.3.1
+Version: 2.3.2
 Author: James Davis
 Author URI: http://www.freecharity.org.uk/
 */
@@ -228,7 +228,7 @@ function fcpetition_install(){
 		$wpdb->get_results("ALTER TABLE $signature_table ADD `fields` TEXT;");
 	}	
 	// Upgrade the petitions table if the custom fields column isn't present
-	if($wpdb->get_var("SHOW COLUMNS FROM $fields_table LIKE 'ts'") != "fields") {
+	if($wpdb->get_var("SHOW COLUMNS FROM $fields_table LIKE 'ts'") != "ts") {
 		$wpdb->get_results("ALTER TABLE $fields_table ADD `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;");
 	}
 	// Upgrade the signatures table if the keep_private column isn't present
