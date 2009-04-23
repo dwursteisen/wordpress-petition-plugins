@@ -441,6 +441,7 @@ function fcpetition_form_bottom($petition) {
 	$pa =  fcpetition_fetchattributes($petition);
     if($pa == 0)  return "<strong>". __("This petition does not exist","fcpetition"). "</strong>";
 	$petition_maximum = $pa->petition_maximum;
+	$comments_enabled = $pa->petition_comments;
 	if($petition_maximum == 0) {
 	    $sql = "SELECT `name`,`comment`,`fields`,`keep_private` from $signature_table WHERE `confirm`='' AND `petition` = '$petition' ORDER BY `time`";
 	    $sub_title = __("Signatories");
@@ -453,7 +454,7 @@ function fcpetition_form_bottom($petition) {
     # $sub_form .= sprintf("<table>");
     $return .= sprintf("");
 
-	foreach($wpdb->get_results($sql) as $row) {	
+	foreach($wpdb->get_results($sql) as $row) {
 			// Is the name private?
 			if ($row->keep_private == 'on') {
 				$the_name = "xxxxxxxx";
@@ -464,7 +465,7 @@ function fcpetition_form_bottom($petition) {
 				$fields = fcpetition_prettyvalues(unserialize(base64_decode($row->fields)));
 			}
 			// Are comments enabled and a comment exists?
-			if ($petition_comments == 1 && $row->comment<>"") {
+			if ( $comments_enabled == 1 && $row->comment != "") {
 				$comment = stripslashes($row->comment);
 				# The following format strings can be editted if you wish. For instance:
 				# $sub_form  .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td></tr>",$the_name,$fields,$comment);

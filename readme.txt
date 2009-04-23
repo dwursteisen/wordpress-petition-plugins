@@ -51,7 +51,7 @@ The plugin purposely avoids forcing any style upon the petition. The styling of 
 
 = Help! My confirmation e-mails aren't being sent! =
 
-The e-mails are sent using the same mechanisms as all e-mails sent from within your WordPress install. The e-mails may be being blocked by your hosting provider. The most likely reason for this is that e-mails sent FROM your confirmation address are being blocked. Try using another address.
+The e-mails are sent in the same way as all e-mails sent from your WordPress install. The most likely reason you are not receiving them is because your web host has blocked them. Contact them first for help, before coming to me.
 
 == Getting Help ==
 
