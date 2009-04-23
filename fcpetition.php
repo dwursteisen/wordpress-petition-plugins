@@ -423,7 +423,7 @@ function fcpetition_form_top($petition,$action){
 		$text
 		<form name='petition' method='post' action='$action' class='petition'>
 			<input type='hidden' name='petition_posted' value='Y'/>
-			$name :<br/><input type='text' name='petition_name' value=''/><br/>
+			$name:<br/><input type='text' name='petition_name' value=''/><br/>
 			$email:<br/><input type='text' name='petition_email' value=''/><br/>
 			$custom_fields
 			$comments_form
