@@ -3,7 +3,7 @@
 Plugin Name: FreeCharity.org.uk WordPress Petition
 Plugin URI: http://www.freecharity.org.uk/wordpress-petition-plugin/
 Description: Simple petitions with e-mail based confirmation to your WordPress installation.
-Version: 2.3.4
+Version: 2.3.5
 Author: James Davis
 Author URI: http://www.freecharity.org.uk/
 */
