@@ -101,6 +101,7 @@ $fields_table_sql = "CREATE TABLE $fields_table (
 						`name`	VARCHAR(100),
 						`type`	VARCHAR(10),
 						`opt`		TEXT,
+						`hide`	TINYINT(1),
 						`ts`	TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 						UNIQUE KEY name (petition,name)
 					) %s;
@@ -231,6 +232,10 @@ function fcpetition_install(){
 	if($wpdb->get_var("SHOW COLUMNS FROM $fields_table LIKE 'ts'") != "ts") {
 		$wpdb->get_results("ALTER TABLE $fields_table ADD `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;");
 	}
+	// Upgrade the petitions table if the hide field isn't present
+	if($wpdb->get_var("SHOW COLUMNS FROM $fields_table LIKE 'hide'") != "hide") {
+		$wpdb->get_results("ALTER TABLE $fields_table ADD `hide` TINYINT(1);");
+    }
 	// Upgrade the signatures table if the keep_private column isn't present
 	if($wpdb->get_var("SHOW COLUMNS FROM $signature_table LIKE 'keep_private'") != "keep_private") {
 		$wpdb->get_results("ALTER TABLE $signature_table ADD `keep_private` enum('on','off') NOT NULL default 'off';");
@@ -462,7 +467,7 @@ function fcpetition_form_bottom($petition) {
 				$the_name = $row->name;
 			}
 			if ($row->fields<>""){
-				$fields = fcpetition_prettyvalues(unserialize(base64_decode($row->fields)));
+				$fields = fcpetition_prettyvalues(unserialize(base64_decode($row->fields)),$petition);
 			}
 			// Are comments enabled and a comment exists?
 			if ( $comments_enabled == 1 && $row->comment != "") {
@@ -916,10 +921,10 @@ function fcpetition_manage_page() {
 /*
  * Adds a custom field to the database
  */
-function fcpetition_addfield($po,$fieldname,$fieldtype,$options){
+function fcpetition_addfield($po,$fieldname,$fieldtype,$options,$hidefield){
 	global $wpdb;
 	global $fields_table;
-	$sql = "INSERT into $fields_table (`petition`,`name`,`type`,`opt`) values ($po,'$fieldname','$fieldtype','$options')";
+	$sql = "INSERT into $fields_table (`petition`,`name`,`type`,`opt`,`hide`) values ($po,'$fieldname','$fieldtype','$options','$hidefield')";
 	$wpdb->get_results($sql);
 }
 
@@ -946,7 +951,7 @@ function fcpetition_displayfields($po) {
 	if (count($res) > 0) {
 		?>
 		<table>
-			<tr><thead><th>Name</th><th>Type</th><th>Options</th><th></th></thead></tr>
+			<tr><thead><th>Name</th><th>Type</th><th>Options</th><th>Printed</th><th></th></thead></tr>
 		<?php
 		foreach($res as $row){
 			?>
@@ -968,6 +973,13 @@ function fcpetition_displayfields($po) {
 			 			</form>
 					<?php } ?>
 				</td>
+				<td>
+		            <?php if($row->hide == 0) { ?>
+						No
+					<?php } else { ?>
+						Yes
+					 <?php } ?>
+				</td>																									                        
 				<td>
 					<form  method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>"/>
 						<input type="hidden" name="fieldname" value="<?php echo $row->name; ?>"/>
@@ -1008,10 +1020,11 @@ function fcpetition_livefields($po) {
 	$output = "";
 	if(count($res)>0) {
 		foreach($res as $row){
+			if($row->hide == 1) { $lmsg = __(" (won't be published)","fcpetition");} else { $lmsg = "";}
 			if($row->type == "text") {
-				$output .= "$row->name:<br/><input type='$row->type' name='$row->name'/><br/>\n";
+				$output .= "$row->name$lmsg:<br/><input type='$row->type' name='$row->name'/><br/>\n";
 			} elseif($row->type == "select") {
-				$output .= "$row->name:<br/><select name='$row->name'>";
+				$output .= "$row->name$lmsg:<br/><select name='$row->name'>";
 				foreach(split(",",$row->opt) as $d){
 					$output .= "<option value='$d'>$d</option>\n";
 				}
@@ -1061,6 +1074,7 @@ function fcpetition_fieldform($po) {
                  	  </select>
 				Name:<input type="text" name="fieldname"/>
 				Options:<input type="text" name="options"/>
+				Publish field <input type="checkbox" name="hide" checked/>
 				<input type="submit" name="Submit" value="<?php _e("Add","fcpetition")?>"/>
 			</form>
 	<?php
@@ -1076,8 +1090,21 @@ function fcpetition_prettyfields($package) {
 	}
 }
 
-function fcpetition_prettyvalues($package) {
+function fcpetition_prettyvalues($package,$petition) {
+	global $wpdb;
+	global $fields_table;
 	if(!$package) return;
+	
+	foreach($wpdb->get_results("SELECT name,hide FROM $fields_table WHERE petition = '$petition' ORDER BY ts") as $row) {
+		$hide[$row->name] = $row->hide;
+	}
+
+	foreach ($package as $fieldname => $fieldvalue){
+			if($hide[$fieldname] == 1) {
+				unset($package[$fieldname]);
+			}
+	}
+
 	$custom_fields = "";
 	$custom_fields = htmlchars(implode(", ",$package));
 	return $custom_fields;
@@ -1157,8 +1184,9 @@ function fcpetition_settings_page() {
 	if ( $_POST['addfield']) {
 		$fieldtype = $wpdb->escape($_POST['fieldtype']);
 		$fieldname = $wpdb->escape($_POST['fieldname']);
+		$fieldhide = $wpdb->escape($_POST['hide'])=='on'?1:0;
 		$fieldoptions = $wpdb->escape($_POST['options']);
-		fcpetition_addfield($po,$fieldname,$fieldtype,$fieldoptions);
+		fcpetition_addfield($po,$fieldname,$fieldtype,$fieldoptions,$fieldhide);
 	}
 	if ( $_POST['deletefield']) {
 		$fieldname = $wpdb->escape($_POST['fieldname']);
