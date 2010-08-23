@@ -1100,7 +1100,7 @@ function fcpetition_prettyvalues($package,$petition) {
 	}
 
 	foreach ($package as $fieldname => $fieldvalue){
-			if($hide[$fieldname] == 1) {
+			if($hide[$fieldname] == 0) {
 				unset($package[$fieldname]);
 			}
 	}
