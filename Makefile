@@ -1,4 +1,4 @@
-all:	fcpetition-he_IL.mo fcpetition.pot fcpetition-nl_NL.mo fcpetition-es_ES.mo fcpetition-fr_FR.mo fcpetition-fi_FI.mo
+all:	fcpetition-he_IL.mo fcpetition.pot fcpetition-nl_NL.mo fcpetition-es_ES.mo fcpetition-fr_FR.mo fcpetition-fi_FI.mo fcpetition-de_DE.mo
 
 fcpetition.pot:	fcpetition.php
 	xgettext --language=PHP --indent --keyword=__ --keyword=_e --keyword=__ngettext:1,2 -s -n --from-code=UTF8 -o fcpetition.pot fcpetition.php
@@ -16,3 +16,5 @@ fcpetition-fi_FI.mo:	fcpetition-fi_FI.po
 	msgfmt -o fcpetition-fi_FI.mo fcpetition-fi_FI.po
 fcpetition-nb_NO.mo:	fcpetition-nb_NO.po
 	msgfmt -o fcpetition-nb_NO.mo fcpetition-nb_NO.po
+fcpetition-de_DE.mo:    fcpetition-de_DE.po
+	msgfmt -o fcpetition-de_DE.mo fcpetition-de_DE.po
