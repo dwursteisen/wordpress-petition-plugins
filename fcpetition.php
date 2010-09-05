@@ -451,12 +451,14 @@ function fcpetition_form_bottom($petition) {
 	    $sql = "SELECT `name`,`comment`,`fields`,`keep_private` from $signature_table WHERE `confirm`='' AND `petition` = '$petition' ORDER BY `time`";
 	    $sub_title = __("Signatories");
 	} else {
+                $count = fcpetition_count($petition);
 		$sql = "SELECT `name`,`comment`,`fields`,`keep_private` from $signature_table WHERE `confirm`='' AND `petition` = '$petition' ORDER BY `time` DESC limit 0,$petition_maximum";
-		$sub_title = sprintf(__("Last %d of %d signatories","fcpetition"),min(fcpetition_count($petition),$petition_maximum),fcpetition_count($petition));
+		$sub_title = sprintf(__("Last %d of %d signatories","fcpetition"),min($count,$petition_maximum),$count);
 	}
 
 	# You can edit the following emtpy string if you wish. For instance:
     # $sub_form .= sprintf("<table>");
+    $return .= $sub_title;
     $return .= sprintf("");
 
 	foreach($wpdb->get_results($sql) as $row) {
