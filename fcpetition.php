@@ -458,8 +458,8 @@ function fcpetition_form_bottom($petition) {
 
 	# You can edit the following emtpy string if you wish. For instance:
     # $sub_form .= sprintf("<table>");
-    $return .= $sub_title;
-    $return .= sprintf("");
+    $return .= sprintf("<p class='subtitle'>%s</p>", $sub_title);
+    $return .= sprintf("<dl class='petitionList'>");
 
 	foreach($wpdb->get_results($sql) as $row) {
 			// Is the name private?
@@ -476,14 +476,14 @@ function fcpetition_form_bottom($petition) {
 				$comment = stripslashes($row->comment);
 				# The following format strings can be editted if you wish. For instance:
 				# $sub_form  .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td></tr>",$the_name,$fields,$comment);
-				$return  .= sprintf("<p><span class='signature'>%s, %s<br/>%s</span></p>",$the_name,$fields,$comment);
+				$return  .= sprintf("<dt class='signature'>%s, %s</dt><dd>%s</dd>",$the_name,$fields,$comment);
 			} else {
-				$return  .= sprintf("<p><span class='signature'>%s, %s</span></p>",$the_name,$fields);
+				$return  .= sprintf("<dt class='signature'>%s, %s</dt><dd></dd>",$the_name,$fields);
 			}
 	}
 	# You can edit the following emtpy string if you wish. For instance:
 	# $sub_form .= sprintf("</table>");
-	$return .= sprintf("");
+	$return .= sprintf("</dl>");
 	return $return;
 
 }
