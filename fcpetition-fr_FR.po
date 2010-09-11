@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Wordpress Petition Plugin\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-04-30 16:39+0100\n"
-"PO-Revision-Date: 2008-05-12 11:21+0100\n"
+"PO-Revision-Date: 2010-09-11 11:41+0100\n"
 "Last-Translator: Romain Gerland <romain.g77@wanadoo.fr>\n"
 "Language-Team: Romain <romain.g77@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -25,31 +25,31 @@ msgstr "<VEUILLEZ ENTRER LA BONNE URL>"
 #: fcpetition.php:538
 #, php-format
 msgid "<p> Showing %d to %d of %d (%d confirmed)</p>"
-msgstr "<p>Affichage de %d � %d sur %d (%d confirm�)</p>"
+msgstr "<p>Affichage de %d à %d sur %d (%d confirmé)</p>"
 
 #: fcpetition.php:377
 msgid "Add New Petition"
-msgstr "Ajouter une Nouvelle P�tition"
+msgstr "Ajouter une Nouvelle Pétition"
 
 #: fcpetition.php:382
 msgid "Add Petition"
-msgstr "Ajouter une P�tition"
+msgstr "Ajouter une Pétition"
 
 #: fcpetition.php:332
 msgid "Add/Delete Petitions"
-msgstr "Ajouter / Supprimer des P�titions"
+msgstr "Ajouter / Supprimer des Pétitions"
 
 #: fcpetition.php:378
 msgid "Adding or deleting a petition will not immediately update the structure of the administration menus."
-msgstr "Ajouter ou supprimer une p�tition ne mettra pas imm�diatement � jour la structure des menus de l'administration"
+msgstr "Ajouter ou supprimer une pétition ne mettra pas immédiatement à jour la structure des menus de l'administration"
 
 #: fcpetition.php:301
 msgid "After you have added your name to this petition an e-mail will be sent to the given address to confirm your signature. Please make sure that your e-mail address is correct or you will not receive this e-mail and your name will not be counted."
-msgstr "Apr�s avoir ajout� votre nom � cette p�tition, un e-mail vous sera envoy� � l'adresse indiqu�e pour confirmer votre signature. Veuillez vous assurer que votre adresse mail est correcte, ou vous ne recevrez pas cet e-mail, et votre nom ne sera pas compt�."
+msgstr "Après avoir ajouté votre nom à cette pétition, un e-mail vous sera envoyé à l'adresse indiquée pour confirmer votre signature. Veuillez vous assurer que votre adresse mail est correcte, ou vous ne recevrez pas cet e-mail, et votre nom ne sera pas compté."
 
 #: fcpetition.php:705
 msgid "Allow signatories to leave a comment"
-msgstr "Autoriser les signataires � laisser un commentaire"
+msgstr "Autoriser les signataires à laisser un commentaire"
 
 #: fcpetition.php:587
 msgid "Clear all signatures"
@@ -63,7 +63,7 @@ msgstr "Commentaires"
 #: fcpetition.php:122
 #, php-format
 msgid "Confirm Petition Signature - %s"
-msgstr "Confirmez votre Signature � la P�tition - %s"
+msgstr "Confirmez votre Signature à la Pétition - %s"
 
 #: fcpetition.php:550
 msgid "Confirmation code"
@@ -71,15 +71,15 @@ msgstr "Code de confirmation"
 
 #: fcpetition.php:482
 msgid "Confirmation e-mail resent."
-msgstr "E-mail de confirmation r�envoy�."
+msgstr "E-mail de confirmation réenvoyé."
 
 #: fcpetition.php:386
 msgid "Current Petitions"
-msgstr "P�titions Actuelles"
+msgstr "Pétitions Actuelles"
 
 #: fcpetition.php:397
 msgid "Delete Petition"
-msgstr "Supprimer la P�tition"
+msgstr "Supprimer la Pétition"
 
 #: fcpetition.php:575
 msgid "Delete Signature"
@@ -92,24 +92,24 @@ msgstr "Adresse e-mail"
 
 #: fcpetition.php:709
 msgid "Enable Petition"
-msgstr "Activer la P�tition"
+msgstr "Activer la Pétition"
 
 #: fcpetition.php:527
 msgid "Export petition results as a CSV file"
-msgstr "Exporter les r�sultats de la p�tition en tant que fichier CSV"
+msgstr "Exporter les résultats de la pétition en tant que fichier CSV"
 
 #: fcpetition.php:419
 msgid "Import Petition"
-msgstr "Importer une P�tition"
+msgstr "Importer une Pétition"
 
 #: fcpetition.php:413
 msgid "Import to petition:"
-msgstr "Importer � la p�tition : "
+msgstr "Importer à la pétition : "
 
 #: fcpetition.php:369
 #, php-format
 msgid "Imported %s signatures"
-msgstr "%s signatures import�es"
+msgstr "%s signatures importées"
 
 #: fcpetition.php:314
 #, php-format
@@ -119,7 +119,7 @@ msgstr "Derniers %d de %d signataires"
 #: fcpetition.php:43
 #, php-format
 msgid "My Petition <%s>"
-msgstr "Ma P�tition <%s>"
+msgstr "Ma Pétition <%s>"
 
 #: fcpetition.php:306
 #: fcpetition.php:544
@@ -132,115 +132,115 @@ msgstr "Les 10 suivants"
 
 #: fcpetition.php:641
 msgid "Options Updated."
-msgstr "Options mises � jour."
+msgstr "Options mises à jour."
 
 #: fcpetition.php:388
 msgid "Petition ID"
-msgstr "ID de la P�tition"
+msgstr "ID de la Pétition"
 
 #: fcpetition.php:334
 #: fcpetition.php:518
 msgid "Petition Management"
-msgstr "Gestion de la P�tition"
+msgstr "Gestion de la Pétition"
 
 #: fcpetition.php:333
 #: fcpetition.php:674
 msgid "Petition Options"
-msgstr "Options de la P�tition"
+msgstr "Options de la Pétition"
 
 #: fcpetition.php:388
 msgid "Petition Title"
-msgstr "Titre de la P�tition"
+msgstr "Titre de la Pétition"
 
 #: fcpetition.php:493
 #: fcpetition.php:651
 msgid "Petition:"
-msgstr "P�tition :"
+msgstr "Pétition :"
 
 #: fcpetition.php:276
 #, php-format
 msgid "Petition: Confirm your signing of the petition '%s'"
-msgstr "P�tition : confirmez votre signature � la p�tition � %s �"
+msgstr "Pétition : confirmez votre signature à la pétition \" %s \""
 
 #: fcpetition.php:675
 #, php-format
 msgid "Place [[petition-%s]] in the page or post where you wish this petition to appear."
-msgstr "Placez [[petition-%s]] dans la page ou dans l'article o� vous voulez que la p�tition apparaisse."
+msgstr "Placez [[petition-%s]] dans la page ou dans l'article où vous voulez que la pétition apparaisse."
 
 #: fcpetition.php:511
 #: fcpetition.php:669
 msgid "Please add a petition."
-msgstr "Veuillez ajouter une p�tition."
+msgstr "Veuillez ajouter une pétition."
 
 #: fcpetition.php:309
 #, php-format
 msgid "Please enter an optional comment (maximum %s characters)"
-msgstr "Veuillez entrer un commentaire facultatif (%s caract�res maximum)"
+msgstr "Veuillez entrer un commentaire facultatif (%s caractères maximum)"
 
 #: fcpetition.php:697
 msgid "Please enter the address which the confirmation e-mail will appear to be sent from. Any replies to the confirmation e-mail will be directed to this address. This <strong>must</strong> follow the same format as the example address."
-msgstr "Veuillez entrer l'adresse depuis laquelle l'e-mail de confirmation semblera provenir. Toutes les r�ponses � cet e-mail de confirmation seront dirig�es � cette adresse. Elle <strong>doit</strong> suivre le m�me format que l'adresse d'exemple."
+msgstr "Veuillez entrer l'adresse depuis laquelle l'e-mail de confirmation semblera provenir. Toutes les réponses à cet e-mail de confirmation seront dirigées à cette adresse. Elle <strong>doit</strong> suivre le même format que l'adresse d'exemple."
 
 #: fcpetition.php:692
 msgid "Please enter the confirmation URL. This is the page or post on which the petition appears. This option <strong>must</strong> be correctly set or the confirmation e-mails will not work."
-msgstr "Veuillez entrer l'URL de confirmation. C'est la page ou l'article dans lequel la p�tition appara�t. Cette option <strong>doit</strong> �tre d�finie correctement, ou l'e-mail de confirmation ne fonctionnera pas."
+msgstr "Veuillez entrer l'URL de confirmation. C'est la page ou l'article dans lequel la pétition apparaît. Cette option <strong>doit</strong> être définie correctement, ou l'e-mail de confirmation ne fonctionnera pas."
 
 #: fcpetition.php:688
 msgid "Please enter the confirmation email text. Insert [[curl]] where the confirmation URL is to appear. [[curl]] <strong>must</strong> appear in the text or the confirmation e-mails will not work."
-msgstr "Veuillez entrer le texte de l'e-mail de conformation. Ins�rez [[curl]] o� le lien de confirmation doit appara�tre. [[curl]] <strong>doit</strong> appara�tre dans le texte, ou l'e-mail de confirmation ne fonctionnera pas"
+msgstr "Veuillez entrer le texte de l'e-mail de conformation. Insérez [[curl]] où le lien de confirmation doit apparaître. [[curl]] <strong>doit</strong> apparaître dans le texte, ou l'e-mail de confirmation ne fonctionnera pas"
 
 #: fcpetition.php:701
 msgid "Please enter the maximum number of signatures to be displayed"
-msgstr "Veuillez entrer le nombre de signatures maximum � afficher"
+msgstr "Veuillez entrer le nombre de signatures maximum à afficher"
 
 #: fcpetition.php:684
 msgid "Please enter the petition text"
-msgstr "Veuillez entrer le texte de la p�tition"
+msgstr "Veuillez entrer le texte de la pétition"
 
 #: fcpetition.php:680
 msgid "Please enter the petition title"
-msgstr "Veuillez entrer le titre de la p�tition"
+msgstr "Veuillez entrer le titre de la pétition"
 
 #: fcpetition.php:539
 msgid "Previous 10"
-msgstr "Les 10 pr�c�dents"
+msgstr "Les 10 précédents"
 
 #: fcpetition.php:560
 msgid "Resend Confirmation e-mail"
-msgstr "R�envoyer l'e-mail de confirmation"
+msgstr "Réenvoyer l'e-mail de confirmation"
 
 #: fcpetition.php:507
 #: fcpetition.php:665
 msgid "Select"
-msgstr "S�lectionner"
+msgstr "Sélectionner"
 
 #: fcpetition.php:311
 msgid "Sign the petition"
-msgstr "Signer la p�tition"
+msgstr "Signer la pétition"
 
 #: fcpetition.php:475
 msgid "Signature Deleted."
-msgstr "Signature supprim�e."
+msgstr "Signature supprimée."
 
 #: fcpetition.php:554
 msgid "Signature confirmed."
-msgstr "Signature confirm�e."
+msgstr "Signature confirmée."
 
 #: fcpetition.php:467
 msgid "Signatures cleared"
-msgstr "Signatures supprim�es."
+msgstr "Signatures supprimées."
 
 #: fcpetition.php:240
 msgid "Sorry, someone has already attempted to sign the petition using this e-mail address."
-msgstr "D�sol�, quelqu'un a d�j� essay� de signer la p�tition avec cette adresse mail."
+msgstr "Désolé, quelqu'un a déjà essayé de signer la pétition avec cette adresse mail."
 
 #: fcpetition.php:232
 msgid "Sorry, you must enter a name to sign the petition."
-msgstr "D�sol�, vous devez entrer un nom pour signer la p�tition."
+msgstr "Désolé, vous devez entrer un nom pour signer la pétition."
 
 #: fcpetition.php:236
 msgid "Sorry, your comment is longer than "
-msgstr "D�sol�, votre commentaire n'est plus disponible"
+msgstr "Désolé, votre commentaire n'est plus disponible"
 
 #: fcpetition.php:133
 #, php-format
@@ -257,7 +257,7 @@ msgid ""
 "\n"
 "James"
 msgstr ""
-"Merci d'avoir sign� la p�tition. \n"
+"Merci d'avoir signé la pétition. \n"
 "\n"
 "[[curl]]\n"
 "\n"
@@ -267,23 +267,23 @@ msgstr ""
 
 #: fcpetition.php:250
 msgid "Thank you for signing the petition. An e-mail has been sent to you so that you may confirm your signature."
-msgstr "Merci d'avoir sign� la p�tition. Un e-mail de confirmation vient de vous �tre envoy� afin de valiger votre signature."
+msgstr "Merci d'avoir signé la pétition. Un e-mail de confirmation vient de vous être envoyé afin de valiger votre signature."
 
 #: fcpetition.php:128
 msgid "The confirmation code you supplied was invalid. Either it was incorrect or it has already been used."
-msgstr "Le code de confirmaation que vous avez soumis est invalide. Soit il est incorrect, soit il a d�j� �t� utilis�."
+msgstr "Le code de confirmaation que vous avez soumis est invalide. Soit il est incorrect, soit il a déjà été utilisé."
 
 #: fcpetition.php:522
 msgid "There are no signatures to manage yet"
-msgstr "Il n'y a aucune signature � g�rer pour le moment"
+msgstr "Il n'y a aucune signature à gêrer pour le moment"
 
 #: fcpetition.php:290
 msgid "This petition does not exist"
-msgstr "Cette p�tition n'existe pas"
+msgstr "Cette pétition n'existe pas"
 
 #: fcpetition.php:296
 msgid "This petition is not enabled"
-msgstr "Cette p�tition n'est pas active"
+msgstr "Cette pétition n'est pas active"
 
 #: fcpetition.php:550
 msgid "Time"
@@ -291,22 +291,22 @@ msgstr "Heure"
 
 #: fcpetition.php:713
 msgid "Update Options"
-msgstr "Mettre les options � jour"
+msgstr "Mettre les options à jour"
 
 #: fcpetition.php:40
 msgid "We the undersigned ask you to sign our petition."
-msgstr "Nous, soussign�s, vous proposons de signer notre p�tition."
+msgstr "Nous, soussignés, vous proposons de signer notre pétition."
 
 #: fcpetition.php:421
 msgid "You must first add a petition to import the data to."
-msgstr "Vous devez d'abord ajouter une p�tition pour y importer des donn�es."
+msgstr "Vous devez d'abord ajouter une pétition pour y importer des données."
 
 #: fcpetition.php:126
 #: fcpetition.php:246
 msgid "Your signature has now been added to the petition. Thank you."
-msgstr "Votre signature a bien �t� ajout�e � la p�tition. Merci."
+msgstr "Votre signature a bien été ajoutée à la pétition. Merci."
 
 #: fcpetition.php:621
 msgid "[[curl]] must appear in your confirmation email text."
-msgstr "[[curl]] doit appara�tre dans le texte de votre e-mail de confirmation."
+msgstr "[[curl]] doit apparaître dans le texte de votre e-mail de confirmation."
 
