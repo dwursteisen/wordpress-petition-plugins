@@ -421,7 +421,7 @@ function fcpetition_form_top($petition,$action){
 	$privacy =  __("Do not display name on website","fcpetition");
 	$button = __("Sign the petition","fcpetition");
 	if($comments_enabled){
-		$comments_form = sprintf(__("Please enter an optional comment","fcpetition")).":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
+		$comments_form = sprintf( __("Please enter an optional comment","fcpetition")).":<br/><textarea name='petition_comment' cols='50'></textarea><br/>";
 	}
 	$custom_fields =  fcpetition_livefields($petition);
 	return "
