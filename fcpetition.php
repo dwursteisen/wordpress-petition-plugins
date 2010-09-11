@@ -417,7 +417,7 @@ function fcpetition_form_top($petition,$action){
 	$comments_enabled = $pa->petition_comments;
 
 	$name = __("Name","fcpetition");
-	$email = __("E-mail address","fcpetition");
+	$email = __("E-mail address","fcpetition"). " ".__(" (won't be published)","fcpetition");
 	$privacy =  __("Do not display name on website","fcpetition");
 	$button = __("Sign the petition","fcpetition");
 	if($comments_enabled){
@@ -1022,7 +1022,7 @@ function fcpetition_livefields($po) {
 	$output = "";
 	if(count($res)>0) {
 		foreach($res as $row){
-			if($row->hide == 1) { $lmsg = __(" (won't be published)","fcpetition");} else { $lmsg = "";}
+			if($row->hide != 1) { $lmsg = __(" (won't be published)","fcpetition");} else { $lmsg = "";}
 			if($row->type == "text") {
 				$output .= "$row->name$lmsg:<br/><input type='$row->type' name='$row->name'/><br/>\n";
 			} elseif($row->type == "select") {
