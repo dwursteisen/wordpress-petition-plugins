@@ -1020,7 +1020,7 @@ function fcpetition_livefields($po) {
 	$output = "";
 	if(count($res)>0) {
 		foreach($res as $row){
-			if($row->hide == 1) { $lmsg = __(" (won't be published)","fcpetition");} else { $lmsg = "";}
+			if($row->hide == 0) { $lmsg = __(" (won't be published)","fcpetition");} else { $lmsg = "";}
 			if($row->type == "text") {
 				$output .= "$row->name$lmsg:<br/><input type='$row->type' name='$row->name'/><br/>\n";
 			} elseif($row->type == "select") {
@@ -1090,23 +1090,37 @@ function fcpetition_prettyfields($package) {
 	}
 }
 
+function fcpetition_qdarrayfilter($input) {
+	if($input == 'xxxxxxx') {
+		return false;
+	} else {
+		return true;
+	}
+}
+
 function fcpetition_prettyvalues($package,$petition) {
 	global $wpdb;
 	global $fields_table;
 	if(!$package) return;
-	
+
 	foreach($wpdb->get_results("SELECT name,hide FROM $fields_table WHERE petition = '$petition' ORDER BY ts") as $row) {
-		$hide[$row->name] = $row->hide;
+		$hide[str_replace(" ","_",$row->name)] = (integer) $row->hide;
 	}
 
 	foreach ($package as $fieldname => $fieldvalue){
-			if($hide[$fieldname] == 0) {
+			if($fieldvalue == "") {
 				unset($package[$fieldname]);
+				next;
+			}
+			if(0 == $hide[$fieldname]) {
+				$package[$fieldname] = "xxxxxxx";
+				unset($package[$fieldname]);
+				next;
 			}
 	}
 
 	$custom_fields = "";
-	$custom_fields = htmlchars(implode(", ",$package));
+	$custom_fields = htmlchars(implode(", ",array_filter($package,fcpetition_qdarrayfilter)));
 	return $custom_fields;
 }
 
