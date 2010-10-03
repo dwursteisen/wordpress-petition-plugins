@@ -339,6 +339,11 @@ function fcpetition_filter_pages($content) {
 		#Pretty much lifted from lost password code
 		$confirm = substr( md5( uniqid( microtime() ) ), 0, 16);
 
+		$prepared_insert_sql = $wpdb->prepare("INSERT INTO $signature_table ".
+									   "(`petition`,`email`,`name`,`confirm`,`comment`,`time`,`fields`,`keep_private`) ".
+									   "VALUES ( %s, %s, %d, %s, %s, NOW(), %s, %s)",
+									   $petition, $email, $name, $confirm, $comment, $fields, $keep_private); 
+									   
 		$wpdb->hide_errors();
 		if ($name == ""){
 			return __("Sorry, you must enter a name to sign the petition.","fcpetition");
@@ -346,7 +351,7 @@ function fcpetition_filter_pages($content) {
 			return __("Sorry, \"$email\" does not appear to be a valid e-mail address.","fcpetition");
 		} else if (0) {
 			return __("Sorry, your comment is longer than ".MAX_COMMENT_SIZE." characters.","fcpetition");
-		} elseif ($wpdb->query("INSERT INTO $signature_table (`petition`,`email`,`name`,`confirm`,`comment`,`time`,`fields`,`keep_private`) VALUES ('$petition','$email','$name','$confirm','$comment',NOW(),'$fields','$keep_private')")===FALSE){
+		} elseif ($wpdb->query($prepared_insert_sql)===FALSE){
 			# This has almost certainly occured due to a duplicate email key
                         $wpdb->show_errors();
                         return __("Sorry, someone has already attempted to sign the petition using this e-mail address.","fcpetition");
@@ -354,7 +359,8 @@ function fcpetition_filter_pages($content) {
 			$wpdb->show_errors();
                         # Successful signature, send an e-mail asking the user to confirm
 						if (OVERRIDE_VERIFICATION) { 
-							$wpdb->query("UPDATE $signature_table SET `confirm` = '' WHERE `confirm` = '$confirm'");
+							$prepared_update_sql = $wpdb->prepare("UPDATE $signature_table SET `confirm` = '' WHERE `confirm` = %s", $confirm);
+							$wpdb->query($prepared_update_sql);
 							return __("Your signature has now been added to the petition. Thank you.","fcpetition");						
 						} else {
 	                        $petition_confirmation = str_replace('[[curl]]',$confirm_url,$petition_confirmation);
