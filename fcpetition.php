@@ -172,7 +172,9 @@ function fcpetition_confirm(){
 		<h2><?php printf(__('Confirm Petition Signature - %s', "fcpetition"), get_bloginfo('name')); ?></h2>
 		<p>
 	<?php
-	if ($wpdb->query("UPDATE $signature_table SET `confirm` = '' WHERE `confirm` = '$confirm'")==1) {
+
+    $prepared_query = $wpdb->prepare("UPDATE $signature_table SET `confirm` = '' WHERE `confirm` = '%s'", $confirm);
+	if ($wpdb->query($prepared_query)==1) {
 		print __("Your signature has now been added to the petition. Thank you.","fcpetition");
 	} else {
 		print __("The confirmation code you supplied was invalid. Either it was incorrect or it has already been used.","fcpetition");
